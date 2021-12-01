@@ -1,6 +1,6 @@
 cc_binary(
         name = "main",
-        srcs = [ "main.cpp", "Ciphertext.cpp" ],
+        srcs = [ "main.cpp", "Ciphertext.cpp", "Ciphertext.hpp" ],
 )
 
 cc_binary(

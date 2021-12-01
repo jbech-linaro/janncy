@@ -1,0 +1,7 @@
+# Set default compiler to clang
+build --repo_env=CC=clang++
+
+build --cxxopt=-std=c++17
+
+build --cxxopt=-Wall --cxxopt=-Wextra --cxxopt=-Werror --cxxopt=-Wpedantic
+

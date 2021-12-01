@@ -1,6 +1,7 @@
-export module Ciphertext;
-import <iostream>;
+#include "Ciphertext.hpp"
 
-export void hello() {
+#include <iostream>
+
+void hello() {
     std::cout << "Hello world!\n";
 }

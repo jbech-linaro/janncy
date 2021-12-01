@@ -1,4 +1,4 @@
-import Ciphertext;
+#include "Ciphertext.hpp"
 
 int main() {
     hello();
