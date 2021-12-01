@@ -1,9 +1,12 @@
-cc_binary(
-        name = "main",
-        srcs = [ "main.cpp", "Ciphertext.cpp", "Ciphertext.hpp" ],
+cc_library(
+        name = "Ciphertext",
+        srcs = [ "Ciphertext.cpp" ],
+        hdrs = [ "Ciphertext.hpp" ],
+        visibility = [ "//test:__pkg__", ],
 )
 
 cc_binary(
-        name = "test",
-        srcs = [ "test.cpp" ],
+        name = "main",
+        srcs = [ "main.cpp" ],
+        deps = [ ":Ciphertext" ],
 )
