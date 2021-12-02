@@ -7,3 +7,13 @@ cc_test(
             "//src:Ciphertext",
         ],
 )
+
+cc_test(
+        name = "test_ConvLayer",
+        srcs = [ "test_ConvLayer.cpp" ],
+        deps = [
+            "@gtest//:gtest",
+            "@gtest//:gtest_main",
+            "//src:ConvLayer",
+        ],
+)

@@ -19,3 +19,19 @@ cc_library(
         hdrs = [ "include/Tensor.hpp" ],
         visibility = [ "//test:__pkg__", ],
 )
+
+cc_library(
+        name = "EncryptedTensor",
+        srcs = [ "EncryptedTensor.cpp" ],
+        hdrs = [ "include/EncryptedTensor.hpp" ],
+        deps = [ "//src:Tensor", ],
+        visibility = [ "//test:__pkg__", ],
+)
+
+cc_library(
+        name = "ConvLayer",
+        srcs = [ "ConvLayer.cpp" ],
+        hdrs = [ "include/ConvLayer.hpp" ],
+        deps = [ "//src:Tensor", ],
+        visibility = [ "//test:__pkg__", ],
+)
