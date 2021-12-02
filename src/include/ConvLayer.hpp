@@ -2,17 +2,18 @@
 #define CONVLAYER_HPP_
 
 #include "Tensor.hpp"
+#include "FlowNode.hpp"
 
-class ConvLayer {
+class ConvLayer : public FlowNode {
 public:
     ConvLayer(Tensor input_tensor, Tensor filter, int stride);
     Tensor output_tensor() const;
+    Tensor input_tensor() const;
+    int stride() const;
 
 private:
     int stride_;
-    Tensor input_tensor_;
     Tensor filter_;
-    Tensor output_tensor_;
 };
 
 #endif  // CONVLAYER_HPP_

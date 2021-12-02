@@ -14,6 +14,14 @@ cc_library(
 )
 
 cc_library(
+        name = "FlowNode",
+        srcs = [ "FlowNode.cpp" ],
+        hdrs = [ "include/FlowNode.hpp" ],
+        deps = [ "//src:Tensor", ],
+        visibility = [ "//test:__pkg__", ],
+)
+
+cc_library(
         name = "Tensor",
         srcs = [ "Tensor.cpp" ],
         hdrs = [ "include/Tensor.hpp" ],
@@ -32,6 +40,14 @@ cc_library(
         name = "ConvLayer",
         srcs = [ "ConvLayer.cpp" ],
         hdrs = [ "include/ConvLayer.hpp" ],
-        deps = [ "//src:Tensor", ],
+        deps = [ "//src:Tensor", "//src:FlowNode", ],
+        visibility = [ "//test:__pkg__", ],
+)
+
+cc_library(
+        name = "ReLU",
+        srcs = [ "ReLU.cpp" ],
+        hdrs = [ "include/ReLU.hpp" ],
+        deps = [ "//src:Tensor", "//src:FlowNode", ],
         visibility = [ "//test:__pkg__", ],
 )
