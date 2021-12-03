@@ -29,11 +29,27 @@ cc_library(
 )
 
 cc_library(
+        name = "CtGraph",
+        srcs = [ "CtGraph.cpp" ],
+        hdrs = [ "include/CtGraph.hpp" ],
+        deps = [ "//src:CtOp", "//src:CtAdd", "//src:CtMul", "//src:CtRotate", "//src:CtInput", "//src:Graph", ],
+        visibility = [ "//test:__pkg__", "//examples:__pkg__", ],
+)
+
+cc_library(
         name = "Flow",
         srcs = [ "Flow.cpp" ],
         hdrs = [ "include/Flow.hpp" ],
         deps = [ "//src:Tensor", "//src:FlowNode", "//src:ConvLayer", "//src:BatchNormalization", "//src:FullyConnected", "//src:Input", "//src:Graph", "//src:ReLU", "//src:AveragePool", "//src:Add", ],
         visibility = [ "//test:__pkg__", "//examples:__pkg__", ],
+)
+
+cc_library(
+        name = "CtOp",
+        srcs = [ "CtOp.cpp" ],
+        hdrs = [ "include/CtOp.hpp" ],
+        deps = [ "//src:Node" ],
+        visibility = [ "//test:__pkg__", ],
 )
 
 cc_library(
@@ -56,6 +72,38 @@ cc_library(
         srcs = [ "EncryptedTensor.cpp" ],
         hdrs = [ "include/EncryptedTensor.hpp" ],
         deps = [ "//src:Tensor", ],
+        visibility = [ "//test:__pkg__", ],
+)
+
+cc_library(
+        name = "CtRotate",
+        srcs = [ "CtRotate.cpp" ],
+        hdrs = [ "include/CtRotate.hpp" ],
+        deps = [ "//src:CtOp" ],
+        visibility = [ "//test:__pkg__", ],
+)
+
+cc_library(
+        name = "CtMul",
+        srcs = [ "CtMul.cpp" ],
+        hdrs = [ "include/CtMul.hpp" ],
+        deps = [ "//src:CtOp" ],
+        visibility = [ "//test:__pkg__", ],
+)
+
+cc_library(
+        name = "CtInput",
+        srcs = [ "CtInput.cpp" ],
+        hdrs = [ "include/CtInput.hpp" ],
+        deps = [ "//src:CtOp" ],
+        visibility = [ "//test:__pkg__", ],
+)
+
+cc_library(
+        name = "CtAdd",
+        srcs = [ "CtAdd.cpp" ],
+        hdrs = [ "include/CtAdd.hpp" ],
+        deps = [ "//src:CtOp" ],
         visibility = [ "//test:__pkg__", ],
 )
 
