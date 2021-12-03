@@ -2,30 +2,25 @@
 #define FLOWNODE_HPP_
 
 #include "Tensor.hpp"
+#include "Node.hpp"
 
 #include <string>
 #include <vector>
 
-class FlowNode {
+class FlowNode : public Node {
 public:
-    FlowNode(FlowNode* parent, Tensor output_tensor);
+    FlowNode(std::vector<FlowNode*> parents, Tensor output_tensor);
     Tensor output_tensor() const;
     Tensor input_tensor() const;
-
-    void add_child(FlowNode* child);
-
-    std::vector<FlowNode*> get_children() const { return children; }
 
     void set_name(std::string name);
 
     std::string str() const;
-
     virtual std::string type_str() const = 0;
 
 protected:
-    FlowNode* parent_;
+    std::vector<FlowNode*> parents_;
     Tensor output_tensor_;
-    std::vector<FlowNode*> children;
     std::string name_;
 };
 

@@ -6,7 +6,7 @@
 
 class ReLU : public FlowNode {
 public:
-    ReLU(Tensor input_tensor);
+    ReLU(FlowNode* parent);
     std::string type_str() const { return "ReLU"; }
 private:
 };

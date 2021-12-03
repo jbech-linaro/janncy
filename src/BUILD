@@ -7,9 +7,24 @@ cc_library(
 )
 
 cc_library(
+        name = "Node",
+        srcs = [ "Node.cpp" ],
+        hdrs = [ "include/Node.hpp" ],
+        visibility = [ "//test:__pkg__", ],
+)
+
+cc_library(
+        name = "Graph",
+        srcs = [ "Graph.cpp" ],
+        hdrs = [ "include/Graph.hpp", "include/Node.hpp", ],
+        visibility = [ "//test:__pkg__", ],
+)
+
+cc_library(
         name = "utils",
         srcs = [ "utils.cpp" ],
-        hdrs = [ "include/utils.hpp" ],
+        hdrs = [ "include/utils.hpp", ],
+        deps = [ "//src:Tensor", "//src:FlowNode", ],
         visibility = [ "//test:__pkg__", ],
 )
 
@@ -17,7 +32,7 @@ cc_library(
         name = "Flow",
         srcs = [ "Flow.cpp" ],
         hdrs = [ "include/Flow.hpp" ],
-        deps = [ "//src:Tensor", "//src:FlowNode", "//src:ConvLayer", "//src:BatchNormalization", "//src:FullyConnected", "//src:Input" ],
+        deps = [ "//src:Tensor", "//src:FlowNode", "//src:ConvLayer", "//src:BatchNormalization", "//src:FullyConnected", "//src:Input", "//src:Graph", "//src:ReLU", "//src:AveragePool", "//src:Add", ],
         visibility = [ "//test:__pkg__", "//examples:__pkg__", ],
 )
 
@@ -25,7 +40,7 @@ cc_library(
         name = "FlowNode",
         srcs = [ "FlowNode.cpp" ],
         hdrs = [ "include/FlowNode.hpp" ],
-        deps = [ "//src:Tensor", ],
+        deps = [ "//src:Tensor", "//src:Node", ],
         visibility = [ "//test:__pkg__", ],
 )
 
@@ -41,6 +56,14 @@ cc_library(
         srcs = [ "EncryptedTensor.cpp" ],
         hdrs = [ "include/EncryptedTensor.hpp" ],
         deps = [ "//src:Tensor", ],
+        visibility = [ "//test:__pkg__", ],
+)
+
+cc_library(
+        name = "Add",
+        srcs = [ "Add.cpp" ],
+        hdrs = [ "include/Add.hpp" ],
+        deps = [ "//src:Tensor", "//src:FlowNode", ],
         visibility = [ "//test:__pkg__", ],
 )
 
@@ -72,7 +95,7 @@ cc_library(
         name = "AveragePool",
         srcs = [ "AveragePool.cpp" ],
         hdrs = [ "include/AveragePool.hpp" ],
-        deps = [ "//src:Tensor", "//src:FlowNode", ],
+        deps = [ "//src:Tensor", "//src:FlowNode", "//src:utils", ],
         visibility = [ "//test:__pkg__", ],
 )
 
@@ -80,7 +103,7 @@ cc_library(
         name = "ConvLayer",
         srcs = [ "ConvLayer.cpp" ],
         hdrs = [ "include/ConvLayer.hpp" ],
-        deps = [ "//src:Tensor", "//src:FlowNode", ],
+        deps = [ "//src:Tensor", "//src:FlowNode", "//src:utils", ],
         visibility = [ "//test:__pkg__", ],
 )
 

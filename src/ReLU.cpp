@@ -2,4 +2,4 @@
 
 #include "include/FlowNode.hpp"
 
-ReLU::ReLU(Tensor input_tensor) : FlowNode(input_tensor, input_tensor) {}
+ReLU::ReLU(FlowNode* parent) : FlowNode({parent}, parent->output_tensor()) {}
