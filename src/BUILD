@@ -14,6 +14,14 @@ cc_library(
 )
 
 cc_library(
+        name = "Flow",
+        srcs = [ "Flow.cpp" ],
+        hdrs = [ "include/Flow.hpp" ],
+        deps = [ "//src:Tensor", "//src:FlowNode", "//src:ConvLayer", "//src:BatchNormalization", "//src:FullyConnected", "//src:Input" ],
+        visibility = [ "//test:__pkg__", "//examples:__pkg__", ],
+)
+
+cc_library(
         name = "FlowNode",
         srcs = [ "FlowNode.cpp" ],
         hdrs = [ "include/FlowNode.hpp" ],
@@ -33,6 +41,38 @@ cc_library(
         srcs = [ "EncryptedTensor.cpp" ],
         hdrs = [ "include/EncryptedTensor.hpp" ],
         deps = [ "//src:Tensor", ],
+        visibility = [ "//test:__pkg__", ],
+)
+
+cc_library(
+        name = "Input",
+        srcs = [ "Input.cpp" ],
+        hdrs = [ "include/Input.hpp" ],
+        deps = [ "//src:Tensor", "//src:FlowNode", ],
+        visibility = [ "//test:__pkg__", ],
+)
+
+cc_library(
+        name = "FullyConnected",
+        srcs = [ "FullyConnected.cpp" ],
+        hdrs = [ "include/FullyConnected.hpp" ],
+        deps = [ "//src:Tensor", "//src:FlowNode", ],
+        visibility = [ "//test:__pkg__", ],
+)
+
+cc_library(
+        name = "BatchNormalization",
+        srcs = [ "BatchNormalization.cpp" ],
+        hdrs = [ "include/BatchNormalization.hpp" ],
+        deps = [ "//src:Tensor", "//src:FlowNode", ],
+        visibility = [ "//test:__pkg__", ],
+)
+
+cc_library(
+        name = "AveragePool",
+        srcs = [ "AveragePool.cpp" ],
+        hdrs = [ "include/AveragePool.hpp" ],
+        deps = [ "//src:Tensor", "//src:FlowNode", ],
         visibility = [ "//test:__pkg__", ],
 )
 

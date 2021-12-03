@@ -6,10 +6,11 @@
 
 class ConvLayer : public FlowNode {
 public:
-    ConvLayer(Tensor input_tensor, Tensor filter, int stride);
+    ConvLayer(FlowNode* parent, Tensor filter, int stride);
     Tensor output_tensor() const;
     Tensor input_tensor() const;
     int stride() const;
+    std::string type_str() const { return "ConvLayer"; }
 
 private:
     int stride_;

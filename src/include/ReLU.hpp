@@ -7,6 +7,7 @@
 class ReLU : public FlowNode {
 public:
     ReLU(Tensor input_tensor);
+    std::string type_str() const { return "ReLU"; }
 private:
 };
 

@@ -3,10 +3,10 @@
 #include "include/FlowNode.hpp"
 #include "include/Tensor.hpp"
 
-ConvLayer::ConvLayer(Tensor input_tensor, Tensor filter, int stride)
-    : FlowNode(input_tensor, Tensor({filter.shape()[0],
-                (input_tensor.shape()[1] - 2*(filter.shape()[2]/2)) / stride,
-                (input_tensor.shape()[2] - 2*(filter.shape()[3]/2)) / stride})),
+ConvLayer::ConvLayer(FlowNode* parent, Tensor filter, int stride)
+    : FlowNode(parent, Tensor({filter.shape()[0],
+                (parent->output_tensor().shape()[1] - 2*(filter.shape()[2]/2)) / stride,
+                (parent->output_tensor().shape()[2] - 2*(filter.shape()[3]/2)) / stride})),
     stride_(stride),
     filter_(filter) {
 }
