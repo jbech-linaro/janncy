@@ -8,6 +8,7 @@ class ReLU : public FlowNode {
 public:
     ReLU(FlowNode* parent);
     std::string type_str() const { return "ReLU"; }
+    CtTensor cipherfy(CtGraph& ct_graph, std::vector<CtTensor> parents) const;
 private:
 };
 

@@ -10,7 +10,9 @@ public:
     int stride() const;
     bool padded() const;
     std::string type_str() const { return "AveragePool"; }
+    CtTensor cipherfy(CtGraph& ct_graph, std::vector<CtTensor> parents) const;
 private:
+    Tensor pool_;
     int stride_;
     bool padded_;
 };

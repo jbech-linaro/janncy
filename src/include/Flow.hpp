@@ -3,6 +3,7 @@
 
 #include "FlowNode.hpp"
 #include "Graph.hpp"
+#include "CtGraph.hpp"
 
 #include <vector>
 
@@ -15,6 +16,8 @@ public:
     FlowNode* average_pool(FlowNode* parent, Tensor pool, int stride, bool padded);
     FlowNode* fully_connected(FlowNode* parent, Tensor matrix);
     FlowNode* add(FlowNode* parent0, FlowNode* parent1);
+
+    CtGraph cipherfy();
 };
 
 #endif  // FLOWNODE_HPP_

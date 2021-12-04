@@ -9,6 +9,8 @@ class CtGraph : public Graph {
 public:
     CtOp* input();
 
+    CtOp* add_pt(CtOp* parent);
+    CtOp* mul_pt(CtOp* parent);
     CtOp* add(CtOp* parent0, CtOp* parent1);
     CtOp* mul(CtOp* parent0, CtOp* parent1);
     CtOp* rotate(CtOp* parent0);

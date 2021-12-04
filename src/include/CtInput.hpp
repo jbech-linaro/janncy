@@ -4,6 +4,7 @@
 #include "CtOp.hpp"
 
 #include <vector>
+#include <string>
 
 class CtInput : public CtOp {
 public:

@@ -68,8 +68,9 @@ FlowNode* conv4(Flow& resnet, FlowNode* parent) {
 int main() {
     auto resnet = Flow();
 
-    auto input_tensor = resnet.input(Tensor({3, 32, 32}));
+    auto input_tensor = resnet.input(Tensor({3, 8, 8}));
 
+    /*
     auto conv2_1 = conv2(resnet, input_tensor);
     auto conv2_2 = conv2(resnet, conv2_1);
     auto conv2_3 = conv2(resnet, conv2_2);
@@ -78,14 +79,16 @@ int main() {
     auto conv3_2 = conv3(resnet, conv3_1_out);
     auto conv3_3 = conv3(resnet, conv3_2);
 
-    auto conv4_1_out = conv4_1(resnet, conv3_3);
+    // auto conv4_1_out = conv4_1(resnet, conv3_3);
+    auto conv4_1_out = conv4_1(resnet, input_tensor);
     auto conv4_2 = conv4(resnet, conv4_1_out);
-    auto conv4_3 = conv4(resnet, conv4_2);
-
-    auto ap = resnet.average_pool(conv4_3, Tensor({64, 8, 8}), 1, false);
-
-    auto fc = resnet.fully_connected(ap, Tensor({64, 10}));
-
+    */
+    auto conv4_3 = resnet.conv_layer(input_tensor, Tensor({8, 3, 3}), 1, true);
+    auto r = resnet.reLU(conv4_3);
+    auto ap = resnet.average_pool(r, Tensor({16, 4, 4}), 1, false);
+    auto fc = resnet.fully_connected(ap, Tensor({16, 10}));
     fc->str();
-    resnet.draw();
+    resnet.draw("flow");
+    auto ct_graph = resnet.cipherfy();
+    ct_graph.draw("ct_graph");
 }

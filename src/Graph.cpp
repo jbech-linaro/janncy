@@ -24,7 +24,7 @@ std::string Graph::str() const {
     return result.str();
 }
 
-void Graph::draw() const {
+void Graph::draw(std::string filename) const {
     std::unordered_map<Node*, Agnode_t*> node_map;
     Agraph_t *g;
     GVC_t *gvc;
@@ -42,7 +42,8 @@ void Graph::draw() const {
         }
     }
     // agsafeset(n, (char*)"color", (char*)"red", (char*)"");
-    char *args[] = { (char*)"dot", (char*)"-Tpdf", (char*)"-o/data/sanchez/users/nsamar/janncy/flow.pdf" };
+    std::string filepath = "-o/data/sanchez/users/nsamar/janncy/"s + filename + ".pdf"s;
+    char *args[] = { (char*)"dot", (char*)"-Tpdf", (char*)filepath.c_str() };
     gvParseArgs(gvc, sizeof(args)/sizeof(char*), args);
 
     gvLayout(gvc, g, "dot");

@@ -14,9 +14,9 @@ public:
 
     std::string str() const;
 
-    void draw() const;
+    void draw(std::string filename) const;
 
-private:
+protected:
     std::vector<Node*> nodes;
 };
 

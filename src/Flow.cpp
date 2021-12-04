@@ -9,9 +9,15 @@
 #include "include/Input.hpp"
 #include "include/ReLU.hpp"
 #include "include/Add.hpp"
+#include "include/CtTensor.hpp"
+#include "include/CtGraph.hpp"
 
 #include <sstream>
 #include <cassert>
+#include <unordered_map>
+#include <unordered_set>
+#include <algorithm>
+#include <iostream>
 
 FlowNode* Flow::input(Tensor input_tensor) {
     auto input_node = new Input(input_tensor);
@@ -64,3 +70,37 @@ FlowNode* Flow::fully_connected(FlowNode* parent, Tensor matrix) {
     return fc;
 }
 
+CtGraph Flow::cipherfy() {
+    CtGraph ct_graph;
+
+    std::unordered_map<Node*, CtTensor> ct_tensor_map;
+    std::unordered_set<Node*> visited;
+
+    while (visited.size() != nodes.size()) {
+       // std::cout << "visited size: " << visited.size() << std::endl;
+        std::cout << "---" << std::endl;
+       for (auto& node : nodes) {
+           auto parents = node->get_parents();
+           std::cout << node->str() << ": " << parents.size() << " :: ";
+           std::cout << "begin: " ; parents.begin(); std::cout << "\n";
+           std::cout << "all_of: " << std::all_of(parents.begin(), parents.end(),
+                       [&](auto x) { std::cout << x->str() << ", "; return visited.count(x); });
+           if (!visited.count(node) && std::all_of(parents.begin(), parents.end(),
+                       [&](auto x) { std::cout << x->str() << ", "; return visited.count(x); })) {
+               visited.insert(node);
+               std::vector<CtTensor> ct_parents;
+               for (auto parent : parents) {
+                   ct_parents.push_back(ct_tensor_map.at(parent));
+               }
+               ct_tensor_map.insert(std::make_pair(node, dynamic_cast<FlowNode*>(node)->cipherfy(ct_graph, ct_parents)));
+           }
+           if (!visited.count(node) && node->get_parents().size() == 0) {
+               visited.insert(node);
+               ct_tensor_map.insert(std::make_pair(node, dynamic_cast<FlowNode*>(node)->cipherfy(ct_graph, {})));
+           }
+           std::cout << std::endl;
+       }
+    }
+
+    return ct_graph;
+}

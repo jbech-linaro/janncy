@@ -4,8 +4,8 @@
 #include <sstream>
 #include <vector>
 
-FlowNode::FlowNode(std::vector<FlowNode*> parents, Tensor output_tensor)
-    : parents_(parents), output_tensor_(output_tensor) {}
+FlowNode::FlowNode(std::vector<Node*> parents, Tensor output_tensor)
+    : Node(parents), output_tensor_(output_tensor) {}
 
 Tensor FlowNode::output_tensor() const {
     return output_tensor_;
@@ -13,7 +13,7 @@ Tensor FlowNode::output_tensor() const {
 
 Tensor FlowNode::input_tensor() const {
     if (parents_[0]) {
-        return parents_[0]->output_tensor_;
+        return dynamic_cast<FlowNode*>(parents_[0])->output_tensor_;
     }
     return output_tensor_;
 }

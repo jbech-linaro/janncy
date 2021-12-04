@@ -12,6 +12,7 @@ public:
     int stride() const;
     bool padded() const;
     std::string type_str() const { return "ConvLayer"; }
+    CtTensor cipherfy(CtGraph& ct_graph, std::vector<CtTensor> parents) const;
 
 private:
     int stride_;

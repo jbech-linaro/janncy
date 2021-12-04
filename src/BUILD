@@ -32,7 +32,7 @@ cc_library(
         name = "CtGraph",
         srcs = [ "CtGraph.cpp" ],
         hdrs = [ "include/CtGraph.hpp" ],
-        deps = [ "//src:CtOp", "//src:CtAdd", "//src:CtMul", "//src:CtRotate", "//src:CtInput", "//src:Graph", ],
+        deps = [ "//src:CtOp", "//src:CtAdd", "//src:CtMul", "//src:CtPtAdd", "//src:CtPtMul", "//src:CtRotate", "//src:CtInput", "//src:Graph", ],
         visibility = [ "//test:__pkg__", "//examples:__pkg__", ],
 )
 
@@ -40,7 +40,7 @@ cc_library(
         name = "Flow",
         srcs = [ "Flow.cpp" ],
         hdrs = [ "include/Flow.hpp" ],
-        deps = [ "//src:Tensor", "//src:FlowNode", "//src:ConvLayer", "//src:BatchNormalization", "//src:FullyConnected", "//src:Input", "//src:Graph", "//src:ReLU", "//src:AveragePool", "//src:Add", ],
+        deps = [ "//src:Tensor", "//src:FlowNode", "//src:ConvLayer", "//src:BatchNormalization", "//src:FullyConnected", "//src:Input", "//src:Graph", "//src:ReLU", "//src:AveragePool", "//src:Add", "//src:CtGraph", "//src:CtOp", ],
         visibility = [ "//test:__pkg__", "//examples:__pkg__", ],
 )
 
@@ -56,7 +56,7 @@ cc_library(
         name = "FlowNode",
         srcs = [ "FlowNode.cpp" ],
         hdrs = [ "include/FlowNode.hpp" ],
-        deps = [ "//src:Tensor", "//src:Node", ],
+        deps = [ "//src:Tensor", "//src:Node", "//src:CtTensor", "//src:CtGraph", ],
         visibility = [ "//test:__pkg__", ],
 )
 
@@ -68,10 +68,9 @@ cc_library(
 )
 
 cc_library(
-        name = "EncryptedTensor",
-        srcs = [ "EncryptedTensor.cpp" ],
-        hdrs = [ "include/EncryptedTensor.hpp" ],
-        deps = [ "//src:Tensor", ],
+        name = "CtTensor",
+        srcs = [ "CtTensor.cpp" ],
+        hdrs = [ "include/CtTensor.hpp" ],
         visibility = [ "//test:__pkg__", ],
 )
 
@@ -79,6 +78,22 @@ cc_library(
         name = "CtRotate",
         srcs = [ "CtRotate.cpp" ],
         hdrs = [ "include/CtRotate.hpp" ],
+        deps = [ "//src:CtOp" ],
+        visibility = [ "//test:__pkg__", ],
+)
+
+cc_library(
+        name = "CtPtAdd",
+        srcs = [ "CtPtAdd.cpp" ],
+        hdrs = [ "include/CtPtAdd.hpp" ],
+        deps = [ "//src:CtOp" ],
+        visibility = [ "//test:__pkg__", ],
+)
+
+cc_library(
+        name = "CtPtMul",
+        srcs = [ "CtPtMul.cpp" ],
+        hdrs = [ "include/CtPtMul.hpp" ],
         deps = [ "//src:CtOp" ],
         visibility = [ "//test:__pkg__", ],
 )
