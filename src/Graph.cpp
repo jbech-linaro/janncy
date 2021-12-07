@@ -2,13 +2,13 @@
 
 #include "include/Node.hpp"
 
-#include <string>
 #include <sstream>
+#include <string>
 #include <unordered_map>
 
-#include <graphviz/types.h>
 #include <graphviz/cgraph.h>
 #include <graphviz/gvc.h>
+#include <graphviz/types.h>
 
 using namespace std::string_literals;
 
@@ -26,8 +26,8 @@ std::string Graph::str() const {
 
 void Graph::draw(std::string filename) const {
     std::unordered_map<Node*, Agnode_t*> node_map;
-    Agraph_t *g;
-    GVC_t *gvc;
+    Agraph_t* g;
+    GVC_t* gvc;
 
     gvc = gvContext();
 
@@ -42,9 +42,10 @@ void Graph::draw(std::string filename) const {
         }
     }
     // agsafeset(n, (char*)"color", (char*)"red", (char*)"");
-    std::string filepath = "-o/data/sanchez/users/nsamar/janncy/"s + filename + ".pdf"s;
-    char *args[] = { (char*)"dot", (char*)"-Tpdf", (char*)filepath.c_str() };
-    gvParseArgs(gvc, sizeof(args)/sizeof(char*), args);
+    std::string filepath =
+        "-o/data/sanchez/users/nsamar/janncy/"s + filename + ".pdf"s;
+    char* args[] = {(char*)"dot", (char*)"-Tpdf", (char*)filepath.c_str()};
+    gvParseArgs(gvc, sizeof(args) / sizeof(char*), args);
 
     gvLayout(gvc, g, "dot");
     gvRenderJobs(gvc, g);
