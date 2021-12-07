@@ -5,8 +5,8 @@
 
 class CtOp;
 
-class CtGraph : public Graph {
-public:
+class CtGraph : public Graph<CtOp> {
+  public:
     CtOp* input();
 
     CtOp* add_pt(CtOp* parent);

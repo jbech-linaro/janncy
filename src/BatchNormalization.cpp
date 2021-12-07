@@ -1,4 +1,5 @@
 #include "include/BatchNormalization.hpp"
+#include "include/CtGraph.hpp"
 
 #include <iostream>
 
@@ -10,7 +11,8 @@ CtOp* batch_norm(CtGraph& ct_graph, CtOp* parent) {
     return ct_graph.mul_pt(tmp);
 }
 
-CtTensor BatchNormalization::cipherfy(CtGraph& ct_graph, std::vector<CtTensor> parents) const {
+CtTensor BatchNormalization::cipherfy(CtGraph& ct_graph,
+                                      std::vector<CtTensor> parents) const {
     auto parent = parents[0].get_ct_ops();
     std::vector<CtOp*> result;
     for (auto& ct_op : parent) {

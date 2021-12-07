@@ -1,5 +1,6 @@
 #include "include/ReLU.hpp"
 
+#include "include/CtGraph.hpp"
 #include "include/FlowNode.hpp"
 
 #include <iostream>
@@ -15,7 +16,7 @@ int get_nearest_pow2(int n) {
 
 CtOp* poly_eval(CtGraph& ct_graph, CtOp* parent, int degree) {
     (void)ct_graph;
-    (void) degree;
+    (void)degree;
     auto result = parent;
     std::vector<CtOp*> ct_degrees;
     ct_degrees.push_back(parent);
@@ -25,7 +26,8 @@ CtOp* poly_eval(CtGraph& ct_graph, CtOp* parent, int degree) {
             monomial = parent;
         } else {
             int nearest_pow2 = get_nearest_pow2(curr_degree - 1);
-            monomial = ct_graph.mul(ct_degrees[nearest_pow2], ct_degrees[curr_degree-nearest_pow2]);
+            monomial = ct_graph.mul(ct_degrees[nearest_pow2],
+                                    ct_degrees[curr_degree - nearest_pow2]);
         }
         ct_degrees.push_back(monomial);
         auto post_mul = ct_graph.mul_pt(monomial);
@@ -47,11 +49,13 @@ CtOp* third_poly(CtGraph& ct_graph, CtOp* parent) {
 }
 
 CtOp* relu_function(CtGraph& ct_graph, CtOp* parent) {
-    auto result = third_poly(ct_graph, second_poly(ct_graph, first_poly(ct_graph, parent)));
+    auto result = third_poly(
+        ct_graph, second_poly(ct_graph, first_poly(ct_graph, parent)));
     return result;
 }
 
-CtTensor ReLU::cipherfy(CtGraph& ct_graph, std::vector<CtTensor> parents) const {
+CtTensor ReLU::cipherfy(CtGraph& ct_graph,
+                        std::vector<CtTensor> parents) const {
     std::vector<CtOp*> result;
     auto parent_cts = parents[0].get_ct_ops();
     for (auto& ct_op : parent_cts) {
