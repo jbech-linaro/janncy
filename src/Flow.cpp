@@ -22,8 +22,11 @@ CtGraph Flow::cipherfy() {
             std::cout << node->output_tensor().shape()[0] << std::endl;
             auto parents = node->get_parents();
             if (parents.size() == 0) {
-                std::vector<CtOp*> ct_tensor_vec(
-                    node->output_tensor().shape()[0], ct_graph.input());
+                std::vector<CtOp*> ct_tensor_vec;
+                for (int idx = 0; idx < node->output_tensor().shape()[0];
+                     ++idx) {
+                    ct_tensor_vec.push_back(ct_graph.input());
+                }
                 std::cout << "Hello" << std::endl;
                 ct_tensor_map.insert(
                     std::make_pair(node, CtTensor(ct_tensor_vec)));
