@@ -22,6 +22,12 @@ cc_library(
 )
 
 cc_library(
+        name = "Panic",
+        srcs = [ "Panic.cpp" ],
+        hdrs = [ "include/Panic.hpp" ],
+)
+
+cc_library(
         name = "utils",
         srcs = [ "utils.cpp" ],
         hdrs = [ "include/utils.hpp", ],
@@ -41,7 +47,7 @@ cc_library(
         name = "Flow",
         srcs = [ "Flow.cpp" ],
         hdrs = [ "include/Flow.hpp" ],
-        deps = [ "//src:Tensor", "//src:FlowNode", "//src:ConvLayer", "//src:BatchNormalization", "//src:FullyConnected", "//src:Input", "//src:Graph", "//src:ReLU", "//src:AveragePool", "//src:Add", "//src:CtGraph", "//src:CtOp", ],
+        deps = [ "//src:Tensor", "//src:CtGraph", "//src:CtOp", "//src:Input", ],
         visibility = [ "//test:__pkg__", "//examples:__pkg__", ],
 )
 
@@ -57,7 +63,7 @@ cc_library(
         name = "FlowNode",
         srcs = [ "FlowNode.cpp" ],
         hdrs = [ "include/FlowNode.hpp" ],
-        deps = [ "//src:Tensor", "//src:Node", "//src:CtTensor", ],
+        deps = [ "//src:Panic", "//src:Tensor", "//src:Node", "//src:CtTensor", ],
         visibility = [ "//test:__pkg__", ],
 )
 
@@ -168,7 +174,7 @@ cc_library(
         srcs = [ "ConvLayer.cpp" ],
         hdrs = [ "include/ConvLayer.hpp" ],
         deps = [ "//src:Tensor", "//src:FlowNode", "//src:utils", "//src:CtGraph", ],
-        visibility = [ "//test:__pkg__", ],
+        visibility = [ "//test:__pkg__", "//examples:__pkg__", ],
 )
 
 cc_library(
@@ -176,5 +182,5 @@ cc_library(
         srcs = [ "ReLU.cpp" ],
         hdrs = [ "include/ReLU.hpp" ],
         deps = [ "//src:Tensor", "//src:FlowNode", "//src:CtGraph", ],
-        visibility = [ "//test:__pkg__", ],
+        visibility = [ "//test:__pkg__", "//examples:__pkg__", ],
 )

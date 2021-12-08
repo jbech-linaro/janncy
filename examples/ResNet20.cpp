@@ -1,7 +1,10 @@
 #include <iostream>
 
+#include "../src/include/ConvLayer.hpp"
 #include "../src/include/Flow.hpp"
-
+#include "../src/include/Input.hpp"
+#include "../src/include/ReLU.hpp"
+/*
 FlowNode* conv_bn(Flow& resnet, FlowNode* parent, Tensor filter) {
     auto conv = resnet.conv_layer(parent, filter, 1, true);
     auto bn = resnet.batch_normalization(conv);
@@ -65,10 +68,14 @@ FlowNode* conv4(Flow& resnet, FlowNode* parent) {
     return conv_out;
 }
 
+*/
+
 int main() {
     auto resnet = Flow();
 
     auto input_tensor = resnet.input(Tensor({3, 8, 8}));
+    auto conv = ConvLayer::create(input_tensor, Tensor({8, 3, 3}), 1, true);
+    auto relu = ReLU::create(conv);
 
     /*
     auto conv2_1 = conv2(resnet, input_tensor);
@@ -82,13 +89,13 @@ int main() {
     // auto conv4_1_out = conv4_1(resnet, conv3_3);
     auto conv4_1_out = conv4_1(resnet, input_tensor);
     auto conv4_2 = conv4(resnet, conv4_1_out);
-    */
     auto conv4_3 = resnet.conv_layer(input_tensor, Tensor({8, 3, 3}), 1, true);
     auto r = resnet.reLU(conv4_3);
     auto ap = resnet.average_pool(r, Tensor({16, 4, 4}), 1, false);
     auto fc = resnet.fully_connected(ap, Tensor({16, 10}));
-    fc->str();
-    resnet.draw("flow");
+    */
+    relu->str();
     auto ct_graph = resnet.cipherfy();
+    resnet.draw("flow");
     ct_graph.draw("ct_graph");
 }

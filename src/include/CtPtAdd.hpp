@@ -6,10 +6,12 @@
 #include <string>
 
 class CtPtAdd : public CtOp {
-public:
-    CtPtAdd(CtOp* parent)
-        : CtOp({parent}) {};
+  public:
+    static CtPtAdd* create(CtOp* parent) { return new CtPtAdd(parent); }
     std::string type_str() const { return "CtPtAdd"; }
+
+  private:
+    CtPtAdd(CtOp* parent) : CtOp({parent}){};
 };
 
 #endif  // CTPTADD_HPP_

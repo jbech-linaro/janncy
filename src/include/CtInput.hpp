@@ -3,12 +3,12 @@
 
 #include "CtOp.hpp"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 class CtInput : public CtOp {
-public:
-    CtInput() : CtOp({}) {};
+  public:
+    CtInput() : CtOp({}){};
     std::string type_str() const { return "CtInput"; }
 };
 

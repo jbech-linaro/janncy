@@ -1,11 +1,15 @@
 #include "include/ReLU.hpp"
 
+#include "include/CtAdd.hpp"
 #include "include/CtGraph.hpp"
+#include "include/CtMul.hpp"
+#include "include/CtPtMul.hpp"
 #include "include/FlowNode.hpp"
 
 #include <iostream>
 
-ReLU::ReLU(FlowNode* parent) : FlowNode({parent}, parent->output_tensor()) {}
+ReLU::ReLU(FlowNode* parent)
+    : FlowNode({parent}, parent->output_tensor(), parent->flow()) {}
 
 int get_nearest_pow2(int n) {
     if (n == 1) {
@@ -14,9 +18,7 @@ int get_nearest_pow2(int n) {
     return 2 * get_nearest_pow2(n >> 1);
 }
 
-CtOp* poly_eval(CtGraph& ct_graph, CtOp* parent, int degree) {
-    (void)ct_graph;
-    (void)degree;
+CtOp* poly_eval(CtOp* parent, int degree) {
     auto result = parent;
     std::vector<CtOp*> ct_degrees;
     ct_degrees.push_back(parent);
@@ -26,40 +28,32 @@ CtOp* poly_eval(CtGraph& ct_graph, CtOp* parent, int degree) {
             monomial = parent;
         } else {
             int nearest_pow2 = get_nearest_pow2(curr_degree - 1);
-            monomial = ct_graph.mul(ct_degrees[nearest_pow2],
-                                    ct_degrees[curr_degree - nearest_pow2]);
+            monomial = CtMul::create(ct_degrees[nearest_pow2],
+                                     ct_degrees[curr_degree - nearest_pow2]);
         }
         ct_degrees.push_back(monomial);
-        auto post_mul = ct_graph.mul_pt(monomial);
-        result = ct_graph.add(result, post_mul);
+        auto post_mul = CtPtMul::create(monomial);
+        result = CtAdd::create(result, post_mul);
     }
     return result;
 }
 
-CtOp* first_poly(CtGraph& ct_graph, CtOp* parent) {
-    return poly_eval(ct_graph, parent, 16);
-}
+CtOp* first_poly(CtOp* parent) { return poly_eval(parent, 16); }
 
-CtOp* second_poly(CtGraph& ct_graph, CtOp* parent) {
-    return poly_eval(ct_graph, parent, 7);
-}
+CtOp* second_poly(CtOp* parent) { return poly_eval(parent, 7); }
 
-CtOp* third_poly(CtGraph& ct_graph, CtOp* parent) {
-    return poly_eval(ct_graph, parent, 7);
-}
+CtOp* third_poly(CtOp* parent) { return poly_eval(parent, 7); }
 
-CtOp* relu_function(CtGraph& ct_graph, CtOp* parent) {
-    auto result = third_poly(
-        ct_graph, second_poly(ct_graph, first_poly(ct_graph, parent)));
+CtOp* relu_function(CtOp* parent) {
+    auto result = third_poly(second_poly(first_poly(parent)));
     return result;
 }
 
-CtTensor ReLU::cipherfy(CtGraph& ct_graph,
-                        std::vector<CtTensor> parents) const {
+CtTensor ReLU::cipherfy(std::vector<CtTensor> parents) const {
     std::vector<CtOp*> result;
     auto parent_cts = parents[0].get_ct_ops();
     for (auto& ct_op : parent_cts) {
-        auto ct_result = relu_function(ct_graph, ct_op);
+        auto ct_result = relu_function(ct_op);
         result.push_back(ct_result);
     }
     return CtTensor(result);

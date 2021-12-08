@@ -4,8 +4,9 @@
 #include <string>
 #include <vector>
 
-FlowNode::FlowNode(std::vector<FlowNode*> parents, Tensor output_tensor)
-    : Node(parents), output_tensor_(output_tensor) {}
+FlowNode::FlowNode(std::vector<FlowNode*> parents, Tensor output_tensor,
+                   Flow* flow)
+    : Node(parents), output_tensor_(output_tensor), flow_(flow) {}
 
 Tensor FlowNode::output_tensor() const { return output_tensor_; }
 

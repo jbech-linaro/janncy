@@ -3,17 +3,11 @@
 
 #include "Graph.hpp"
 
-class CtOp;
+class CtInput;
 
 class CtGraph : public Graph<CtOp> {
   public:
-    CtOp* input();
-
-    CtOp* add_pt(CtOp* parent);
-    CtOp* mul_pt(CtOp* parent);
-    CtOp* add(CtOp* parent0, CtOp* parent1);
-    CtOp* mul(CtOp* parent0, CtOp* parent1);
-    CtOp* rotate(CtOp* parent0);
+    CtInput* input();
 };
 
 #endif  // CTGRAPH_HPP_

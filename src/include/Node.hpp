@@ -11,9 +11,13 @@
  **/
 template <class T> class Node {
   public:
-    explicit Node(std::vector<T*> parents) : parents_(parents){};
-    void add_child(T* child) { children.push_back(child); }
-    std::vector<T*> get_children() const { return children; }
+    explicit Node(std::vector<T*> parents) : parents_(parents) {
+        for (auto& parent : parents) {
+            parent->add_child(static_cast<T*>(this));
+        }
+    }
+    void add_child(T* child) { children_.push_back(child); }
+    std::vector<T*> get_children() const { return children_; }
     virtual std::string str() const = 0;
 
     std::vector<T*> get_parents() const { return parents_; }
@@ -22,7 +26,7 @@ template <class T> class Node {
     std::vector<T*> parents_;
 
   private:
-    std::vector<T*> children;
+    std::vector<T*> children_;
 };
 
 #endif  // NODE_HPP_

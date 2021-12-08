@@ -5,9 +5,12 @@
 #include "FlowNode.hpp"
 #include "Node.hpp"
 
+#include <algorithm>
+#include <set>
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 #include <graphviz/cgraph.h>
 #include <graphviz/gvc.h>
@@ -16,17 +19,17 @@
 using namespace std::string_literals;
 
 #include <string>
-#include <vector>
+#include <unordered_set>
 
 template <class T> class Node;
 
 template <class T> class Graph {
   public:
-    void add_node(T* node) { nodes.push_back(node); }
+    void add_node(T* node) { nodes_.insert(node); }
 
     std::string str() const {
         std::stringstream result;
-        for (auto& node : nodes) {
+        for (auto& node : nodes_) {
             result << node->str() << " -> ";
             for (auto& child : node->get_children()) {
                 result << child->str() << ", ";
@@ -36,7 +39,34 @@ template <class T> class Graph {
         return result.str();
     }
 
-    void draw(std::string filename) const {
+    void reload() {
+        std::set<T*> new_nodes;
+        std::set<T*> nodes;
+        for (auto& node : nodes_) {
+            nodes.insert(node);
+            new_nodes.insert(node);
+        }
+        while (!new_nodes.empty()) {
+            for (auto& val : new_nodes) {
+                nodes.insert(val);
+            }
+            new_nodes.clear();
+            for (auto& node : nodes) {
+                auto children = node->get_children();
+                for (auto& child : children) {
+                    if (!nodes.count(child)) {
+                        new_nodes.insert(child);
+                    }
+                }
+            }
+        }
+        for (auto& node : nodes) {
+            nodes_.insert(node);
+        }
+    }
+
+    void draw(std::string filename) {
+        reload();
         std::unordered_map<T*, Agnode_t*> node_map;
         Agraph_t* g;
         GVC_t* gvc;
@@ -45,11 +75,11 @@ template <class T> class Graph {
 
         g = agopen((char*)"g", Agdirected, nullptr);
 
-        for (auto& node : nodes) {
+        for (auto& node : nodes_) {
             node_map[node] =
                 agnode(g, const_cast<char*>((node->str()).c_str()), 1);
         }
-        for (auto& node : nodes) {
+        for (auto& node : nodes_) {
             for (auto& child : node->get_children()) {
                 agedge(g, node_map[node], node_map[child], 0, 1);
             }
@@ -68,7 +98,7 @@ template <class T> class Graph {
     }
 
   protected:
-    std::vector<T*> nodes;
+    std::unordered_set<T*> nodes_;
 };
 
 #endif  // GRAPH_HPP_

@@ -1,6 +1,8 @@
 #include "include/ConvLayer.hpp"
 
-#include "include/CtGraph.hpp"
+#include "include/CtAdd.hpp"
+#include "include/CtPtMul.hpp"
+#include "include/CtRotate.hpp"
 #include "include/FlowNode.hpp"
 #include "include/Tensor.hpp"
 #include "include/utils.hpp"
@@ -11,7 +13,8 @@ ConvLayer::ConvLayer(FlowNode* parent, Tensor filter, int stride, bool padded)
     : FlowNode({parent},
                Tensor({filter.shape()[0],
                        get_output_width(parent, filter, stride, padded),
-                       get_output_height(parent, filter, stride, padded)})),
+                       get_output_height(parent, filter, stride, padded)}),
+               parent->flow()),
       stride_(stride),
       filter_(filter),
       padded_(padded) {}
@@ -22,8 +25,7 @@ bool ConvLayer::padded() const { return padded_; }
 
 Tensor ConvLayer::output_tensor() const { return output_tensor_; }
 
-CtTensor ConvLayer::cipherfy(CtGraph& ct_graph,
-                             std::vector<CtTensor> parents) const {
+CtTensor ConvLayer::cipherfy(std::vector<CtTensor> parents) const {
     auto parent = parents[0].get_ct_ops();
     auto result = std::vector<CtOp*>(output_tensor().shape()[0], nullptr);
 
@@ -37,11 +39,11 @@ CtTensor ConvLayer::cipherfy(CtGraph& ct_graph,
                 for (auto filter_height_idx = 0;
                      filter_height_idx < filter_.shape()[1];
                      ++filter_height_idx) {
-                    auto rot = ct_graph.rotate(parent[input_channel_idx]);
-                    auto tmp = ct_graph.mul_pt(rot);
+                    auto rot = CtRotate::create(parent[input_channel_idx]);
+                    auto tmp = CtPtMul::create(rot);
                     if (result[output_channel_idx]) {
                         result[output_channel_idx] =
-                            ct_graph.add(result[output_channel_idx], tmp);
+                            CtAdd::create(result[output_channel_idx], tmp);
                     } else {
                         result[output_channel_idx] = tmp;
                     }

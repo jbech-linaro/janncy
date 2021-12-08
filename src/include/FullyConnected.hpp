@@ -1,14 +1,19 @@
 #ifndef FULLYCONNECTED_HPP_
 #define FULLYCONNECTED_HPP_
 
-#include "Tensor.hpp"
 #include "FlowNode.hpp"
+#include "Tensor.hpp"
 
 class FullyConnected : public FlowNode {
-public:
-    FullyConnected(FlowNode* parent, Tensor matrix);
+  public:
+    static FullyConnected* create(FlowNode* parent, Tensor matrix) {
+        return new FullyConnected(parent, matrix);
+    }
     std::string type_str() const { return "FullyConnected"; }
-    CtTensor cipherfy(CtGraph& ct_graph, std::vector<CtTensor> parents) const;
+    CtTensor cipherfy(std::vector<CtTensor> parents) const;
+
+  private:
+    FullyConnected(FlowNode* parent, Tensor matrix);
 };
 
 #endif  // FULLYCONNECTRED_HPP_
