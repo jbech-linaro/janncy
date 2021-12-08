@@ -13,8 +13,7 @@ ConvLayer::ConvLayer(FlowNode* parent, Tensor filter, int stride, bool padded)
     : FlowNode({parent},
                Tensor({filter.shape()[0],
                        get_output_width(parent, filter, stride, padded),
-                       get_output_height(parent, filter, stride, padded)}),
-               parent->flow()),
+                       get_output_height(parent, filter, stride, padded)})),
       stride_(stride),
       filter_(filter),
       padded_(padded) {}

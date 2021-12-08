@@ -8,8 +8,7 @@
 
 #include <iostream>
 
-ReLU::ReLU(FlowNode* parent)
-    : FlowNode({parent}, parent->output_tensor(), parent->flow()) {}
+ReLU::ReLU(FlowNode* parent) : FlowNode({parent}, parent->output_tensor()) {}
 
 int get_nearest_pow2(int n) {
     if (n == 1) {

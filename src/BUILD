@@ -9,15 +9,7 @@ cc_library(
 cc_library(
         name = "Node",
         srcs = [ "Node.cpp" ],
-        hdrs = [ "include/Node.hpp" ],
-        visibility = [ "//test:__pkg__", ],
-)
-
-cc_library(
-        name = "Graph",
-        srcs = [ "Graph.cpp" ],
-        hdrs = [ "include/Graph.hpp", ],
-        deps = [ "//src:Node", "//src:CtOp", "//src:FlowNode", ],
+        hdrs = [ "include/Node.hpp", "include/Graph.hpp", "include/Panic.hpp", ],
         visibility = [ "//test:__pkg__", ],
 )
 
@@ -25,6 +17,7 @@ cc_library(
         name = "Panic",
         srcs = [ "Panic.cpp" ],
         hdrs = [ "include/Panic.hpp" ],
+        visibility = [ "//test:__pkg__", ],
 )
 
 cc_library(
@@ -38,16 +31,16 @@ cc_library(
 cc_library(
         name = "CtGraph",
         srcs = [ "CtGraph.cpp" ],
-        hdrs = [ "include/CtGraph.hpp" ],
-        deps = [ "//src:CtOp", "//src:CtAdd", "//src:CtMul", "//src:CtPtAdd", "//src:CtPtMul", "//src:CtRotate", "//src:CtInput", "//src:Graph", ],
+        hdrs = [ "include/CtGraph.hpp", "include/Graph.hpp", "include/Panic.hpp", ],
+        deps = [ "//src:FlowNode", "//src:CtTensor", "//src:CtOp", "//src:CtAdd", "//src:CtMul", "//src:CtPtAdd", "//src:CtPtMul", "//src:CtRotate", "//src:CtInput", "//src:Panic", ],
         visibility = [ "//test:__pkg__", "//examples:__pkg__", ],
 )
 
 cc_library(
         name = "Flow",
         srcs = [ "Flow.cpp" ],
-        hdrs = [ "include/Flow.hpp" ],
-        deps = [ "//src:Tensor", "//src:CtGraph", "//src:CtOp", "//src:Input", ],
+        hdrs = [ "include/Flow.hpp", "include/Graph.hpp", "include/Panic.hpp" ],
+        deps = [ "//src:Tensor", "//src:CtGraph", "//src:CtOp", "//src:Input", "//src:Panic", ],
         visibility = [ "//test:__pkg__", "//examples:__pkg__", ],
 )
 
@@ -62,7 +55,7 @@ cc_library(
 cc_library(
         name = "FlowNode",
         srcs = [ "FlowNode.cpp" ],
-        hdrs = [ "include/FlowNode.hpp" ],
+        hdrs = [ "include/FlowNode.hpp", ],
         deps = [ "//src:Panic", "//src:Tensor", "//src:Node", "//src:CtTensor", ],
         visibility = [ "//test:__pkg__", ],
 )

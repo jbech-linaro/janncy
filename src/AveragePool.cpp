@@ -12,8 +12,7 @@ AveragePool::AveragePool(FlowNode* parent, Tensor pool, int stride, bool padded)
     : FlowNode({parent},
                Tensor({pool.shape()[0],
                        get_output_width(parent, pool, stride, padded),
-                       get_output_height(parent, pool, stride, padded)}),
-               parent->flow()),
+                       get_output_height(parent, pool, stride, padded)})),
       pool_(pool),
       stride_(stride),
       padded_(padded) {}

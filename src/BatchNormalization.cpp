@@ -6,7 +6,7 @@
 #include <iostream>
 
 BatchNormalization::BatchNormalization(FlowNode* parent)
-    : FlowNode({parent}, parent->output_tensor(), parent->flow()) {}
+    : FlowNode({parent}, parent->output_tensor()) {}
 
 CtOp* batch_norm(CtOp* parent) {
     auto tmp = CtPtAdd::create(parent);

@@ -1,18 +1,19 @@
 #ifndef FLOW_HPP_
 #define FLOW_HPP_
 
-#include "CtGraph.hpp"
 #include "Graph.hpp"
+#include "Tensor.hpp"
 
 #include <vector>
 
 class FlowNode;
 class Input;
+class CtGraph;
 
 class Flow : public Graph<FlowNode> {
   public:
     Input* input(Tensor input_tensor);
-    CtGraph cipherfy();
+    CtGraph* cipherfy();
 };
 
 #endif  // FLOWNODE_HPP_

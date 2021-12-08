@@ -6,9 +6,11 @@
 #include <string>
 #include <vector>
 
+template <class T> class Graph;
+
 class CtInput : public CtOp {
   public:
-    CtInput() : CtOp({}){};
+    CtInput(Graph<CtOp>* graph) : CtOp(graph){};
     std::string type_str() const { return "CtInput"; }
 };
 

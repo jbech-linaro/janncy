@@ -1,14 +1,13 @@
 #include "include/Input.hpp"
 
+#include "include/Graph.hpp"
 #include "include/Panic.hpp"
 
 #include <cassert>
 #include <iostream>
 
-class Flow;
-
-Input::Input(Flow* flow, Tensor input_tensor)
-    : FlowNode({}, input_tensor, flow) {}
+Input::Input(Graph<FlowNode>* flow, Tensor input_tensor)
+    : FlowNode(flow, input_tensor) {}
 
 CtTensor Input::cipherfy(std::vector<CtTensor> parents) const {
     assert(parents.size() == 0);

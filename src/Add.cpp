@@ -6,7 +6,7 @@
 #include <vector>
 
 Add::Add(FlowNode* parent0, FlowNode* parent1)
-    : FlowNode({parent0, parent1}, parent0->output_tensor(), parent0->flow()) {}
+    : FlowNode({parent0, parent1}, parent0->output_tensor()) {}
 
 CtTensor Add::cipherfy(std::vector<CtTensor> parents) const {
     auto parent0 = parents[0].get_ct_ops();

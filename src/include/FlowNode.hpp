@@ -10,12 +10,13 @@
 #include <string>
 #include <vector>
 
-class CtGraph;
 class Flow;
+template <class T> class Graph;
 
 class FlowNode : public Node<FlowNode> {
   public:
-    FlowNode(std::vector<FlowNode*> parents, Tensor output_tensor, Flow* flow);
+    FlowNode(Graph<FlowNode>* graph, Tensor output_tensor);
+    FlowNode(std::vector<FlowNode*> parents, Tensor output_tensor);
     Tensor output_tensor() const;
     Tensor input_tensor() const;
 
@@ -31,12 +32,9 @@ class FlowNode : public Node<FlowNode> {
     std::string str() const;
     virtual std::string type_str() const = 0;
 
-    Flow* flow() const { return flow_; }
-
   protected:
     Tensor output_tensor_;
     std::string name_;
-    Flow* const flow_;
     ~FlowNode() {
         panic(
             "FlowNodes must not be created as automatic (stack) variable. This "

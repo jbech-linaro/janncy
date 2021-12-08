@@ -5,7 +5,7 @@
 #include <iostream>
 
 FullyConnected::FullyConnected(FlowNode* parent, Tensor matrix)
-    : FlowNode({parent}, Tensor({matrix.shape()[1]}), parent->flow()) {}
+    : FlowNode({parent}, Tensor({matrix.shape()[1]})) {}
 
 CtTensor FullyConnected::cipherfy(std::vector<CtTensor> parents) const {
     auto parent = parents[0].get_ct_ops();

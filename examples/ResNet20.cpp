@@ -1,9 +1,11 @@
 #include <iostream>
 
 #include "../src/include/ConvLayer.hpp"
+#include "../src/include/CtGraph.hpp"
 #include "../src/include/Flow.hpp"
 #include "../src/include/Input.hpp"
 #include "../src/include/ReLU.hpp"
+
 /*
 FlowNode* conv_bn(Flow& resnet, FlowNode* parent, Tensor filter) {
     auto conv = resnet.conv_layer(parent, filter, 1, true);
@@ -97,5 +99,5 @@ int main() {
     relu->str();
     auto ct_graph = resnet.cipherfy();
     resnet.draw("flow");
-    ct_graph.draw("ct_graph");
+    ct_graph->draw("ct_graph");
 }
