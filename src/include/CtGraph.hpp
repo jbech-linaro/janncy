@@ -9,7 +9,6 @@ class FlowNode;
 
 class CtGraph : public Graph<CtOp> {
   public:
-    CtTensor input(FlowNode* input_node);
 };
 
 #endif  // CTGRAPH_HPP_

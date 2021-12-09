@@ -25,7 +25,9 @@ class FlowNode : public Node<FlowNode> {
     FlowNode(FlowNode&&) = delete;
     FlowNode& operator=(FlowNode&&) = delete;
 
-    virtual CtTensor cipherfy(std::vector<CtTensor> parents) const = 0;
+    virtual CtTensor cipherfy(std::vector<CtTensor> parents) const {
+        return parents[0];
+    }
 
     void set_name(std::string name);
 

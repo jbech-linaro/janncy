@@ -6,7 +6,9 @@
 int get_output_width(FlowNode* parent, Tensor filter, int stride, bool padded) {
     int result;
     if (!padded) {
-        result = (parent->output_tensor().shape()[1] - 2*(filter.shape()[1]/2)) / stride;
+        result =
+            (parent->output_tensor().shape()[1] - 2 * (filter.shape()[1] / 2)) /
+            stride;
     } else {
         result = parent->output_tensor().shape()[1] / stride;
     }
@@ -16,10 +18,13 @@ int get_output_width(FlowNode* parent, Tensor filter, int stride, bool padded) {
     return result;
 }
 
-int get_output_height(FlowNode* parent, Tensor filter, int stride, bool padded) {
+int get_output_height(FlowNode* parent, Tensor filter, int stride,
+                      bool padded) {
     int result;
     if (!padded) {
-        result = (parent->output_tensor().shape()[2] - 2*(filter.shape()[2]/2)) / stride;
+        result =
+            (parent->output_tensor().shape()[2] - 2 * (filter.shape()[2] / 2)) /
+            stride;
     } else {
         result = parent->output_tensor().shape()[2] / stride;
     }

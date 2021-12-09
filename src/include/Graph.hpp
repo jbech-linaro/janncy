@@ -26,6 +26,17 @@ template <class T> class Graph {
         nodes_.push_back(node);
     }
 
+    T* sentinel() {
+        if (!sentinel_) {
+            /*
+             * nsamar: This is undefined behavior cuz node<T> is not a T
+             * It works, but is a hack. dynamic_cast would generate a nullptr.
+             */
+            sentinel_ = static_cast<T*>(new Node<T>(this, {}));
+        }
+        return sentinel_;
+    }
+
     std::string str() const {
         std::stringstream result;
         for (auto& node : nodes_) {
@@ -50,8 +61,10 @@ template <class T> class Graph {
         for (auto& node : nodes_) {
             node_map[node] =
                 agnode(g, const_cast<char*>((node->str()).c_str()), 1);
-            for (auto& parent : node->get_parents()) {
-                agedge(g, node_map.at(parent), node_map.at(node), 0, 1);
+            for (auto& child : node->get_children()) {
+                node_map[child] =
+                    agnode(g, const_cast<char*>((child->str()).c_str()), 1);
+                agedge(g, node_map.at(node), node_map.at(child), 0, 1);
             }
         }
         // agsafeset(n, (char*)"color", (char*)"red", (char*)"");
@@ -69,6 +82,7 @@ template <class T> class Graph {
 
   protected:
     std::vector<T*> nodes_;
+    T* sentinel_ = nullptr;
 };
 
 #endif  // GRAPH_HPP_

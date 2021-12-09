@@ -7,10 +7,3 @@
 
 #include <vector>
 
-CtTensor CtGraph::input(FlowNode* input_node) {
-    std::vector<CtOp*> result;
-    for (int i = 0; i < input_node->output_tensor().shape()[0]; ++i) {
-        result.push_back(new CtInput(this));
-    }
-    return CtTensor(result);
-}

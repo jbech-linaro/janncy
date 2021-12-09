@@ -2,6 +2,7 @@
 
 #include "include/CtGraph.hpp"
 #include "include/CtInput.hpp"
+#include "include/CtTensor.hpp"
 #include "include/Input.hpp"
 #include "include/Tensor.hpp"
 
@@ -16,18 +17,14 @@
 CtGraph* Flow::cipherfy() {
     CtGraph ct_graph;
     std::unordered_map<FlowNode*, CtTensor> ct_tensor_map;
+    ct_tensor_map.insert(std::make_pair(
+        sentinel(), CtTensor(std::vector<CtOp*>{ct_graph.sentinel()})));
     for (auto& node : nodes_) {
-        auto parents = node->get_parents();
-        if (parents.size() == 0) {
-            ct_tensor_map.insert(std::make_pair(node, ct_graph.input(node)));
-        } else {
-            std::vector<CtTensor> ct_parents;
-            for (auto parent : parents) {
-                ct_parents.push_back(ct_tensor_map.at(parent));
-            }
-            ct_tensor_map.insert(
-                std::make_pair(node, node->cipherfy(ct_parents)));
+        std::vector<CtTensor> ct_parents;
+        for (auto parent : node->get_parents()) {
+            ct_parents.push_back(ct_tensor_map.at(parent));
         }
+        ct_tensor_map.insert(std::make_pair(node, node->cipherfy(ct_parents)));
     }
     return new CtGraph(ct_graph);
 }
