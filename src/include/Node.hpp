@@ -20,6 +20,7 @@ template <class T> class Node {
   public:
     explicit Node(Graph<T>* graph);
     explicit Node(std::vector<T*> parents);
+    Node(const Node& other);
     Node(Graph<T>* graph, std::vector<T*> parents)
         : graph_(graph), parents_(parents) {}
     void add_child(T* child) {
@@ -31,6 +32,7 @@ template <class T> class Node {
     std::vector<T*> get_children() const { return children_; }
     virtual std::string str() const { return "Anonymous"; }
     std::vector<T*> get_parents() const { return parents_; }
+    void register_with_graph();
 
     Graph<T>* graph() const { return graph_; }
 
@@ -54,15 +56,10 @@ template <class T> Graph<T>* get_graph(std::vector<T*> parents) {
     return parents[0]->graph();
 }
 
-template <class T>
-Node<T>::Node(std::vector<T*> parents)
-    : graph_(get_graph(parents)), parents_(parents) {
-    if (!graph_) {
-        panic("nullptr graph!");
-    }
-    for (auto& parent : parents) {
+template <class T> void Node<T>::register_with_graph() {
+    for (auto& parent : parents_) {
         if (!parent) {
-            panic("nulltpr parent!");
+            panic("nullptr parent!");
         }
         /**
          * nsamar: These static_cast()'s are concerning, but I see no cleaner
@@ -82,7 +79,16 @@ Node<T>::Node(std::vector<T*> parents)
          **/
         parent->add_child(static_cast<T*>(this));
     }
+    if (!graph_) {
+        panic("nullptr graph!");
+    }
     graph_->add_node(static_cast<T*>(this));
+}
+
+template <class T>
+Node<T>::Node(std::vector<T*> parents)
+    : graph_(get_graph(parents)), parents_(parents) {
+    register_with_graph();
 }
 
 template <class T>
@@ -92,6 +98,16 @@ Node<T>::Node(Graph<T>* graph) : graph_(graph), parents_{graph->sentinel()} {
         panic("nullptr graph!");
     }
     graph_->add_node(static_cast<T*>(this));
+}
+
+template <class T>
+Node<T>::Node(const Node& other)
+    : graph_(other.graph_), parents_{other.parents_} {
+    if (graph_->sentinel() == parents_[0]) {
+        graph_->add_node(static_cast<T*>(this));
+    } else {
+        register_with_graph();
+    }
 }
 
 #endif  // NODE_HPP_

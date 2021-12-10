@@ -4,11 +4,13 @@
 #include "FlowNode.hpp"
 #include "Tensor.hpp"
 
+class FlowVisitor;
+
 class ReLU : public FlowNode {
   public:
     static ReLU* create(FlowNode* parent) { return new ReLU(parent); }
     std::string type_str() const { return "ReLU"; }
-    CtTensor cipherfy(std::vector<CtTensor> parents) const;
+    void visit(FlowVisitor* visitor);
 
   private:
     ReLU(FlowNode* parent);

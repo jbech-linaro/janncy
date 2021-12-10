@@ -6,9 +6,9 @@
 
 #include <vector>
 
+class CtGraph;
 class FlowNode;
 class Input;
-class CtGraph;
 
 class Flow : public Graph<FlowNode> {
   public:

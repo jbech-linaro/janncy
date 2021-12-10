@@ -1,5 +1,7 @@
 #include "include/FlowNode.hpp"
 
+#include "include/FlowVisitor.hpp"
+
 #include <sstream>
 #include <string>
 #include <vector>

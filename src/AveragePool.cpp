@@ -1,8 +1,7 @@
 #include "include/AveragePool.hpp"
 
-#include "include/CtAdd.hpp"
-#include "include/CtRotate.hpp"
 #include "include/FlowNode.hpp"
+#include "include/FlowVisitor.hpp"
 #include "include/Tensor.hpp"
 #include "include/utils.hpp"
 
@@ -18,8 +17,9 @@ AveragePool::AveragePool(FlowNode* parent, Tensor pool, int stride, bool padded)
       padded_(padded) {}
 
 int AveragePool::stride() const { return stride_; }
-
 bool AveragePool::padded() const { return padded_; }
+Tensor AveragePool::pool() const { return pool_; }
+void AveragePool::visit(FlowVisitor* visitor) { visitor->visit(this); }
 
 int log2(int n) {
     if (n == 1) {
@@ -28,18 +28,3 @@ int log2(int n) {
     return 1 + log2(n >> 1);
 }
 
-CtTensor AveragePool::cipherfy(std::vector<CtTensor> parents) const {
-    auto parent = parents[0].get_ct_ops();
-    auto result = parent;
-    for (auto channel_idx = 0ul; channel_idx < parent.size(); ++channel_idx) {
-        for (auto idx = 0; idx < log2(pool_.shape()[1]); ++idx) {
-            auto rot = CtRotate::create(result[channel_idx]);
-            result[channel_idx] = CtAdd::create(result[channel_idx], rot);
-        }
-        for (auto idx = 0; idx < log2(pool_.shape()[1]); ++idx) {
-            auto rot = CtRotate::create(result[channel_idx]);
-            result[channel_idx] = CtAdd::create(result[channel_idx], rot);
-        }
-    }
-    return CtTensor(result);
-}

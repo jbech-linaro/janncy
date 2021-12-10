@@ -29,10 +29,17 @@ cc_library(
 )
 
 cc_library(
+        name = "Cipherfier",
+        srcs = [ "Cipherfier.cpp" ],
+        hdrs = [ "include/Cipherfier.hpp" ],
+        deps = [ "//src:AveragePool", "//src:BatchNormalization", "//src:CtGraph", "//src:FlowNode", "//src:ConvLayer", "//src:FullyConnected", "//src:Add", "//src:Input", "//src:ReLU", "//src:CtAdd", "//src:CtMul", "//src:CtPtAdd", "//src:CtPtMul", "//src:CtInput", "//src:CtRotate", "//src:CtTensor", ],
+)
+
+cc_library(
         name = "CtGraph",
         srcs = [ "CtGraph.cpp" ],
-        hdrs = [ "include/CtGraph.hpp", "include/Graph.hpp", "include/Panic.hpp", ],
-        deps = [ "//src:FlowNode", "//src:CtTensor", "//src:CtOp", "//src:CtAdd", "//src:CtMul", "//src:CtPtAdd", "//src:CtPtMul", "//src:CtRotate", "//src:CtInput", "//src:Panic", ],
+        hdrs = [ "include/CtGraph.hpp", "include/Graph.hpp", ],
+        deps = [ "//src:CtOp" ],
         visibility = [ "//test:__pkg__", "//examples:__pkg__", ],
 )
 
@@ -40,7 +47,7 @@ cc_library(
         name = "Flow",
         srcs = [ "Flow.cpp" ],
         hdrs = [ "include/Flow.hpp", "include/Graph.hpp", "include/Panic.hpp" ],
-        deps = [ "//src:Tensor", "//src:CtGraph", "//src:CtOp", "//src:Input", "//src:Panic", ],
+        deps = [ "//src:Cipherfier", "//src:CtGraph", "//src:Tensor", "//src:CtOp", "//src:Input", "//src:Panic", ],
         visibility = [ "//test:__pkg__", "//examples:__pkg__", ],
 )
 
@@ -55,7 +62,7 @@ cc_library(
 cc_library(
         name = "FlowNode",
         srcs = [ "FlowNode.cpp" ],
-        hdrs = [ "include/FlowNode.hpp", ],
+        hdrs = [ "include/FlowNode.hpp", "include/FlowVisitor.hpp", ],
         deps = [ "//src:Panic", "//src:Tensor", "//src:Node", "//src:CtTensor", ],
         visibility = [ "//test:__pkg__", ],
 )
@@ -115,6 +122,13 @@ cc_library(
 )
 
 cc_library(
+        name = "Input",
+        srcs = [ "Input.cpp", "include/Graph.hpp", ],
+        hdrs = [ "include/Input.hpp" ],
+        deps = [ "//src:FlowNode" ],
+)
+
+cc_library(
         name = "CtAdd",
         srcs = [ "CtAdd.cpp" ],
         hdrs = [ "include/CtAdd.hpp" ],
@@ -126,15 +140,7 @@ cc_library(
         name = "Add",
         srcs = [ "Add.cpp" ],
         hdrs = [ "include/Add.hpp" ],
-        deps = [ "//src:Tensor", "//src:FlowNode", "//src:CtGraph", ],
-        visibility = [ "//test:__pkg__", ],
-)
-
-cc_library(
-        name = "Input",
-        srcs = [ "Input.cpp" ],
-        hdrs = [ "include/Input.hpp" ],
-        deps = [ "//src:Tensor", "//src:FlowNode", "//src:CtGraph", ],
+        deps = [ "//src:Tensor", "//src:FlowNode", ],
         visibility = [ "//test:__pkg__", ],
 )
 
@@ -142,7 +148,7 @@ cc_library(
         name = "FullyConnected",
         srcs = [ "FullyConnected.cpp" ],
         hdrs = [ "include/FullyConnected.hpp" ],
-        deps = [ "//src:Tensor", "//src:FlowNode", "//src:CtGraph", ],
+        deps = [ "//src:Tensor", "//src:FlowNode", ],
         visibility = [ "//test:__pkg__", ],
 )
 
@@ -150,7 +156,7 @@ cc_library(
         name = "BatchNormalization",
         srcs = [ "BatchNormalization.cpp" ],
         hdrs = [ "include/BatchNormalization.hpp" ],
-        deps = [ "//src:Tensor", "//src:FlowNode", "//src:CtGraph", ],
+        deps = [ "//src:Tensor", "//src:FlowNode", ],
         visibility = [ "//test:__pkg__", ],
 )
 
@@ -158,7 +164,7 @@ cc_library(
         name = "AveragePool",
         srcs = [ "AveragePool.cpp" ],
         hdrs = [ "include/AveragePool.hpp" ],
-        deps = [ "//src:Tensor", "//src:FlowNode", "//src:utils", "//src:CtGraph", ],
+        deps = [ "//src:Tensor", "//src:FlowNode", "//src:utils", ],
         visibility = [ "//test:__pkg__", ],
 )
 
@@ -166,7 +172,7 @@ cc_library(
         name = "ConvLayer",
         srcs = [ "ConvLayer.cpp" ],
         hdrs = [ "include/ConvLayer.hpp" ],
-        deps = [ "//src:Tensor", "//src:FlowNode", "//src:utils", "//src:CtGraph", ],
+        deps = [ "//src:Tensor", "//src:FlowNode", "//src:utils", ],
         visibility = [ "//test:__pkg__", "//examples:__pkg__", ],
 )
 
@@ -174,6 +180,6 @@ cc_library(
         name = "ReLU",
         srcs = [ "ReLU.cpp" ],
         hdrs = [ "include/ReLU.hpp" ],
-        deps = [ "//src:Tensor", "//src:FlowNode", "//src:CtGraph", ],
+        deps = [ "//src:Tensor", "//src:FlowNode", ],
         visibility = [ "//test:__pkg__", "//examples:__pkg__", ],
 )

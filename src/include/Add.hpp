@@ -3,10 +3,12 @@
 
 #include "FlowNode.hpp"
 
+class FlowVisitor;
+
 class Add : public FlowNode {
   public:
     std::string type_str() const { return "Add"; }
-    CtTensor cipherfy(std::vector<CtTensor> parents) const;
+    void visit(FlowVisitor* visitor);
     static Add* create(FlowNode* parent0, FlowNode* parent1) {
         return new Add(parent0, parent1);
     }

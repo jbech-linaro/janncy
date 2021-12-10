@@ -6,14 +6,15 @@
 
 class Flow;
 template <class T> class Graph;
+class FlowVisitor;
 
 class Input : public FlowNode {
   public:
     static Input* create(Graph<FlowNode>* flow, Tensor input_tensor) {
         return new Input(flow, input_tensor);
     }
+    void visit(FlowVisitor* visitor);
     std::string type_str() const { return "Input"; }
-    CtTensor cipherfy(std::vector<CtTensor> parents) const;
 
   private:
     Input(Graph<FlowNode>* flow, Tensor input_tensor);

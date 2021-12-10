@@ -2,13 +2,11 @@
 #define CTGRAPH_HPP_
 
 #include "CtOp.hpp"
-#include "CtTensor.hpp"
 #include "Graph.hpp"
-
-class FlowNode;
 
 class CtGraph : public Graph<CtOp> {
   public:
+    CtGraph(){};
 };
 
 #endif  // CTGRAPH_HPP_
