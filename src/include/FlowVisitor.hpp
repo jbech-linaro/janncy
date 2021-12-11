@@ -1,5 +1,5 @@
-#ifndef VISITOR_HPP_
-#define VISITOR_HPP_
+#ifndef FLOWVISITOR_HPP_
+#define FLOWVISITOR_HPP_
 
 class FlowNode;
 class ConvLayer;
@@ -21,4 +21,4 @@ class FlowVisitor {
     virtual void visit(ReLU* node) = 0;
 };
 
-#endif  // VISITOR_HPP_
+#endif  // FLOWVISITOR_HPP_
