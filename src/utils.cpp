@@ -3,7 +3,8 @@
 #include "include/FlowNode.hpp"
 #include "include/Tensor.hpp"
 
-int get_output_width(FlowNode* parent, Tensor filter, int stride, bool padded) {
+int get_output_width(const FlowNode* parent, const Tensor& filter, int stride,
+                     bool padded) {
     int result;
     if (!padded) {
         result =
@@ -18,7 +19,7 @@ int get_output_width(FlowNode* parent, Tensor filter, int stride, bool padded) {
     return result;
 }
 
-int get_output_height(FlowNode* parent, Tensor filter, int stride,
+int get_output_height(const FlowNode* parent, const Tensor& filter, int stride,
                       bool padded) {
     int result;
     if (!padded) {

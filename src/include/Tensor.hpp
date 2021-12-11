@@ -4,10 +4,11 @@
 #include <vector>
 
 class Tensor {
-public:
+  public:
     Tensor(std::vector<int> shape);
     std::vector<int> shape() const;
-private:
+
+  private:
     std::vector<int> shape_;
 };
 #endif  // TENSOR_HPP_

@@ -4,6 +4,4 @@
 
 Tensor::Tensor(std::vector<int> shape) : shape_(shape) {}
 
-std::vector<int> Tensor::shape() const {
-    return shape_;
-}
+std::vector<int> Tensor::shape() const { return shape_; }

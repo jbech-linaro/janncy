@@ -32,15 +32,13 @@ class Cipherfier : public FlowVisitor {
     void visit(Input* node) override;
     void visit(ReLU* node) override;
 
-    void register_node(FlowNode* node, std::vector<CtOp*> ct_ops);
-
     CtGraph* ct_graph() const { return ct_graph_; }
 
   private:
-    CtTensor ct_op(FlowNode* node);
-    std::vector<CtTensor> parents(FlowNode* node);
-    std::vector<CtTensor> get_parents(FlowNode* node);
-    std::unordered_map<FlowNode*, CtTensor> ct_map_;
+    void register_node(const FlowNode* node, const std::vector<CtOp*>& ct_ops);
+    CtTensor ct_op(const FlowNode* node);
+    std::vector<CtTensor> parents(const FlowNode* node);
+    std::unordered_map<const FlowNode*, CtTensor> ct_map_;
     CtGraph* ct_graph_;
 };
 

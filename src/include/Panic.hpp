@@ -3,6 +3,6 @@
 
 #include <string>
 
-void panic(std::string message);
+void panic(const std::string& message);
 
 #endif  // PANIC_HPP_

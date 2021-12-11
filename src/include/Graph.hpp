@@ -49,7 +49,7 @@ template <class T> class Graph {
         return result.str();
     }
 
-    void draw(std::string filename) {
+    void draw(const std::string& filename) const {
         std::unordered_map<T*, Agnode_t*> node_map;
         Agraph_t* g;
         GVC_t* gvc;

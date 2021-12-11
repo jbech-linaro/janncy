@@ -24,6 +24,7 @@ class CleartextEvaluator : public CtGraphVisitor {
     void visit(CtPtMul* node) override;
     void visit(CtRotate* node) override;
     void visit(CtInput* node) override;
+
     std::vector<std::vector<double> > result() const;
 
   private:

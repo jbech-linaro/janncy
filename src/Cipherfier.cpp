@@ -22,11 +22,12 @@
 
 Cipherfier::Cipherfier() { ct_graph_ = new CtGraph(); };
 
-void Cipherfier::register_node(FlowNode* node, std::vector<CtOp*> ct_ops) {
+void Cipherfier::register_node(const FlowNode* node,
+                               const std::vector<CtOp*>& ct_ops) {
     ct_map_.insert(std::make_pair(node, CtTensor(ct_ops)));
 }
 
-template <class T> CtAdd* accumulate(std::vector<T*> cts) {
+template <class T> CtAdd* accumulate(const std::vector<T*>& cts) {
     if (cts.size() == 2) {
         return CtAdd::create(cts[0], cts[1]);
     }
@@ -45,21 +46,21 @@ template <class T> std::vector<CtOp*> create_many(int amt, T* obj) {
     return result;
 }
 
-std::vector<CtOp*> pt_mul(std::vector<CtOp*> cts) {
+std::vector<CtOp*> pt_mul(const std::vector<CtOp*>& cts) {
     auto multiplied = std::vector<CtOp*>();
     std::transform(cts.begin(), cts.end(), std::back_inserter(multiplied),
                    [&](auto& x) { return CtPtMul::create(x); });
     return multiplied;
 }
 
-CtTensor Cipherfier::ct_op(FlowNode* node) {
+CtTensor Cipherfier::ct_op(const FlowNode* node) {
     if (ct_map_.find(node) == ct_map_.end()) {
         return CtTensor({ct_graph_->sentinel()});
     }
     return ct_map_.at(node);
 }
 
-std::vector<CtTensor> Cipherfier::parents(FlowNode* node) {
+std::vector<CtTensor> Cipherfier::parents(const FlowNode* node) {
     // TODO: rename get_parents in Node to parents(). Same for children()
     auto prnts = node->get_parents();
     auto result = std::vector<CtTensor>();
@@ -68,7 +69,7 @@ std::vector<CtTensor> Cipherfier::parents(FlowNode* node) {
     return result;
 }
 
-CtAdd* apply_filter(std::vector<CtOp*> parents, int filter_size) {
+CtAdd* apply_filter(const std::vector<CtOp*>& parents, int filter_size) {
     auto filtered_channels = std::vector<CtOp*>();
     std::transform(parents.begin(), parents.end(),
                    std::back_inserter(filtered_channels), [&](auto& p) {

@@ -20,15 +20,19 @@ template <class T> class Node {
   public:
     explicit Node(Graph<T>* graph);
     explicit Node(std::vector<T*> parents);
+
     Node(const Node& other);
+
     Node(Graph<T>* graph, std::vector<T*> parents)
         : graph_(graph), parents_(parents) {}
+
     void add_child(T* child) {
         if (!child) {
             panic("nullptr child!");
         }
         children_.push_back(child);
     }
+
     std::vector<T*> get_children() const { return children_; }
     virtual std::string str() const { return "Anonymous"; }
     std::vector<T*> get_parents() const { return parents_; }
@@ -44,7 +48,7 @@ template <class T> class Node {
 
 #include "Graph.hpp"
 
-template <class T> Graph<T>* get_graph(std::vector<T*> parents) {
+template <class T> Graph<T>* get_graph(const std::vector<T*>& parents) {
     if (parents.size() == 0) {
         panic("Parents array has size zero!");
     }
