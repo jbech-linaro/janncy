@@ -1,8 +1,11 @@
 #include <iostream>
 
+#include "../src/include/BatchNormalization.hpp"
+#include "../src/include/CleartextEvaluator.hpp"
 #include "../src/include/ConvLayer.hpp"
 #include "../src/include/CtGraph.hpp"
 #include "../src/include/Flow.hpp"
+#include "../src/include/FullyConnected.hpp"
 #include "../src/include/Input.hpp"
 #include "../src/include/ReLU.hpp"
 
@@ -12,7 +15,6 @@ FlowNode* conv_bn(Flow& resnet, FlowNode* parent, Tensor filter) {
     auto bn = resnet.batch_normalization(conv);
     return bn;
 }
-
 FlowNode* conv_bn_relu(Flow& resnet, FlowNode* parent, Tensor filter) {
     auto bn = conv_bn(resnet, parent, filter);
     auto relu = resnet.reLU(bn);
@@ -78,6 +80,18 @@ int main() {
     auto input_tensor = resnet.input(Tensor({3, 8, 8}));
     auto conv = ConvLayer::create(input_tensor, Tensor({8, 3, 3}), 1, true);
     auto relu = ReLU::create(conv);
+    auto fc = FullyConnected::create(relu, Tensor({8, 3}));
+    BatchNormalization::create(fc);
+
+    auto ct_graph = resnet.cipherfy();
+    ct_graph->draw("ct_graph");
+    auto result = ct_graph->evaluate(
+        std::vector<std::vector<double>>(3, std::vector<double>(32, 1)));
+    for (auto& res : result) {
+        for_each(res.begin(), res.end(),
+                 [&](auto x) { std::cout << x << " "; });
+        std::cout << std::endl;
+    }
 
     /*
     auto conv2_1 = conv2(resnet, input_tensor);
@@ -96,8 +110,4 @@ int main() {
     auto ap = resnet.average_pool(r, Tensor({16, 4, 4}), 1, false);
     auto fc = resnet.fully_connected(ap, Tensor({16, 10}));
     */
-    relu->str();
-    auto ct_graph = resnet.cipherfy();
-    resnet.draw("flow");
-    ct_graph->draw("ct_graph");
 }

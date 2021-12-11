@@ -39,7 +39,7 @@ cc_library(
         name = "CtGraph",
         srcs = [ "CtGraph.cpp" ],
         hdrs = [ "include/CtGraph.hpp", "include/Graph.hpp", ],
-        deps = [ "//src:CtOp" ],
+        deps = [ "//src:CtOp", "//src:CleartextEvaluator", ],
         visibility = [ "//test:__pkg__", "//examples:__pkg__", ],
 )
 
@@ -84,15 +84,15 @@ cc_library(
 cc_library(
         name = "CtRotate",
         srcs = [ "CtRotate.cpp" ],
-        hdrs = [ "include/CtRotate.hpp" ],
-        deps = [ "//src:CtOp" ],
+        hdrs = [ "include/CtRotate.hpp", "include/CtGraphVisitor.hpp", ],
+        deps = [ "//src:CtOp", ],
         visibility = [ "//test:__pkg__", ],
 )
 
 cc_library(
         name = "CtPtAdd",
         srcs = [ "CtPtAdd.cpp" ],
-        hdrs = [ "include/CtPtAdd.hpp" ],
+        hdrs = [ "include/CtPtAdd.hpp", "include/CtGraphVisitor.hpp", ],
         deps = [ "//src:CtOp" ],
         visibility = [ "//test:__pkg__", ],
 )
@@ -100,7 +100,7 @@ cc_library(
 cc_library(
         name = "CtPtMul",
         srcs = [ "CtPtMul.cpp" ],
-        hdrs = [ "include/CtPtMul.hpp" ],
+        hdrs = [ "include/CtPtMul.hpp", "include/CtGraphVisitor.hpp", ],
         deps = [ "//src:CtOp" ],
         visibility = [ "//test:__pkg__", ],
 )
@@ -108,7 +108,7 @@ cc_library(
 cc_library(
         name = "CtMul",
         srcs = [ "CtMul.cpp" ],
-        hdrs = [ "include/CtMul.hpp" ],
+        hdrs = [ "include/CtMul.hpp", "include/CtGraphVisitor.hpp", ],
         deps = [ "//src:CtOp" ],
         visibility = [ "//test:__pkg__", ],
 )
@@ -116,7 +116,7 @@ cc_library(
 cc_library(
         name = "CtInput",
         srcs = [ "CtInput.cpp" ],
-        hdrs = [ "include/CtInput.hpp" ],
+        hdrs = [ "include/CtInput.hpp", "include/CtGraphVisitor.hpp", ],
         deps = [ "//src:CtOp" ],
         visibility = [ "//test:__pkg__", ],
 )
@@ -131,7 +131,7 @@ cc_library(
 cc_library(
         name = "CtAdd",
         srcs = [ "CtAdd.cpp" ],
-        hdrs = [ "include/CtAdd.hpp" ],
+        hdrs = [ "include/CtAdd.hpp", "include/CtGraphVisitor.hpp", ],
         deps = [ "//src:CtOp" ],
         visibility = [ "//test:__pkg__", ],
 )
@@ -183,3 +183,11 @@ cc_library(
         deps = [ "//src:Tensor", "//src:FlowNode", ],
         visibility = [ "//test:__pkg__", "//examples:__pkg__", ],
 )
+
+cc_library(
+        name = "CleartextEvaluator",
+        srcs = [ "CleartextEvaluator.cpp" ],
+        hdrs = [ "include/CleartextEvaluator.hpp", "include/CtGraphVisitor.hpp", ],
+        deps = [ "//src:CtAdd", "//src:CtInput", "//src:CtMul", "//src:CtPtAdd", "//src:CtPtMul", "//src:CtRotate", ],
+        visibility = [ "//test:__pkg__", "//examples:__pkg__", ],
+        )
