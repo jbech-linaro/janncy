@@ -190,4 +190,10 @@ cc_library(
         hdrs = [ "include/CleartextEvaluator.hpp", "include/CtGraphVisitor.hpp", ],
         deps = [ "//src:CtAdd", "//src:CtInput", "//src:CtMul", "//src:CtPtAdd", "//src:CtPtMul", "//src:CtRotate", ],
         visibility = [ "//test:__pkg__", "//examples:__pkg__", ],
-        )
+)
+
+cc_binary(
+        name = "OnnxParser",
+        srcs = [ "OnnxParser.cpp", "include/OnnxParser.hpp", ],
+        deps = [ "@onnx//:onnx_cc_proto", ],
+)

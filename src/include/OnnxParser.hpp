@@ -1,0 +1,4 @@
+#ifndef ONNXPARSER_HPP_
+#define ONNXPARSER_HPP_
+
+#endif  // ONNXPARSER_HPP_
