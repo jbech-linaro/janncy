@@ -9,7 +9,7 @@ cc_library(
 cc_library(
         name = "Node",
         srcs = [ "Node.cpp" ],
-        hdrs = [ "include/Node.hpp", "include/Graph.hpp", "include/Panic.hpp", ],
+        hdrs = [ "include/Node.hpp", "include/Graph.hpp", "include/Panic.hpp", "@graphviz//:headers", ],
         visibility = [ "//test:__pkg__", ],
 )
 

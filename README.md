@@ -1,1 +1,1 @@
-Dependencies: clang with C++ 17 support, bazel, googletest, graphviz
+Dependencies: bazel 4.2.2
