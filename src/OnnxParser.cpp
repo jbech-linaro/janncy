@@ -1,6 +1,10 @@
 #include "include/OnnxParser.hpp"
+
+#include "include/Panic.hpp"
+
 #include "onnx/onnx.pb.h"
 
+#include <experimental/filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -39,7 +43,10 @@ void print_io_info(
 int main() {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     std::string filename = "/data/sanchez/users/nsamar/pytorch/resnet18.onnx";
-    // TODO: do check if file exists
+    if (!std::experimental::filesystem::exists(
+            std::experimental::filesystem::path(filename))) {
+        panic("ONNX file does not exist!");
+    }
     std::ifstream in(filename, std::ios::ate | std::ios::binary);
     std::streamsize size = in.tellg();
     in.seekg(0, std::ios::beg);

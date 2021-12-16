@@ -195,5 +195,6 @@ cc_library(
 cc_binary(
         name = "OnnxParser",
         srcs = [ "OnnxParser.cpp", "include/OnnxParser.hpp", ],
-        deps = [ "@onnx//:onnx_cc_proto", ],
+        deps = [ "@onnx//:onnx_cc_proto", "//src:Panic", ],
+        linkopts = [ "-lstdc++fs", ],
 )
