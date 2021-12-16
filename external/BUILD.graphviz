@@ -1,7 +1,5 @@
-package(default_visibility = [ "//visibility:public" ])
-
-cc_library(
-    name = "headers",
-    srcs = glob(["**/*.dylib", ]),
-    hdrs = glob(["**/*.h", ]),
+filegroup(
+    name = "all",
+    srcs = glob(["**"]),
+    visibility = [ "//visibility:public" ],
 )
