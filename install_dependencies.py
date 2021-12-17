@@ -3,12 +3,6 @@
 import os
 from os.path import exists
 
-# pip3
-os.system("sudo apt-get install python3-pip")
-
-# PyTorch
-os.system("pip3 install torch")
-
 # bazel
 os.system("sudo apt install apt-transport-https curl gnupg")
 os.system("curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg")
@@ -32,3 +26,14 @@ os.system("sudo apt install graphviz libgraphviz-dev")
 
 # graphviz
 os.system("sudo apt install graphviz libgraphviz-dev")
+
+# pip3
+os.system("sudo apt-get install python3-pip")
+
+# PyTorch
+os.system("pip3 install torch")
+
+
+# Download neural nets and convert to onnx
+os.system("mkdir -p .pytorch")
+os.system("./scripts/download_nets.py")

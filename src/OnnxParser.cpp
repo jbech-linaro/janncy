@@ -40,9 +40,12 @@ void print_io_info(
     }
 }
 
-int main() {
+int main(int argc, char **argv) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
-    std::string filename = "/data/sanchez/users/nsamar/pytorch/resnet18.onnx";
+    if (argc != 2) {
+        panic("Please provide filepath!");
+    }
+    std::string filename = argv[1];
     if (!std::experimental::filesystem::exists(
             std::experimental::filesystem::path(filename))) {
         panic("ONNX file does not exist!");
