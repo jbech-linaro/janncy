@@ -1,16 +1,3 @@
-load("@rules_foreign_cc//foreign_cc:cmake.bzl", "cmake")
-
-
-cmake(
-        name = "graphviz",
-        lib_source = "@graphviz//:all",
-        out_shared_libs = select({
-                "//:macos": [ "libgraphviz.dylib" ],
-                "//:windows": [ "libgraphviz.dll" ],
-                "//conditions:default": [ "libgraphviz.so" ],
-        }),
-)
-
 cc_library(
         name = "Ciphertext",
         srcs = [ "Ciphertext.cpp" ],
@@ -22,7 +9,7 @@ cc_library(
 cc_library(
         name = "Node",
         srcs = [ "Node.cpp" ],
-        hdrs = [ "include/Node.hpp", "include/Graph.hpp", "include/Panic.hpp", ":graphviz", ],
+        hdrs = [ "include/Node.hpp", "include/Graph.hpp", "include/Panic.hpp", ],
         visibility = [ "//test:__pkg__", ],
 )
 
@@ -208,6 +195,8 @@ cc_library(
 cc_binary(
         name = "OnnxParser",
         srcs = [ "OnnxParser.cpp", "include/OnnxParser.hpp", ],
-        deps = [ "@onnx//:onnx_cc_proto", "//src:Panic", ],
+        deps = [ "//src:Panic", "//:onnx_proto", ],
+        copts = [ "-I.dependencies/onnx/", ],
         linkopts = [ "-lstdc++fs", ],
 )
+

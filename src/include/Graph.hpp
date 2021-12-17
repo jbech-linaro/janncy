@@ -10,9 +10,9 @@
 #include <string>
 #include <unordered_map>
 
-#include "graphviz/cgraph.h"
-#include "graphviz/gvc.h"
-#include "graphviz/types.h"
+#include <graphviz/cgraph.h>
+#include <graphviz/gvc.h>
+#include <graphviz/types.h>
 
 #include <string>
 #include <unordered_set>

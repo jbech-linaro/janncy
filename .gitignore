@@ -3,4 +3,6 @@ bazel-*
 a.out
 *.pdf
 *.png
-t
+.dependencies
+*.gch
+bazel.gpg
