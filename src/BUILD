@@ -197,6 +197,6 @@ cc_binary(
         srcs = [ "OnnxParser.cpp", "include/OnnxParser.hpp", ],
         deps = [ "//src:Panic", "//:onnx_proto", ],
         copts = [ "-I.dependencies/onnx/", ],
-        linkopts = [ "-lstdc++fs", ],
+        linkopts = [ "-pthread", "-lstdc++fs", ],
 )
 

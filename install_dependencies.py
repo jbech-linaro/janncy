@@ -3,6 +3,12 @@
 import os
 from os.path import exists
 
+# pip3
+os.system("sudo apt-get install python3-pip")
+
+# PyTorch
+os.system("pip3 install torch")
+
 # bazel
 os.system("sudo apt install apt-transport-https curl gnupg")
 os.system("curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg")
@@ -20,9 +26,9 @@ os.system("ln -s /usr/bin/clang-10 /usr/bin/clang")
 os.system("sudo apt-get install libprotobuf-dev protobuf-compiler")
 
 # onnx
-if not exists(".dependencies/onnx"):
-    os.system("mkdir -p .dependencies")
-    os.system("cd .dependencies; git clone --recursive https://github.com/onnx/onnx.git")
+os.system("mkdir -p .dependencies")
+os.system("cd .dependencies; git clone --recursive https://github.com/onnx/onnx.git")
+os.system("sudo apt install graphviz libgraphviz-dev")
 
 # graphviz
-os.system("sudo apt install graphviz")
+os.system("sudo apt install graphviz libgraphviz-dev")
