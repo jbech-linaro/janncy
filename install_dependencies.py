@@ -13,8 +13,8 @@ os.system("sudo apt update && sudo apt install bazel")
 # clang
 os.system("sudo apt-get install llvm-10")
 os.system("sudo apt-get install clang-tools-10")
-os.system("ln -s /usr/bin/clang++-10 /usr/bin/clang++")
-os.system("ln -s /usr/bin/clang-10 /usr/bin/clang")
+os.system("sudo ln -s /usr/bin/clang++-10 /usr/bin/clang++")
+os.system("sudo ln -s /usr/bin/clang-10 /usr/bin/clang")
 
 # protobuf
 os.system("sudo apt-get install libprotobuf-dev protobuf-compiler")
@@ -23,12 +23,17 @@ os.system("sudo apt-get install libprotobuf-dev protobuf-compiler")
 os.system("mkdir -p .dependencies")
 os.system("cd .dependencies; git clone --recursive https://github.com/onnx/onnx.git")
 os.system("sudo apt install graphviz libgraphviz-dev")
+os.system("protoc -I=.dependencies/onnx/onnx/ --cpp_out=.dependencies/onnx/onnx/ .dependencies/onnx/onnx/onnx.proto")
 
 # graphviz
 os.system("sudo apt install graphviz libgraphviz-dev")
 
 # pip3
 os.system("sudo apt-get install python3-pip")
+
+# Pillow (needed by pytorch seems like?)
+os.system("sudo apt-get install libjpeg-dev zlib1g-deb")
+os.system("pip3 install image")
 
 # PyTorch
 os.system("pip3 install torch")
