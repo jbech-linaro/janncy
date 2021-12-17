@@ -33,6 +33,9 @@ os.system("sudo apt-get install python3-pip")
 # PyTorch
 os.system("pip3 install torch")
 
+# numpy
+os.system("pip3 install numpy")
+
 
 # Download neural nets and convert to onnx
 os.system("mkdir -p .pytorch")
