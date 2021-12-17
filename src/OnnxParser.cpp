@@ -18,7 +18,7 @@ void print_dim(const ::onnx::TensorShapeProto_Dimension &dim) {
             std::cout << dim.dim_value();
             break;
         default:
-            assert(false && "should never happen");
+            panic("print_dim()'s case statements!");
     }
 }
 
