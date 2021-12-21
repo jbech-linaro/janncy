@@ -1,11 +1,19 @@
+#include "include/Flow.hpp"
+#include "include/Input.hpp"
 #include "include/Panic.hpp"
+#include "include/ReLU.hpp"
+#include "include/Tensor.hpp"
 
 #include "onnx/onnx.pb.h"
 
+#include <algorithm>
 #include <experimental/filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <unordered_map>
+
+std::unordered_map<std::string, FlowNode *> flownode_map;
 
 void print_dim(const ::onnx::TensorShapeProto_Dimension &dim) {
     switch (dim.value_case()) {
@@ -38,10 +46,27 @@ void print_io_info(
     }
 }
 
+void create_node(Flow *flow, const onnx::NodeProto &node) {
+    FlowNode *new_node;
+    auto parents = std::vector<FlowNode *>{};
+    std::transform(node.input().begin(), node.input().begin() + 1,
+                   std::back_inserter(parents), [&](auto parent) {
+                       return flownode_map.at(std::string(parent));
+                   });
+    if (node.name() == "relu") {
+        new_node = ReLU::create(parents[0]);
+    } else {
+        new_node = ReLU::create(parents[0]);
+    }
+    flownode_map.insert(std::make_pair(std::string(node.output(0)), new_node));
+}
+
 int main(int argc, char **argv) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
+
     if (argc != 2) {
-        panic("Please provide filepath!");
+        panic(
+            "Please provide filepath to *.onnx file as command-line argument!");
     }
     std::string filename = argv[1];
     if (!std::experimental::filesystem::exists(
@@ -65,18 +90,24 @@ int main(int argc, char **argv) {
 
     std::cout << "graph inputs:\n";
     print_io_info(graph.input());
+    Flow *flow = new Flow();
+    flownode_map.insert(std::make_pair(
+        graph.input(0).name(),
+        Input::create(flow, Tensor(std::vector<int>{3, 224, 224}))));
 
     std::cout << "graph outputs:\n";
     print_io_info(graph.output());
 
-    for (int i = 0; i < graph.node_size(); ++i) {
-        std::cout << graph.node(i).name() << ": ";
-        for (auto in : graph.node(i).input()) {
+    for (auto node : graph.node()) {
+        std::cout << node.name() << ": ";
+        for (auto in : node.input()) {
             std::cout << in << ", ";
         }
         std::cout << " -> ";
-        for (auto out : graph.node(i).output()) {
+        for (auto out : node.output()) {
             std::cout << out << std::endl;
         }
+        create_node(flow, node);
     }
+    flow->draw("test");
 }
