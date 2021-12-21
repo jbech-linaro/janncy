@@ -1,5 +1,3 @@
-#include "include/OnnxParser.hpp"
-
 #include "include/Panic.hpp"
 
 #include "onnx/onnx.pb.h"

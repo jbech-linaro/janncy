@@ -3,6 +3,8 @@
 
 #include "Tensor.hpp"
 
+class FlowNode;
+
 int get_output_width(const FlowNode* parent, const Tensor& filter, int stride,
                      bool padded);
 int get_output_height(const FlowNode* parent, const Tensor& filter, int stride,

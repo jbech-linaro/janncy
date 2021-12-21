@@ -1,13 +1,13 @@
 #include <iostream>
 
-#include "../src/include/BatchNormalization.hpp"
-#include "../src/include/CleartextEvaluator.hpp"
-#include "../src/include/ConvLayer.hpp"
-#include "../src/include/CtGraph.hpp"
-#include "../src/include/Flow.hpp"
-#include "../src/include/FullyConnected.hpp"
-#include "../src/include/Input.hpp"
-#include "../src/include/ReLU.hpp"
+#include "include/BatchNormalization.hpp"
+#include "include/CleartextEvaluator.hpp"
+#include "include/ConvLayer.hpp"
+#include "include/CtGraph.hpp"
+#include "include/Flow.hpp"
+#include "include/FullyConnected.hpp"
+#include "include/Input.hpp"
+#include "include/ReLU.hpp"
 
 /*
 FlowNode* conv_bn(Flow& resnet, FlowNode* parent, Tensor filter) {
