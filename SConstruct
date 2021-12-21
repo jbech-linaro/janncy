@@ -67,7 +67,7 @@ def install_protobuf() -> None:
 
 def install_onnx() -> None:
     cmd("mkdir -p .dependencies")
-    cmd("cd .dependencies; git clone --recursive https://github.com/onnx.git")
+    cmd("cd .dependencies; git clone --recursive https://github.com/onnx/onnx.git")
     cmd("protoc -I=.dependencies/onnx/onnx/ --cpp_out=.dependencies/onnx/onnx .dependencies/onnx/onnx/onnx.proto")
 
 def install_graphviz() -> None:
