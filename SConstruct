@@ -15,12 +15,6 @@ clang_path = Path(f"/usr/bin/clang-{clang_version}")
 onnx_path = Path(".dependencies/onnx")
 pip3_list_path = Path(".pip3_list")
 
-env = Environment(ENV = os.environ)
-env.VariantDir(build_dir, src_dir, duplicate=0)
-env.Append(CPPFLAGS = [ "-g", f"-std=c++{cpp_version}", "-Wall" ])
-env.Append(CPPPATH = [ onnx_path, src_dir, ])
-env.Append(LIBS = [ "stdc++fs", "pthread", "cgraph", "gvc", "protobuf", ])
-
 def cmd(cmd_str: str) -> str:
     print(cmd_str)
     result = subprocess.run(cmd_str, shell=True, stdout=subprocess.PIPE, encoding="utf-8")
@@ -97,6 +91,12 @@ def install_dependencies() -> None:
     cmd("python3 scripts/download_models.py")
 
 install_dependencies()
+
+env = Environment(CXX = f'/usr/bin/clang++-{clang_version}', ENV = os.environ)
+env.VariantDir(build_dir, src_dir, duplicate=0)
+env.Append(CPPFLAGS = [ "-g", f"-std=c++{cpp_version}", "-Wall" ])
+env.Append(CPPPATH = [ onnx_path, src_dir, ])
+env.Append(LIBS = [ "stdc++fs", "pthread", "cgraph", "gvc", "protobuf", ])
 
 resnet20_cpps = [ "examples/ResNet20.cpp" ] + Glob("src/*.cpp")
 env.Program(str(build_dir / "resnet20"), resnet20_cpps)
