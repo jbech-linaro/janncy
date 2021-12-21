@@ -85,8 +85,6 @@ def install_torch() -> None:
     pip3_if_missing("torch")
     # numpy
     pip3_if_missing("numpy")
-    # download and setup onnx models
-    cmd("python3 scripts/download_models.py")
 
 def install_dependencies() -> None:
     install_clang()
@@ -95,7 +93,8 @@ def install_dependencies() -> None:
     if not os.path.exists(onnx_path):
         install_onnx()
     install_torch()
-    download_models()
+    # download and setup onnx models
+    cmd("python3 scripts/download_models.py")
 
 install_dependencies()
 
