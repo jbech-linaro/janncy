@@ -10,6 +10,7 @@
 #include "include/ReLU.hpp"
 #include "include/Tensor.hpp"
 
+#include "onnx/defs/tensor_proto_util.h"
 #include "onnx/onnx_pb.h"
 #include "onnx/proto_utils.h"
 
@@ -22,6 +23,7 @@
 
 std::unordered_map<std::string, FlowNode *> flownode_map;
 std::unordered_map<std::string, Tensor> shape_map;
+std::unordered_map<std::string, onnx::TensorProto> ini_map;
 
 void print_dim(const ::onnx::TensorShapeProto_Dimension &dim) {
     switch (dim.value_case()) {
@@ -96,6 +98,25 @@ void create_node(Flow *flow, const onnx::NodeProto &node) {
     if (node.op_type() == "Relu") {
         new_node = ReLU::create(parents[0]);
     } else if (node.op_type() == "Conv") {
+        std::cout << ini_map[node.input(1)].float_data().size() << std::endl;
+        std::cout << "has_data_type: " << ini_map[node.input(1)].data_type()
+                  << std::endl;
+        for (auto dim : ini_map[node.input(1)].dims()) {
+            std::cout << dim << ", ";
+        }
+        std::cout << std::endl;
+        std::cout << "has_segment: " << ini_map[node.input(1)].has_segment()
+                  << std::endl;
+        std::cout << "float_data_size: "
+                  << ini_map[node.input(1)].float_data_size() << std::endl;
+        std::cout << "int32_data_size: "
+                  << ini_map[node.input(1)].int32_data_size() << std::endl;
+        std::cout << "string_data_size: "
+                  << ini_map[node.input(1)].string_data_size() << std::endl;
+        std::cout << "has_raw_data: " << ini_map[node.input(1)].has_raw_data()
+                  << std::endl;
+        auto real_weights = onnx::ParseData<float>(&ini_map.at(node.input(1)));
+        std::cout << "number of weights: " << real_weights.size() << std::endl;
         int stride = 1;
         int padding = 0;
         for (auto attr : node.attribute()) {
@@ -208,6 +229,7 @@ int main(int argc, char **argv) {
             Input::create(flow, Tensor(std::vector<int>{3, 224, 224}))));
     }
     for (auto ini : graph.initializer()) {
+        ini_map.insert(std::make_pair(ini.name(), ini));
         std::vector<int> dim_vec;
         for (auto dim : ini.dims()) {
             dim_vec.push_back(dim);

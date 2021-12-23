@@ -69,6 +69,7 @@ def install_onnx() -> None:
     cmd("mkdir -p .dependencies")
     cmd("cd .dependencies; git clone --recursive https://github.com/onnx/onnx.git")
     cmd("protoc -I=.dependencies/onnx/onnx/ --cpp_out=.dependencies/onnx/onnx .dependencies/onnx/onnx/onnx.proto")
+    cmd("protoc -I=.dependencies/onnx/ -I=.dependencies/onnx/onnx/ --cpp_out=.dependencies/onnx/onnx .dependencies/onnx/onnx/onnx-operators.proto")
 
 def install_graphviz() -> None:
     install_if_missing("graphviz")
@@ -117,7 +118,7 @@ env.Append(LIBS = [ "stdc++fs", "pthread", "cgraph", "gvc", "protobuf", "gtest_m
 resnet20_cpps = [ "examples/ResNet20.cpp" ] + Glob("src/*.cpp")
 env.Program(str(build_dir / "resnet20"), resnet20_cpps)
 
-onnx_parser_cpps = [ "examples/OnnxParser.cpp", ".dependencies/onnx/onnx/onnx.pb.cc", ] + Glob("src/*.cpp")
+onnx_parser_cpps = [ "examples/OnnxParser.cpp", ".dependencies/onnx/onnx/onnx.pb.cc", ".dependencies/onnx/onnx/defs/tensor_proto_util.cc", ".dependencies/onnx/onnx/defs/data_type_utils.cc", ".dependencies/onnx/onnx/defs/shape_inference.cc", ] + Glob("src/*.cpp")
 env.Program(str(build_dir / "onnx_parser"), onnx_parser_cpps)
 
 env.Program(str(build_dir / "tests"), Glob("test/*.cpp"))
