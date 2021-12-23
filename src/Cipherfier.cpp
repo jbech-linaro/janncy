@@ -12,9 +12,11 @@
 #include "include/CtPtMul.hpp"
 #include "include/CtRotate.hpp"
 #include "include/CtTensor.hpp"
+#include "include/Flatten.hpp"
 #include "include/FlowNode.hpp"
 #include "include/FullyConnected.hpp"
 #include "include/Input.hpp"
+#include "include/MaxPool.hpp"
 #include "include/Panic.hpp"
 #include "include/ReLU.hpp"
 
@@ -92,6 +94,16 @@ void Cipherfier::visit(FullyConnected* node) {
     auto parent = parents(node)[0].get_ct_ops();
     auto result = create_many(node->shape()[0], accumulate(pt_mul(parent)));
     register_node(node, result);
+}
+
+void Cipherfier::visit(MaxPool* node) {
+    // TODO(nsamar): this node is currently just bypassed
+    register_node(node, parents(node)[0].get_ct_ops());
+}
+
+void Cipherfier::visit(Flatten* node) {
+    // TODO(nsamar): this node is currently just bypassed
+    register_node(node, parents(node)[0].get_ct_ops());
 }
 
 void Cipherfier::visit(AveragePool* node) {

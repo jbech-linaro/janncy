@@ -9,6 +9,8 @@ class BatchNormalization;
 class Add;
 class Input;
 class ReLU;
+class MaxPool;
+class Flatten;
 
 class FlowVisitor {
   public:
@@ -19,6 +21,8 @@ class FlowVisitor {
     virtual void visit(Add* node) = 0;
     virtual void visit(Input* node) = 0;
     virtual void visit(ReLU* node) = 0;
+    virtual void visit(MaxPool* node) = 0;
+    virtual void visit(Flatten* node) = 0;
 };
 
 #endif  // FLOWVISITOR_HPP_

@@ -17,6 +17,7 @@ class BatchNormalization;
 class Add;
 class Input;
 class ReLU;
+class Flatten;
 
 class CtGraph;
 
@@ -31,6 +32,8 @@ class Cipherfier : public FlowVisitor {
     void visit(Add* node) override;
     void visit(Input* node) override;
     void visit(ReLU* node) override;
+    void visit(MaxPool* node) override;
+    void visit(Flatten* node) override;
 
     CtGraph* ct_graph() const { return ct_graph_; }
 

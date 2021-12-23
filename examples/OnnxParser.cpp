@@ -1,10 +1,17 @@
+#include "include/Add.hpp"
+#include "include/AveragePool.hpp"
+#include "include/ConvLayer.hpp"
+#include "include/Flatten.hpp"
 #include "include/Flow.hpp"
+#include "include/FullyConnected.hpp"
 #include "include/Input.hpp"
+#include "include/MaxPool.hpp"
 #include "include/Panic.hpp"
 #include "include/ReLU.hpp"
 #include "include/Tensor.hpp"
 
-#include "onnx/onnx.pb.h"
+#include "onnx/onnx_pb.h"
+#include "onnx/proto_utils.h"
 
 #include <algorithm>
 #include <experimental/filesystem>
@@ -14,6 +21,7 @@
 #include <unordered_map>
 
 std::unordered_map<std::string, FlowNode *> flownode_map;
+std::unordered_map<std::string, Tensor> shape_map;
 
 void print_dim(const ::onnx::TensorShapeProto_Dimension &dim) {
     switch (dim.value_case()) {
@@ -46,27 +54,126 @@ void print_io_info(
     }
 }
 
+bool is_substring(std::string superstring, std::string substring) {
+    return (superstring.find(substring) != std::string::npos);
+}
+
+/**
+ * Specification of ONNX operations:
+ * https://github.com/onnx/onnx/blob/master/docs/Operators.md#MaxPool
+ */
 void create_node(Flow *flow, const onnx::NodeProto &node) {
     FlowNode *new_node;
     auto parents = std::vector<FlowNode *>{};
-    std::transform(node.input().begin(), node.input().begin() + 1,
-                   std::back_inserter(parents), [&](auto parent) {
-                       return flownode_map.at(std::string(parent));
-                   });
-    if (node.name() == "relu") {
+    auto weights = std::vector<Tensor>{};
+    for (auto node : node.input()) {
+        if (is_substring(node, "input") &&
+            flownode_map.find(std::string(node)) == flownode_map.end()) {
+            flownode_map.insert(std::make_pair(
+                std::string(node),
+                Input::create(flow, Tensor(std::vector<int>{3, 224, 224}))));
+        }
+    }
+    std::transform(
+        node.input().begin(), node.input().end(), std::back_inserter(parents),
+        [&](auto parent) {
+            if (flownode_map.find(std::string(parent)) != flownode_map.end()) {
+                return flownode_map.at(std::string(parent));
+            } else {
+                return (FlowNode *)nullptr;
+            }
+        });
+    std::transform(
+        node.input().begin(), node.input().end(), std::back_inserter(weights),
+        [&](auto weight) {
+            if (shape_map.find(std::string(weight)) != shape_map.end()) {
+                return shape_map.at(std::string(weight));
+            } else {
+                return Tensor({});
+            }
+        });
+
+    if (node.op_type() == "Relu") {
         new_node = ReLU::create(parents[0]);
+    } else if (node.op_type() == "Conv") {
+        int stride = 1;
+        int padding = 0;
+        for (auto attr : node.attribute()) {
+            if (attr.name() == "stride") {
+                stride = attr.ints(0);
+            }
+            if (attr.name() == "pads") {
+                padding = attr.ints(0);
+            }
+        }
+        new_node = ConvLayer::create(parents[0], weights[1], stride, padding);
+    } else if (node.op_type() == "Add") {
+        new_node = Add::create(parents[0], parents[1]);
+    } else if (node.op_type() == "MaxPool") {
+        int stride = 1;
+        int padding = 0;
+        std::vector<int> shape_vec;
+        Tensor tensor(std::vector<int>{});
+        for (auto attr : node.attribute()) {
+            if (attr.name() == "stride") {
+                stride = attr.ints(0);
+            }
+            if (attr.name() == "pads") {
+                padding = attr.ints(0);
+            }
+            if (attr.name() == "kernel_shape") {
+                for (auto dim : attr.ints()) {
+                    shape_vec.push_back(dim);
+                }
+                tensor = Tensor(shape_vec);
+            }
+        }
+        new_node = MaxPool::create(parents[0], tensor, stride, padding);
+    } else if (node.op_type() == "AveragePool") {
+        int stride = 1;
+        int padding = 0;
+        std::vector<int> shape_vec;
+        Tensor tensor(std::vector<int>{});
+        for (auto attr : node.attribute()) {
+            if (attr.name() == "stride") {
+                stride = attr.ints(0);
+            }
+            if (attr.name() == "pads") {
+                padding = attr.ints(0);
+            }
+            if (attr.name() == "kernel_shape") {
+                for (auto dim : attr.ints()) {
+                    shape_vec.push_back(dim);
+                }
+                tensor = Tensor(shape_vec);
+            }
+        }
+        new_node = AveragePool::create(parents[0], tensor, stride, padding);
+    } else if (node.op_type() == "GlobalAveragePool") {
+        auto tensor = Tensor({parents[0]->output_tensor().shape()[0]});
+        new_node = AveragePool::create(parents[0], tensor, 1, 0);
+    } else if (node.op_type() == "Gemm") {
+        new_node = FullyConnected::create(parents[0], weights[1]);
+    } else if (node.op_type() == "Flatten") {
+        int axis = 1;
+        for (auto attr : node.attribute()) {
+            if (attr.name() == "axis") {
+                axis = attr.i();
+            }
+        }
+        new_node = Flatten::create(parents[0], axis);
     } else {
-        new_node = ReLU::create(parents[0]);
+        panic("ONNX operation `" + node.op_type() + "' not supported!");
     }
     flownode_map.insert(std::make_pair(std::string(node.output(0)), new_node));
 }
 
 int main(int argc, char **argv) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
-
     if (argc != 2) {
         panic(
-            "Please provide filepath to *.onnx file as command-line argument!");
+            "Please provide filepath to *.onnx file as command-line "
+            "argument!");
     }
     std::string filename = argv[1];
     if (!std::experimental::filesystem::exists(
@@ -79,34 +186,36 @@ int main(int argc, char **argv) {
 
     std::vector<char> buffer(size);
     in.read(buffer.data(), size);
-    onnx::ModelProto model;
-    model.ParseFromArray(buffer.data(), size);
+    std::unique_ptr<onnx::ModelProto> model(new onnx::ModelProto());
+    ParseProtoFromBytes(model.get(), buffer.data(), size);
     google::protobuf::ShutdownProtobufLibrary();
 
-    std::cout << "has graph: " << model.has_graph() << std::endl;
-    auto graph = model.graph();
+    /**
+     * TODO(nsamar): For some reason, I get a logic_error for the
+     * model->graph() line if I do not print the value of has_graph(). This
+     * only occurs when running on resnet18.onnx.
+     */
+    std::cout << model->has_graph() << std::endl;
+    if (!model->has_graph()) {
+        panic("Model does not have a graph!");
+    }
+    auto graph = model->graph();
 
-    std::cout << "graph name: " << graph.name() << std::endl;
-
-    std::cout << "graph inputs:\n";
-    print_io_info(graph.input());
     Flow *flow = new Flow();
-    flownode_map.insert(std::make_pair(
-        graph.input(0).name(),
-        Input::create(flow, Tensor(std::vector<int>{3, 224, 224}))));
-
-    std::cout << "graph outputs:\n";
-    print_io_info(graph.output());
+    if (graph.input().size() > 0) {
+        flownode_map.insert(std::make_pair(
+            graph.input(0).name(),
+            Input::create(flow, Tensor(std::vector<int>{3, 224, 224}))));
+    }
+    for (auto ini : graph.initializer()) {
+        std::vector<int> dim_vec;
+        for (auto dim : ini.dims()) {
+            dim_vec.push_back(dim);
+        }
+        shape_map.insert(std::make_pair(ini.name(), Tensor(dim_vec)));
+    }
 
     for (auto node : graph.node()) {
-        std::cout << node.name() << ": ";
-        for (auto in : node.input()) {
-            std::cout << in << ", ";
-        }
-        std::cout << " -> ";
-        for (auto out : node.output()) {
-            std::cout << out << std::endl;
-        }
         create_node(flow, node);
     }
     flow->draw("test");

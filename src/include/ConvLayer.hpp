@@ -9,22 +9,20 @@ class FlowVisitor;
 class ConvLayer : public FlowNode {
   public:
     static ConvLayer* create(FlowNode* parent, Tensor filter, int stride,
-                             bool padded) {
-        return new ConvLayer(parent, filter, stride, padded);
+                             bool padding) {
+        return new ConvLayer(parent, filter, stride, padding);
     };
     void visit(FlowVisitor* visitor);
-    Tensor output_tensor() const;
-    Tensor input_tensor() const;
     Tensor filter() const;
     int stride() const;
-    bool padded() const;
+    int padding() const;
     std::string type_str() const { return "ConvLayer"; }
 
   private:
-    ConvLayer(FlowNode* parent, Tensor filter, int stride, bool padded);
+    ConvLayer(FlowNode* parent, Tensor filter, int stride, int padding);
     int stride_;
     Tensor filter_;
-    bool padded_;
+    int padding_;
 };
 
 #endif  // CONVLAYER_HPP_

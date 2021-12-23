@@ -15,8 +15,11 @@ clang_path = Path(f"/usr/bin/clang-{clang_version}")
 onnx_path = Path(".dependencies/onnx")
 pip3_list_path = Path(".pip3_list")
 
+def cmd_allow_fail(cmd_str : str) -> str:
+    result = subprocess.run(cmd_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding="utf-8")
+    return result
+
 def cmd(cmd_str: str) -> str:
-    print(cmd_str)
     result = subprocess.run(cmd_str, shell=True, stdout=subprocess.PIPE, encoding="utf-8")
     if result.returncode != 0:
         print(f"Command `{cmd_str}' failed with exit code {result.returncode}!")
@@ -34,8 +37,8 @@ def get_pip3_list() -> str:
 pip3_list = get_pip3_list()
 
 def is_library_installed(library_name: str) -> None:
-    result = cmd(f"dpkg -L {library_name}")
-    return not ("is not installed" in result)
+    result = cmd_allow_fail(f"dpkg -L {library_name}")
+    return not ("is not installed" in str(result))
 
 def install_if_missing(package_name: str) -> None:
     if not is_library_installed(package_name):
@@ -94,12 +97,12 @@ install_dependencies()
 
 env = Environment(CXX = f'/usr/bin/clang++-{clang_version}', ENV = os.environ)
 env.VariantDir(build_dir, src_dir, duplicate=0)
-env.Append(CPPFLAGS = [ "-g", f"-std=c++{cpp_version}", "-Wall" ])
+env.Append(CPPFLAGS = [ "-g", f"-std=c++{cpp_version}", "-Wall", "-DONNX_NAMESPACE=onnx", ])
 env.Append(CPPPATH = [ onnx_path, src_dir, ])
 env.Append(LIBS = [ "stdc++fs", "pthread", "cgraph", "gvc", "protobuf", ])
 
 resnet20_cpps = [ "examples/ResNet20.cpp" ] + Glob("src/*.cpp")
 env.Program(str(build_dir / "resnet20"), resnet20_cpps)
 
-onnx_parser_cpps = [ "examples/OnnxParser.cpp", ".dependencies/onnx/onnx/onnx.pb.cc" ] + Glob("src/*.cpp")
+onnx_parser_cpps = [ "examples/OnnxParser.cpp", ".dependencies/onnx/onnx/onnx.pb.cc", ] + Glob("src/*.cpp")
 env.Program(str(build_dir / "onnx_parser"), onnx_parser_cpps)
