@@ -7,6 +7,8 @@ import sys
 
 build_dir = Path("build/")
 src_dir = Path("src/")
+test_dir = Path("test/")
+gtest_dir = Path("/usr/gtest/include")
 clang_version = 10
 cpp_version = 17
 install_cmd = "sudo apt-get install -y"
@@ -51,6 +53,7 @@ def is_pip3_package_installed(package_name: str) -> bool:
 def pip3_if_missing(package_name: str) -> None:
     if not is_pip3_package_installed(package_name):
         cmd(f"pip3 install {package_name}")
+
         with open(pip3_list_path, "w") as f:
             f.write(cmd("pip3 list"))
 
@@ -83,6 +86,15 @@ def install_torch() -> None:
     # numpy
     pip3_if_missing("numpy")
 
+def install_gtest() -> None:
+    if os.path.exists("/usr/lib/libgtest.a"):
+        return
+    install_if_missing("libgtest-dev")
+    install_if_missing("cmake")
+    cmd("cd /usr/src/gtest; sudo cmake CMakeLists.txt")
+    cmd("cd /usr/src/gtest; sudo make")
+    cmd("cd /usr/src/gtest; sudo cp *.a /usr/lib")
+
 def install_dependencies() -> None:
     install_clang()
     install_protobuf()
@@ -90,6 +102,7 @@ def install_dependencies() -> None:
     if not os.path.exists(onnx_path):
         install_onnx()
     install_torch()
+    install_gtest()
     # download and setup onnx models
     cmd("python3 scripts/download_models.py")
 
@@ -98,11 +111,13 @@ install_dependencies()
 env = Environment(CXX = f'/usr/bin/clang++-{clang_version}', ENV = os.environ)
 env.VariantDir(build_dir, src_dir, duplicate=0)
 env.Append(CPPFLAGS = [ "-g", f"-std=c++{cpp_version}", "-Wall", "-DONNX_NAMESPACE=onnx", ])
-env.Append(CPPPATH = [ onnx_path, src_dir, ])
-env.Append(LIBS = [ "stdc++fs", "pthread", "cgraph", "gvc", "protobuf", ])
+env.Append(CPPPATH = [ onnx_path, src_dir, gtest_dir, ])
+env.Append(LIBS = [ "stdc++fs", "pthread", "cgraph", "gvc", "protobuf", "gtest_main", "gtest", ])
 
 resnet20_cpps = [ "examples/ResNet20.cpp" ] + Glob("src/*.cpp")
 env.Program(str(build_dir / "resnet20"), resnet20_cpps)
 
 onnx_parser_cpps = [ "examples/OnnxParser.cpp", ".dependencies/onnx/onnx/onnx.pb.cc", ] + Glob("src/*.cpp")
 env.Program(str(build_dir / "onnx_parser"), onnx_parser_cpps)
+
+env.Program(str(build_dir / "tests"), Glob("test/*.cpp"))
