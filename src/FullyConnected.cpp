@@ -1,10 +1,11 @@
 #include "include/FullyConnected.hpp"
 
+#include "include/Flow.hpp"
 #include "include/FlowVisitor.hpp"
 
-#include <iostream>
+FullyConnected::FullyConnected(std::vector<int> output_shape)
+    : FlowNode(output_shape, "FullyConnected") {}
 
-FullyConnected::FullyConnected(FlowNode* parent, Tensor matrix)
-    : FlowNode({parent}, Tensor({matrix.shape()[1]})) {}
-
-void FullyConnected::visit(FlowVisitor* visitor) { visitor->visit(this); }
+void FullyConnected::visit(Flow* flow, FlowVisitor* visitor) {
+    visitor->visit(flow, this);
+}

@@ -8,31 +8,20 @@
 
 template <class T> class Graph;
 
-FlowNode::FlowNode(std::vector<FlowNode*> parents, Tensor output_tensor)
-    : Node(parents), output_tensor_(output_tensor) {}
+FlowNode::FlowNode(std::vector<int> output_shape, std::string op_type)
+    : output_shape_(output_shape), op_type_(op_type) {}
 
-FlowNode::FlowNode(Graph<FlowNode>* graph, Tensor output_tensor)
-    : Node(graph), output_tensor_(output_tensor) {}
+std::string FlowNode::op_type() const { return op_type_; }
 
-Tensor FlowNode::output_tensor() const { return output_tensor_; }
-
-Tensor FlowNode::input_tensor() const {
-    if (get_parents()[0]) {
-        return get_parents()[0]->output_tensor_;
-    }
-    return output_tensor_;
-}
-
-void FlowNode::set_name(std::string name) { name_ = name; }
+std::vector<int> FlowNode::shape() const { return output_shape_; }
 
 std::string FlowNode::str() const {
     std::stringstream result;
     result << "[" << this << "] ";
-    result << type_str();
-    if (type_str() != "Input") {
+    result << op_type_;
+    if (op_type_ != "Input") {
         result << "(";
-        auto shape_vec = input_tensor().shape();
-        for (auto& value : shape_vec) {
+        for (auto& value : output_shape_) {
             result << value << ", ";
         }
         result << ")";

@@ -2,20 +2,15 @@
 #define FLATTEN_HPP_
 
 #include "FlowNode.hpp"
-#include "Tensor.hpp"
 
 class FlowVisitor;
+class Flow;
 
 class Flatten : public FlowNode {
   public:
-    static Flatten* create(FlowNode* parent, int axis) {
-        return new Flatten(parent, axis);
-    }
-    void visit(FlowVisitor* visitor);
-    std::string type_str() const { return "Flatten"; }
+    Flatten(std::vector<int> output_shape);
 
-  private:
-    Flatten(FlowNode* parent, int axis);
+    void visit(Flow* flow, FlowVisitor* visitor);
 };
 
 #endif  // FLATTEN_HPP_

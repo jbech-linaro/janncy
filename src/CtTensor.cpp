@@ -1,8 +1,7 @@
 #include "include/CtTensor.hpp"
+#include "include/CtOp.hpp"
 
 #include <vector>
-
-class CtOp;
 
 CtTensor::CtTensor(std::vector<CtOp*> parents) : parents_(parents) {}
 

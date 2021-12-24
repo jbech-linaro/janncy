@@ -6,11 +6,11 @@
 class CtOp;
 
 class CtTensor {
-public:
+  public:
     explicit CtTensor(std::vector<CtOp*> parents);
     std::vector<CtOp*> get_ct_ops() const;
 
-private:
+  private:
     std::vector<CtOp*> parents_;
 };
 

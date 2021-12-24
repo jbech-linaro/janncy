@@ -1,10 +1,13 @@
 #include "include/ReLU.hpp"
 
+#include "include/Flow.hpp"
 #include "include/FlowNode.hpp"
 #include "include/FlowVisitor.hpp"
 
-#include <iostream>
+#include <vector>
 
-ReLU::ReLU(FlowNode* parent) : FlowNode({parent}, parent->output_tensor()) {}
+ReLU::ReLU(std::vector<int> output_shape) : FlowNode(output_shape, "Relu"){};
 
-void ReLU::visit(FlowVisitor* visitor) { visitor->visit(this); }
+void ReLU::visit(Flow* flow, FlowVisitor* visitor) {
+    visitor->visit(flow, this);
+}

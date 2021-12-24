@@ -1,12 +1,13 @@
 #include "include/Input.hpp"
 
+#include "include/Flow.hpp"
 #include "include/FlowVisitor.hpp"
 #include "include/Graph.hpp"
 
-#include <cassert>
-#include <iostream>
+#include <vector>
 
-Input::Input(Graph<FlowNode>* flow, Tensor input_tensor)
-    : FlowNode(flow, input_tensor) {}
+Input::Input(std::vector<int> input_shape) : FlowNode(input_shape, "Input") {}
 
-void Input::visit(FlowVisitor* visitor) { visitor->visit(this); }
+void Input::visit(Flow* flow, FlowVisitor* visitor) {
+    visitor->visit(flow, this);
+}

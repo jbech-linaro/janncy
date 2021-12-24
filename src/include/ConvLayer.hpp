@@ -2,27 +2,27 @@
 #define CONVLAYER_HPP_
 
 #include "FlowNode.hpp"
-#include "Tensor.hpp"
+
+#include <vector>
 
 class FlowVisitor;
+class Flow;
 
 class ConvLayer : public FlowNode {
   public:
-    static ConvLayer* create(FlowNode* parent, Tensor filter, int stride,
-                             bool padding) {
-        return new ConvLayer(parent, filter, stride, padding);
-    };
-    void visit(FlowVisitor* visitor);
-    Tensor filter() const;
-    int stride() const;
-    int padding() const;
-    std::string type_str() const { return "ConvLayer"; }
+    ConvLayer(std::vector<int> output_shape, std::vector<int> kernel_shape,
+              std::vector<int> stride, std::vector<int> padding);
+
+    void visit(Flow* flow, FlowVisitor* visitor);
+
+    std::vector<int> stride() const;
+    std::vector<int> padding() const;
+    std::vector<int> kernel_shape() const;
 
   private:
-    ConvLayer(FlowNode* parent, Tensor filter, int stride, int padding);
-    int stride_;
-    Tensor filter_;
-    int padding_;
+    std::vector<int> kernel_shape_;
+    std::vector<int> stride_;
+    std::vector<int> padding_;
 };
 
 #endif  // CONVLAYER_HPP_

@@ -115,9 +115,6 @@ env.Append(CPPFLAGS = [ "-g", f"-std=c++{cpp_version}", "-Wall", "-DONNX_NAMESPA
 env.Append(CPPPATH = [ onnx_path, src_dir, gtest_dir, ])
 env.Append(LIBS = [ "stdc++fs", "pthread", "cgraph", "gvc", "protobuf", "gtest_main", "gtest", ])
 
-resnet20_cpps = [ "examples/ResNet20.cpp" ] + Glob("src/*.cpp")
-env.Program(str(build_dir / "resnet20"), resnet20_cpps)
-
 onnx_parser_cpps = [ "examples/OnnxParser.cpp", ".dependencies/onnx/onnx/onnx.pb.cc", ".dependencies/onnx/onnx/defs/tensor_proto_util.cc", ".dependencies/onnx/onnx/defs/data_type_utils.cc", ".dependencies/onnx/onnx/defs/shape_inference.cc", ] + Glob("src/*.cpp")
 env.Program(str(build_dir / "onnx_parser"), onnx_parser_cpps)
 

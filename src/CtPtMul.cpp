@@ -1,5 +1,12 @@
 #include "include/CtPtMul.hpp"
 
+#include "include/CtGraph.hpp"
 #include "include/CtGraphVisitor.hpp"
 
-void CtPtMul::visit(CtGraphVisitor* visitor) { return visitor->visit(this); }
+CtPtMul::CtPtMul() : CtOp("CtPtMul"){};
+
+std::vector<double> CtPtMul::value() const { return value_; }
+
+void CtPtMul::visit(CtGraph* ct_graph, CtGraphVisitor* visitor) {
+    return visitor->visit(ct_graph, this);
+}

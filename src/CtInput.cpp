@@ -1,5 +1,10 @@
 #include "include/CtInput.hpp"
 
+#include "include/CtGraph.hpp"
 #include "include/CtGraphVisitor.hpp"
 
-void CtInput::visit(CtGraphVisitor* visitor) { return visitor->visit(this); }
+CtInput::CtInput() : CtOp("CtInput"){};
+
+void CtInput::visit(CtGraph* ct_graph, CtGraphVisitor* visitor) {
+    return visitor->visit(ct_graph, this);
+}

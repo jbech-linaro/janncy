@@ -2,20 +2,15 @@
 #define BATCHNORMALIZATION_HPP_
 
 #include "FlowNode.hpp"
-#include "Tensor.hpp"
 
 class FlowVisitor;
+class Flow;
 
 class BatchNormalization : public FlowNode {
   public:
-    static BatchNormalization* create(FlowNode* parent) {
-        return new BatchNormalization(parent);
-    }
-    void visit(FlowVisitor* visitor);
-    std::string type_str() const { return "BatchNormalization"; }
+    BatchNormalization(std::vector<int> output_shape);
 
-  private:
-    BatchNormalization(FlowNode* parent);
+    void visit(Flow* flow, FlowVisitor* visitor);
 };
 
 #endif  // BATCHNORMALIZATION_HPP_

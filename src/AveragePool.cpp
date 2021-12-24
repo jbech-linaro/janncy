@@ -1,22 +1,24 @@
 #include "include/AveragePool.hpp"
 
+#include "include/Flow.hpp"
 #include "include/FlowNode.hpp"
 #include "include/FlowVisitor.hpp"
-#include "include/Tensor.hpp"
-#include "include/utils.hpp"
 
-#include <iostream>
+#include <vector>
 
-AveragePool::AveragePool(FlowNode* parent, Tensor pool, int stride, int padding)
-    : FlowNode({parent},
-               Tensor({pool.shape()[0],
-                       get_output_width(parent, pool, stride, padding),
-                       get_output_height(parent, pool, stride, padding)})),
-      pool_(pool),
+AveragePool::AveragePool(std::vector<int> output_shape,
+                         std::vector<int> kernel_shape, std::vector<int> stride,
+                         std::vector<int> padding)
+    : FlowNode(output_shape, "AveragePool"),
+      kernel_shape_(kernel_shape),
       stride_(stride),
-      padding_(padding) {}
+      padding_(padding){};
 
-int AveragePool::stride() const { return stride_; }
-int AveragePool::padding() const { return padding_; }
-Tensor AveragePool::pool() const { return pool_; }
-void AveragePool::visit(FlowVisitor* visitor) { visitor->visit(this); }
+void AveragePool::visit(Flow* flow, FlowVisitor* visitor) {
+    visitor->visit(flow, this);
+}
+
+std::vector<int> AveragePool::stride() const { return stride_; }
+std::vector<int> AveragePool::padding() const { return padding_; }
+std::vector<int> AveragePool::kernel_shape() const { return kernel_shape_; }
+

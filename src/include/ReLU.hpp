@@ -2,18 +2,15 @@
 #define RELU_HPP_
 
 #include "FlowNode.hpp"
-#include "Tensor.hpp"
 
 class FlowVisitor;
+class Flow;
 
 class ReLU : public FlowNode {
   public:
-    static ReLU* create(FlowNode* parent) { return new ReLU(parent); }
-    std::string type_str() const { return "ReLU"; }
-    void visit(FlowVisitor* visitor);
+    ReLU(std::vector<int> output_shape);
 
-  private:
-    ReLU(FlowNode* parent);
+    void visit(Flow* flow, FlowVisitor* visitor);
 };
 
 #endif  // RELU_HPP_

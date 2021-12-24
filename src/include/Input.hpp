@@ -2,22 +2,17 @@
 #define INPUT_HPP_
 
 #include "FlowNode.hpp"
-#include "Tensor.hpp"
+
+#include <vector>
 
 class Flow;
-template <class T> class Graph;
 class FlowVisitor;
 
 class Input : public FlowNode {
   public:
-    static Input* create(Graph<FlowNode>* flow, Tensor input_tensor) {
-        return new Input(flow, input_tensor);
-    }
-    void visit(FlowVisitor* visitor);
-    std::string type_str() const { return "Input"; }
+    Input(std::vector<int> input_tensor);
 
-  private:
-    Input(Graph<FlowNode>* flow, Tensor input_tensor);
+    void visit(Flow* flow, FlowVisitor* visitor);
 };
 
 #endif  // INPUT_HPP_

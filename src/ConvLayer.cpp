@@ -1,22 +1,23 @@
 #include "include/ConvLayer.hpp"
 
+#include "include/Flow.hpp"
 #include "include/FlowNode.hpp"
 #include "include/FlowVisitor.hpp"
-#include "include/Tensor.hpp"
-#include "include/utils.hpp"
 
-ConvLayer::ConvLayer(FlowNode* parent, Tensor filter, int stride, int padding)
-    : FlowNode({parent},
-               Tensor({filter.shape()[0],
-                       get_output_width(parent, filter, stride, padding),
-                       get_output_height(parent, filter, stride, padding)})),
+#include <vector>
+
+ConvLayer::ConvLayer(std::vector<int> output_shape,
+                     std::vector<int> kernel_shape, std::vector<int> stride,
+                     std::vector<int> padding)
+    : FlowNode(output_shape, "Conv"),
+      kernel_shape_(kernel_shape),
       stride_(stride),
-      filter_(filter),
-      padding_(padding) {}
+      padding_(padding){};
 
-int ConvLayer::stride() const { return stride_; }
-Tensor ConvLayer::filter() const { return filter_; }
+std::vector<int> ConvLayer::stride() const { return stride_; }
+std::vector<int> ConvLayer::kernel_shape() const { return kernel_shape_; }
+std::vector<int> ConvLayer::padding() const { return padding_; }
 
-int ConvLayer::padding() const { return padding_; }
-
-void ConvLayer::visit(FlowVisitor* visitor) { visitor->visit(this); }
+void ConvLayer::visit(Flow* flow, FlowVisitor* visitor) {
+    visitor->visit(flow, this);
+}

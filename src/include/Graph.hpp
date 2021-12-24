@@ -1,40 +1,31 @@
 #ifndef GRAPH_HPP_
 #define GRAPH_HPP_
 
-#include "Node.hpp"
 #include "Panic.hpp"
 
 #include <algorithm>
-#include <set>
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include <graphviz/cgraph.h>
 #include <graphviz/gvc.h>
 #include <graphviz/types.h>
 
-#include <string>
-#include <unordered_set>
-
 template <class T> class Graph {
   public:
-    void add_node(T* node) {
+    void add_node(T* node, const std::vector<T*>& parents) {
         if (!node) {
             panic("Cannot insert nullptr node!");
         }
         nodes_.push_back(node);
-    }
-
-    T* sentinel() {
-        if (!sentinel_) {
-            /*
-             * nsamar: This is undefined behavior cuz node<T> is not a T
-             * It works, but is a hack. dynamic_cast would generate a nullptr.
-             */
-            sentinel_ = static_cast<T*>(new Node<T>(this, {}));
+        child_map_.insert(std::make_pair(node, std::vector<T*>{}));
+        parent_map_.insert(std::make_pair(node, std::vector<T*>{}));
+        for (auto parent : parents) {
+            child_map_.at(parent).push_back(node);
+            parent_map_.at(node).push_back(parent);
         }
-        return sentinel_;
     }
 
     std::string str() const {
@@ -49,7 +40,7 @@ template <class T> class Graph {
         return result.str();
     }
 
-    void draw(const std::string& filename) const {
+    void draw(const std::string& filename) {
         std::unordered_map<T*, Agnode_t*> node_map;
         Agraph_t* g;
         GVC_t* gvc;
@@ -61,7 +52,7 @@ template <class T> class Graph {
         for (auto& node : nodes_) {
             node_map[node] =
                 agnode(g, const_cast<char*>((node->str()).c_str()), 1);
-            for (auto& child : node->get_children()) {
+            for (auto& child : children(node)) {
                 node_map[child] =
                     agnode(g, const_cast<char*>((child->str()).c_str()), 1);
                 agedge(g, node_map.at(node), node_map.at(child), 0, 1);
@@ -80,9 +71,16 @@ template <class T> class Graph {
         gvFreeContext(gvc);
     }
 
-  protected:
+    std::vector<T*>& parents(T* node) { return parent_map_.at(node); }
+
+    std::vector<T*>& children(T* node) { return child_map_.at(node); }
+
+    std::vector<T*> nodes() const { return nodes_; }
+
+  private:
     std::vector<T*> nodes_;
-    T* sentinel_ = nullptr;
+    std::unordered_map<T*, std::vector<T*> > child_map_;
+    std::unordered_map<T*, std::vector<T*> > parent_map_;
 };
 
 #endif  // GRAPH_HPP_

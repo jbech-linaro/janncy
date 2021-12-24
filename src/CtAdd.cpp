@@ -2,4 +2,7 @@
 
 #include "include/CtGraphVisitor.hpp"
 
-void CtAdd::visit(CtGraphVisitor* visitor) { return visitor->visit(this); }
+CtAdd::CtAdd() : CtOp("CtAdd"){};
+void CtAdd::visit(CtGraph* ct_graph, CtGraphVisitor* visitor) {
+    return visitor->visit(ct_graph, this);
+}

@@ -6,6 +6,8 @@
 #include <unordered_map>
 #include <vector>
 
+class CtGraph;
+
 class CtAdd;
 class CtMul;
 class CtPtAdd;
@@ -18,14 +20,14 @@ class CleartextEvaluator : public CtGraphVisitor {
     CleartextEvaluator(std::vector<std::vector<double> > inputs)
         : inputs_(inputs){};
 
-    void visit(CtAdd* node) override;
-    void visit(CtMul* node) override;
-    void visit(CtPtAdd* node) override;
-    void visit(CtPtMul* node) override;
-    void visit(CtRotate* node) override;
-    void visit(CtInput* node) override;
+    void visit(CtGraph* ct_graph, CtAdd* node) override;
+    void visit(CtGraph* ct_graph, CtMul* node) override;
+    void visit(CtGraph* ct_graph, CtPtAdd* node) override;
+    void visit(CtGraph* ct_graph, CtPtMul* node) override;
+    void visit(CtGraph* ct_graph, CtRotate* node) override;
+    void visit(CtGraph* ct_graph, CtInput* node) override;
 
-    std::vector<std::vector<double> > result() const;
+    std::vector<std::vector<double> > result(CtGraph* ct_graph) const;
 
   private:
     std::vector<std::vector<double> > inputs_;

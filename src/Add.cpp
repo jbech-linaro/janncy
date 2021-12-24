@@ -1,11 +1,13 @@
 #include "include/Add.hpp"
 
+#include "include/Flow.hpp"
 #include "include/FlowNode.hpp"
 #include "include/FlowVisitor.hpp"
 
 #include <vector>
 
-Add::Add(FlowNode* parent0, FlowNode* parent1)
-    : FlowNode({parent0, parent1}, parent0->output_tensor()) {}
+Add::Add(std::vector<int> output_shape) : FlowNode(output_shape, "Add"){};
 
-void Add::visit(FlowVisitor* visitor) { visitor->visit(this); }
+void Add::visit(Flow* flow, FlowVisitor* visitor) {
+    visitor->visit(flow, this);
+}

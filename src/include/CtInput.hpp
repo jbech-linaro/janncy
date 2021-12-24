@@ -11,9 +11,9 @@ template <class T> class Graph;
 
 class CtInput : public CtOp {
   public:
-    CtInput(Graph<CtOp>* graph) : CtOp(graph){};
-    std::string type_str() const override { return "CtInput"; }
-    void visit(CtGraphVisitor* visitor) override;
+    CtInput();
+
+    void visit(CtGraph* ct_graph, CtGraphVisitor* visitor) override;
 };
 
 #endif  // CTINPUT_HPP_
