@@ -4,11 +4,13 @@
 class CtGraph;
 class CtAdd;
 class CtPtAdd;
+class CtInput;
 class CtPtMul;
 class CtRotate;
 class CtMul;
 class CtOp;
 
+CtInput* ct_input(CtGraph* ct_graph);
 CtAdd* ct_add(CtGraph* ct_graph, CtOp* parent0, CtOp* parent1);
 CtMul* ct_mul(CtGraph* ct_graph, CtOp* parent0, CtOp* parent1);
 CtPtAdd* ct_pt_add(CtGraph* ct_graph, CtOp* parent);

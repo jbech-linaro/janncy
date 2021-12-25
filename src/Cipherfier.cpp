@@ -13,7 +13,6 @@
 #include "include/CtPtAdd.hpp"
 #include "include/CtPtMul.hpp"
 #include "include/CtRotate.hpp"
-#include "include/CtTensor.hpp"
 #include "include/Flatten.hpp"
 #include "include/Flow.hpp"
 #include "include/FlowNode.hpp"
@@ -34,22 +33,29 @@ void Cipherfier::register_node(const FlowNode* node,
 
 template <class T>
 CtAdd* accumulate(CtGraph* ct_graph, const std::vector<T*>& cts) {
+    assert(cts.size() >= 2);
     if (cts.size() == 2) {
         return ct_add(ct_graph, cts[0], cts[1]);
     }
+    if (cts.size() == 3) {
+        return ct_add(ct_graph, cts[0], ct_add(ct_graph, cts[1], cts[2]));
+    }
     return ct_add(
-        ct_graph, cts[0],
-        accumulate(ct_graph, std::vector<CtOp*>(cts.begin() + 1, cts.end())));
+        ct_graph,
+        accumulate(ct_graph,
+                   std::vector<T*>(cts.begin(), cts.begin() + cts.size() / 2)),
+        accumulate(ct_graph,
+                   std::vector<T*>(cts.begin() + cts.size() / 2, cts.end())));
 }
 
-template <class T> std::vector<CtOp*> create_many(int amt, T* obj) {
-    auto result = std::vector<CtOp*>(amt, nullptr);
-    result[0] = obj;
-    std::transform(result.begin() + 1, result.end(), result.begin() + 1,
-                   [&](auto x) {
-                       (void)x;
-                       return new T(*obj);
-                   });
+template <class T>
+std::vector<CtOp*> create_many(CtGraph* ct_graph, int amt, T* obj) {
+    auto result = std::vector<CtOp*>{obj};
+    for (auto idx = 1ul; idx < amt; ++idx) {
+        auto new_obj = new T(*obj);
+        ct_graph->add_node(new_obj, ct_graph->parents(obj));
+        result.push_back(new_obj);
+    }
     return result;
 }
 
@@ -77,15 +83,13 @@ std::vector<CtTensor> Cipherfier::parents(Flow* flow, FlowNode* node) {
 
 CtAdd* apply_filter(CtGraph* ct_graph, const std::vector<CtOp*>& parents,
                     int filter_size) {
-    auto filtered_channels = std::vector<CtOp*>();
-    std::transform(
-        parents.begin(), parents.end(), std::back_inserter(filtered_channels),
-        [&](auto& p) {
-            return accumulate(
-                ct_graph,
-                pt_mul(ct_graph,
-                       create_many(filter_size, ct_rotate(ct_graph, p))));
-        });
+    auto filtered_channels = std::vector<CtOp*>{};
+    for (auto p : parents) {
+        auto rot = ct_rotate(ct_graph, p);
+        auto cm = create_many(ct_graph, filter_size, rot);
+        auto pt_m = pt_mul(ct_graph, cm);
+        filtered_channels.push_back(accumulate(ct_graph, pt_m));
+    }
     return accumulate(ct_graph, filtered_channels);
 }
 
@@ -93,14 +97,14 @@ void Cipherfier::visit(Flow* flow, ConvLayer* node) {
     auto parent = parents(flow, node)[0].get_ct_ops();
     auto output_channels = node->shape()[0];
     auto filter_size = node->kernel_shape()[1] * node->kernel_shape()[1];
-    auto result = create_many(output_channels,
+    auto result = create_many(ct_graph_, output_channels,
                               apply_filter(ct_graph_, parent, filter_size));
     register_node(node, result);
 }
 
 void Cipherfier::visit(Flow* flow, FullyConnected* node) {
     auto parent = parents(flow, node)[0].get_ct_ops();
-    auto result = create_many(node->shape()[0],
+    auto result = create_many(ct_graph_, node->shape()[0],
                               accumulate(ct_graph_, pt_mul(ct_graph_, parent)));
     register_node(node, result);
 }
@@ -121,11 +125,12 @@ void Cipherfier::visit(Flow* flow, AveragePool* node) {
     auto amt = log2(node->kernel_shape()[1]);
     std::transform(
         parent.begin(), parent.end(), std::back_inserter(result), [&](auto x) {
-            return accumulate(ct_graph_,
-                              create_many(amt, ct_rotate(ct_graph_, x)));
+            return accumulate(ct_graph_, create_many(ct_graph_, amt,
+                                                     ct_rotate(ct_graph_, x)));
         });
     std::transform(parent.begin(), parent.end(), result.begin(), [&](auto x) {
-        return accumulate(ct_graph_, create_many(amt, ct_rotate(ct_graph_, x)));
+        return accumulate(ct_graph_,
+                          create_many(ct_graph_, amt, ct_rotate(ct_graph_, x)));
     });
     register_node(node, result);
 }
@@ -149,7 +154,8 @@ void Cipherfier::visit(Flow* flow, Add* node) {
 }
 
 void Cipherfier::visit(Flow* flow, Input* node) {
-    auto result = create_many(node->shape()[0], new CtInput());
+    auto in_node = ct_input(ct_graph_);
+    auto result = create_many(ct_graph_, node->shape()[0], in_node);
     register_node(node, result);
 }
 

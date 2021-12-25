@@ -2,6 +2,7 @@
 
 #include "include/Add.hpp"
 #include "include/AveragePool.hpp"
+#include "include/Cipherfier.hpp"
 #include "include/ConvLayer.hpp"
 #include "include/CtGraph.hpp"
 #include "include/Flatten.hpp"
@@ -276,6 +277,6 @@ int main(int argc, char **argv) {
         create_node(flow, node);
     }
     flow->draw("test");
-    auto ct_graph = flow->cipherfy();
-    ct_graph->draw("ct_graph");
+    flow->cipherfy();
+    // ct_graph->draw("ct_graph");
 }

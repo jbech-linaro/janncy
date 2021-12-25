@@ -2,11 +2,18 @@
 
 #include "include/CtAdd.hpp"
 #include "include/CtGraph.hpp"
+#include "include/CtInput.hpp"
 #include "include/CtMul.hpp"
 #include "include/CtOp.hpp"
 #include "include/CtPtAdd.hpp"
 #include "include/CtPtMul.hpp"
 #include "include/CtRotate.hpp"
+
+CtInput* ct_input(CtGraph* ct_graph) {
+    auto node = new CtInput();
+    ct_graph->add_node(node, {});
+    return node;
+}
 
 CtAdd* ct_add(CtGraph* ct_graph, CtOp* parent0, CtOp* parent1) {
     auto result = new CtAdd();
