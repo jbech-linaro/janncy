@@ -15,7 +15,7 @@ class FlowNode {
   public:
     FlowNode(std::vector<int> output_shape, std::string op_type);
 
-    std::vector<int> shape() const;
+    const std::vector<int>& shape() const;
 
     FlowNode(const FlowNode&) = delete;
     FlowNode& operator=(const FlowNode&) = delete;

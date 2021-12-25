@@ -13,7 +13,7 @@ FlowNode::FlowNode(std::vector<int> output_shape, std::string op_type)
 
 std::string FlowNode::op_type() const { return op_type_; }
 
-std::vector<int> FlowNode::shape() const { return output_shape_; }
+const std::vector<int>& FlowNode::shape() const { return output_shape_; }
 
 std::string FlowNode::str() const {
     std::stringstream result;

@@ -137,11 +137,6 @@ std::vector<int> get_shape_average_pool(const std::vector<int>& input_shape,
         std::cout << dim << ", ";
     }
     std::cout << std::endl;
-    std::cout << "kernel shape: ";
-    for (auto dim : kernel_shape) {
-        std::cout << dim << ", ";
-    }
-    std::cout << std::endl;
     std::cout << "stride shape: ";
     for (auto dim : stride) {
         std::cout << dim << ", ";
@@ -196,9 +191,9 @@ std::vector<int> get_shape_conv_layer(const std::vector<int>& input_shape,
     std::cout << std::endl;
     auto shape = std::vector<int>{kernel_shape[0]};
     for (auto dim_idx = 1ul; dim_idx < input_shape.size(); ++dim_idx) {
-        auto new_dim = floor((input_shape[dim_idx] + 2 * padding[dim_idx + 1] -
+        auto new_dim = floor((input_shape[dim_idx] + 2 * padding[dim_idx - 1] -
                               kernel_shape[dim_idx + 1]) /
-                                 stride[dim_idx + 1] +
+                                 stride[dim_idx - 1] +
                              1);
         shape.push_back(new_dim);
     }

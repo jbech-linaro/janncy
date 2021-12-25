@@ -3,6 +3,7 @@
 #include "include/Add.hpp"
 #include "include/AveragePool.hpp"
 #include "include/ConvLayer.hpp"
+#include "include/CtGraph.hpp"
 #include "include/Flatten.hpp"
 #include "include/Flow.hpp"
 #include "include/FullyConnected.hpp"
@@ -26,66 +27,18 @@ std::unordered_map<std::string, FlowNode *> flownode_map;
 std::unordered_map<std::string, std::vector<int> > shape_map;
 std::unordered_map<std::string, onnx::TensorProto> ini_map;
 
-void print_dim(const ::onnx::TensorShapeProto_Dimension &dim) {
-    switch (dim.value_case()) {
-        case onnx::TensorShapeProto_Dimension::ValueCase::kDimParam:
-            std::cout << dim.dim_param();
-            break;
-        case onnx::TensorShapeProto_Dimension::ValueCase::kDimValue:
-            std::cout << dim.dim_value();
-            break;
-        default:
-            panic("print_dim()'s case statements!");
-    }
-}
-
-void print_io_info(
-    const ::google::protobuf::RepeatedPtrField< ::onnx::ValueInfoProto> &info) {
-    for (auto input_data : info) {
-        auto shape = input_data.type().tensor_type().shape();
-        std::cout << "  " << input_data.name() << ":";
-        std::cout << "[";
-        if (shape.dim_size() != 0) {
-            int size = shape.dim_size();
-            for (int i = 0; i < size - 1; ++i) {
-                print_dim(shape.dim(i));
-                std::cout << ", ";
-            }
-            print_dim(shape.dim(size - 1));
-        }
-        std::cout << "]\n";
-    }
-}
+std::string ATTR_STRIDES = "strides";
+std::string ATTR_PADDING = "pads";
+std::string ATTR_AUTO_PAD = "auto_pad";
+std::string ATTR_KERNEL_SHAPE = "kernel_shape";
+std::string ATTR_AXIS = "axis";
 
 bool is_substring(std::string superstring, std::string substring) {
     return (superstring.find(substring) != std::string::npos);
 }
 
-/**
- * Specification of ONNX operations:
- * https://github.com/onnx/onnx/blob/master/docs/Operators.md#MaxPool
- */
-void create_node(Flow *flow, onnx::NodeProto &node) {
-    FlowNode *new_node;
+std::vector<FlowNode *> get_parents(onnx::NodeProto &node) {
     auto parents = std::vector<FlowNode *>{};
-    auto weights = std::vector<std::vector<int> >{};
-    std::cout << node.name() << ": ";
-    for (auto in : node.input()) {
-        std::cout << in << ", ";
-    }
-    std::cout << " -> ";
-    for (auto out : node.output()) {
-        std::cout << out << ", ";
-    }
-    std::cout << std::endl;
-
-    for (auto node : node.input()) {
-        if (is_substring(node, "input") &&
-            flownode_map.find(std::string(node)) == flownode_map.end()) {
-            flownode_map.insert(std::make_pair(
-                std::string(node), input(flow, std::vector<int>{3, 224, 224})));
-        }
-    }
     std::transform(
         node.input().begin(), node.input().end(), std::back_inserter(parents),
         [&](auto parent) {
@@ -95,6 +48,11 @@ void create_node(Flow *flow, onnx::NodeProto &node) {
                 return (FlowNode *)nullptr;
             }
         });
+    return parents;
+}
+
+std::vector<std::vector<int> > get_weights(onnx::NodeProto &node) {
+    auto weights = std::vector<std::vector<int> >{};
     std::transform(
         node.input().begin(), node.input().end(), std::back_inserter(weights),
         [&](auto weight) {
@@ -104,136 +62,165 @@ void create_node(Flow *flow, onnx::NodeProto &node) {
                 return std::vector<int>{};
             }
         });
+    return weights;
+}
 
+void create_relu(Flow *flow, onnx::NodeProto &node) {
+    assert(node.op_type() == "Relu");
+    auto parents = get_parents(node);
+    auto new_node = relu(flow, parents[0]);
+    flownode_map.insert(std::make_pair(std::string(node.output(0)), new_node));
+}
+
+int get_attribute_int(onnx::NodeProto &node, const std::string &attr_name) {
+    for (auto attr : node.attribute()) {
+        if (attr.name() == attr_name) {
+            return attr.i();
+        }
+    }
+    panic("Attribute `" + attr_name + "' not found!");
+    return 0;
+}
+
+std::vector<int> get_attribute_ints(onnx::NodeProto &node,
+                                    const std::string &attr_name) {
+    for (auto attr : node.attribute()) {
+        if (attr.name() == attr_name) {
+            auto result = std::vector<int>{};
+            for (auto value : attr.ints()) {
+                result.push_back(value);
+                std::cout << value << ", ";
+            }
+            std::cout << std::endl;
+            return result;
+        }
+    }
+    panic("Attribute `" + attr_name + "' not found!");
+    return std::vector<int>{};
+}
+
+bool attribute_exists(onnx::NodeProto &node, const std::string &attr_name) {
+    return std::any_of(node.attribute().begin(), node.attribute().end(),
+                       [&](auto x) { return x.name() == attr_name; });
+}
+
+std::vector<int> get_strides(onnx::NodeProto &node) {
+    auto parents = get_parents(node);
+    auto strides = std::vector<int>(parents[0]->shape().size() + 1, 1);
+    if (attribute_exists(node, ATTR_STRIDES)) {
+        strides = get_attribute_ints(node, ATTR_STRIDES);
+    }
+    return strides;
+}
+
+std::vector<int> get_padding(onnx::NodeProto &node) {
+    auto parents = get_parents(node);
+    auto padding = std::vector<int>(parents[0]->shape().size() + 1, 0);
+    if (attribute_exists(node, ATTR_PADDING)) {
+        padding = get_attribute_ints(node, ATTR_PADDING);
+    }
+    return padding;
+}
+
+void create_conv(Flow *flow, onnx::NodeProto &node) {
+    assert(node.op_type() == "Conv");
+    auto parents = get_parents(node);
+    auto weights = get_weights(node);
+    auto real_weights = onnx::ParseData<float>(&ini_map.at(node.input(1)));
+    auto strides = get_strides(node);
+    auto padding = get_padding(node);
+    auto new_node = conv_layer(flow, parents[0], weights[1], strides, padding);
+    flownode_map.insert(std::make_pair(std::string(node.output(0)), new_node));
+}
+
+void create_add(Flow *flow, onnx::NodeProto &node) {
+    auto parents = get_parents(node);
+    auto new_node = add(flow, {parents[0], parents[1]});
+    flownode_map.insert(std::make_pair(std::string(node.output(0)), new_node));
+}
+
+void create_max_pool(Flow *flow, onnx::NodeProto &node) {
+    auto parents = get_parents(node);
+    auto weights = get_weights(node);
+    auto strides = get_strides(node);
+    auto padding = get_padding(node);
+    auto kernel_shape = get_attribute_ints(node, ATTR_KERNEL_SHAPE);
+    auto new_node = max_pool(flow, parents[0], kernel_shape, strides, padding);
+    flownode_map.insert(std::make_pair(std::string(node.output(0)), new_node));
+}
+
+void create_average_pool(Flow *flow, onnx::NodeProto &node) {
+    auto parents = get_parents(node);
+    auto strides = get_strides(node);
+    auto padding = get_padding(node);
+    auto kernel_shape = get_attribute_ints(node, ATTR_KERNEL_SHAPE);
+    auto new_node =
+        average_pool(flow, parents[0], kernel_shape, strides, padding);
+    flownode_map.insert(std::make_pair(std::string(node.output(0)), new_node));
+}
+
+void create_global_average_pool(Flow *flow, onnx::NodeProto &node) {
+    auto parents = get_parents(node);
+    std::cout << parents[0]->shape().size() << std::endl;
+    std::vector<int> tensor(parents[0]->shape().begin() + 1,
+                            parents[0]->shape().end());
+    std::cout << "kernel shape size: " << tensor.size() << std::endl;
+    auto new_node =
+        average_pool(flow, parents[0], tensor,
+                     std::vector<int>(parents[0]->shape().size(), 1),
+                     std::vector<int>(parents[0]->shape().size(), 0));
+    flownode_map.insert(std::make_pair(std::string(node.output(0)), new_node));
+}
+void create_fully_connected(Flow *flow, onnx::NodeProto &node) {
+    auto parents = get_parents(node);
+    auto weights = get_weights(node);
+    auto new_node = fully_connected(flow, parents[0], weights[1]);
+    flownode_map.insert(std::make_pair(std::string(node.output(0)), new_node));
+}
+int get_axis(onnx::NodeProto &node) {
+    int axis = 1;
+    if (attribute_exists(node, ATTR_AXIS)) {
+        axis = get_attribute_int(node, ATTR_AXIS);
+    }
+    return axis;
+}
+
+void create_flatten(Flow *flow, onnx::NodeProto &node) {
+    auto parents = get_parents(node);
+    auto axis = get_axis(node);
+    if (axis < 1) {
+        panic(
+            "Nikola only knows how to support axis >= 1. If "
+            "you "
+            "need axis < 1, please create an issue!");
+    }
+    auto new_node = flatten(flow, parents[0], axis);
+    flownode_map.insert(std::make_pair(std::string(node.output(0)), new_node));
+}
+/**
+ * Specification of ONNX operations:
+ * https://github.com/onnx/onnx/blob/master/docs/Operators.md#MaxPool
+ */
+void create_node(Flow *flow, onnx::NodeProto &node) {
     if (node.op_type() == "Relu") {
-        new_node = relu(flow, parents[0]);
+        create_relu(flow, node);
     } else if (node.op_type() == "Conv") {
-        std::cout << ini_map[node.input(1)].float_data().size() << std::endl;
-        std::cout << "has_data_type: " << ini_map[node.input(1)].data_type()
-                  << std::endl;
-        for (auto dim : ini_map[node.input(1)].dims()) {
-            std::cout << dim << ", ";
-        }
-        std::cout << std::endl;
-        auto real_weights = onnx::ParseData<float>(&ini_map.at(node.input(1)));
-        std::cout << "number of weights: " << real_weights.size() << std::endl;
-        auto stride = std::vector<int>(parents[0]->shape().size() + 1, 1);
-        auto padding = std::vector<int>(parents[0]->shape().size() + 1, 0);
-        for (auto attr : node.attribute()) {
-            if (attr.name() == "stride") {
-                stride = std::vector<int>{};
-                std::transform(attr.ints().begin(), attr.ints().end(),
-                               std::back_inserter(stride),
-                               [&](auto x) { return x; });
-            }
-            if (attr.name() == "pads") {
-                padding = std::vector<int>{};
-                std::transform(attr.ints().begin(), attr.ints().end(),
-                               std::back_inserter(padding),
-                               [&](auto x) { return x; });
-            }
-        }
-        new_node = conv_layer(flow, parents[0], weights[1], stride, padding);
+        create_conv(flow, node);
     } else if (node.op_type() == "Add") {
-        new_node = add(flow, std::vector<FlowNode *>{parents[0], parents[1]});
+        create_add(flow, node);
     } else if (node.op_type() == "MaxPool") {
-        auto stride = std::vector<int>(parents[0]->shape().size() + 1, 1);
-        auto padding = std::vector<int>(parents[0]->shape().size() + 1, 0);
-        auto tensor = std::vector<int>{};
-        for (auto attr : node.attribute()) {
-            if (attr.name() == "auto_pad") {
-                panic(
-                    "`auto_pad' is a deprecated ONNX attributed that is not "
-                    "supported! Please explicitly list padding strategy under "
-                    "the `pads' attribute.");
-            }
-            if (attr.name() == "ceil_mode") {
-                panic("`ceil_mode' not supported yet!");
-            }
-            if (attr.name() == "strides") {
-                stride = std::vector<int>{};
-                std::transform(attr.ints().begin(), attr.ints().end(),
-                               std::back_inserter(stride),
-                               [&](auto x) { return x; });
-            }
-            if (attr.name() == "pads") {
-                std::cout << "PADDING: ";
-                padding = std::vector<int>{};
-                std::transform(attr.ints().begin(), attr.ints().end(),
-                               std::back_inserter(padding),
-                               [&](auto x) { return x; });
-                for (auto pad : attr.ints()) {
-                    std::cout << pad << ", ";
-                }
-                std::cout << "END PAD" << std::endl;
-            }
-            if (attr.name() == "kernel_shape") {
-                for (auto dim : attr.ints()) {
-                    tensor.push_back(dim);
-                }
-            }
-        }
-        new_node = max_pool(flow, parents[0], tensor, stride, padding);
+        create_max_pool(flow, node);
     } else if (node.op_type() == "AveragePool") {
-        auto stride = std::vector<int>(parents[0]->shape().size() + 1, 1);
-        auto padding = std::vector<int>(parents[0]->shape().size() + 1, 0);
-        auto tensor = std::vector<int>{};
-        for (auto attr : node.attribute()) {
-            if (attr.name() == "auto_pad") {
-                panic(
-                    "`auto_pad' is a deprecated ONNX attributed that is not "
-                    "supported! Please explicitly list padding strategy under "
-                    "the `pads' attribute.");
-            }
-            if (attr.name() == "ceil_mode") {
-                panic("`ceil_mode' not supported yet!");
-            }
-            if (attr.name() == "strides") {
-                stride = std::vector<int>{};
-                std::transform(attr.ints().begin(), attr.ints().end(),
-                               std::back_inserter(stride),
-                               [&](auto x) { return x; });
-            }
-            if (attr.name() == "pads") {
-                padding = std::vector<int>{};
-                std::transform(attr.ints().begin(), attr.ints().end(),
-                               std::back_inserter(padding),
-                               [&](auto x) { return x; });
-            }
-            if (attr.name() == "kernel_shape") {
-                for (auto dim : attr.ints()) {
-                    tensor.push_back(dim);
-                }
-            }
-        }
-        new_node = average_pool(flow, parents[0], tensor, stride, padding);
+        create_average_pool(flow, node);
     } else if (node.op_type() == "GlobalAveragePool") {
-        std::cout << parents[0]->shape().size() << std::endl;
-        auto tensor = std::vector<int>(parents[0]->shape().begin() + 1,
-                                       parents[0]->shape().end());
-        new_node =
-            average_pool(flow, parents[0], tensor,
-                         std::vector<int>(parents[0]->shape().size(), 1),
-                         std::vector<int>(parents[0]->shape().size(), 0));
+        create_global_average_pool(flow, node);
     } else if (node.op_type() == "Gemm") {
-        new_node = fully_connected(flow, parents[0], weights[1]);
+        create_fully_connected(flow, node);
     } else if (node.op_type() == "Flatten") {
-        int axis = 1;
-        for (auto attr : node.attribute()) {
-            if (attr.name() == "axis") {
-                axis = attr.i();
-                if (axis < 1) {
-                    panic(
-                        "Nikola only knows how to support axis >= 1. If you "
-                        "need axis < 1, please create an issue!");
-                }
-            }
-        }
-        new_node = flatten(flow, parents[0], axis);
+        create_flatten(flow, node);
     } else {
         panic("ONNX operation `" + node.op_type() + "' not supported!");
     }
-    flownode_map.insert(std::make_pair(std::string(node.output(0)), new_node));
 }
 
 int main(int argc, char **argv) {
@@ -272,10 +259,6 @@ int main(int argc, char **argv) {
     Flow *flow = new Flow();
     // TODO(nsamar): the input dimensions should be read out, not assumed to be
     // {3, 224, 224}
-    if (graph.input().size() > 0) {
-        flownode_map.insert(std::make_pair(
-            graph.input(0).name(), input(flow, std::vector<int>{3, 224, 224})));
-    }
     for (auto ini : graph.initializer()) {
         ini_map.insert(std::make_pair(ini.name(), ini));
         std::vector<int> dim_vec;
@@ -284,9 +267,15 @@ int main(int argc, char **argv) {
         }
         shape_map.insert(std::make_pair(ini.name(), dim_vec));
     }
+    for (auto node : graph.input()) {
+        flownode_map.insert(std::make_pair(
+            node.name(), input(flow, std::vector<int>{3, 224, 224})));
+    }
 
     for (auto node : graph.node()) {
         create_node(flow, node);
     }
     flow->draw("test");
+    auto ct_graph = flow->cipherfy();
+    ct_graph->draw("ct_graph");
 }
