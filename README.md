@@ -1,1 +1,1 @@
-Dependencies: bazel 4.2.2
+Dependencies: scons, python3
