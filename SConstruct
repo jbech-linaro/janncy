@@ -92,7 +92,6 @@ def install_gtest() -> None:
     if os.path.exists("/usr/lib/libgtest.a"):
         return
     install_if_missing("libgtest-dev")
-    install_if_missing("cmake")
     cmd("cd /usr/src/gtest; sudo cmake CMakeLists.txt")
     cmd("cd /usr/src/gtest; sudo make")
     cmd("cd /usr/src/gtest; sudo cp *.a /usr/lib")
@@ -110,7 +109,11 @@ def download_models() -> None:
             model = torch.hub.load("pytorch/vision:v0.10.0", model_name, pretrained=True)
             torch.onnx.export(model, torch.randn(1, 3, 224, 224), pytorch_path / f"{model_name}.onnx")
 
+def install_cmake() -> None:
+    install_if_missing("cmake")
+
 def install_dependencies() -> None:
+    install_cmake()
     install_clang()
     install_protobuf()
     install_graphviz()
