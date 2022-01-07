@@ -40,7 +40,7 @@ template <class T> class Graph {
         return result.str();
     }
 
-    void draw(const std::string& filename) {
+    void draw(const std::string& filename) const {
         std::unordered_map<T*, Agnode_t*> node_map;
         Agraph_t* g;
         GVC_t* gvc;
@@ -71,11 +71,11 @@ template <class T> class Graph {
         gvFreeContext(gvc);
     }
 
-    std::vector<T*>& parents(T* node) { return parent_map_.at(node); }
+    const std::vector<T*>& parents(T* node) const { return parent_map_.at(node); }
 
-    std::vector<T*>& children(T* node) { return child_map_.at(node); }
+    const std::vector<T*>& children(T* node) const { return child_map_.at(node); }
 
-    std::vector<T*> nodes() const { return nodes_; }
+    const std::vector<T*>& nodes() const { return nodes_; }
 
   private:
     std::vector<T*> nodes_;

@@ -67,6 +67,8 @@ def install_protobuf() -> None:
     install_if_missing("protobuf-compiler")
 
 def install_onnx() -> None:
+    if os.path.exists(onnx_path):
+        return
     cmd("mkdir -p .dependencies")
     cmd("cd .dependencies; git clone --recursive https://github.com/onnx/onnx.git")
     cmd("protoc -I=.dependencies/onnx/onnx/ --cpp_out=.dependencies/onnx/onnx .dependencies/onnx/onnx/onnx.proto")
@@ -117,8 +119,7 @@ def install_dependencies() -> None:
     install_clang()
     install_protobuf()
     install_graphviz()
-    if not os.path.exists(onnx_path):
-        install_onnx()
+    install_onnx()
     install_torch()
     install_gtest()
     download_models()
@@ -127,9 +128,10 @@ install_dependencies()
 
 env = Environment(CXX = f'/usr/bin/clang++-{clang_version}', ENV = os.environ)
 env.VariantDir(build_dir, src_dir, duplicate=0)
+env.Append(CPPFLAGS = [ "-fsanitize=address", ])
 env.Append(CPPFLAGS = [ "-g", f"-std=c++{cpp_version}", "-Wall", "-DONNX_NAMESPACE=onnx", ])
 env.Append(CPPPATH = [ onnx_path, src_dir, gtest_dir, ])
-env.Append(LIBS = [ "stdc++fs", "pthread", "cgraph", "gvc", "protobuf", "gtest_main", "gtest", ])
+env.Append(LIBS = [ "asan", "stdc++fs", "pthread", "cgraph", "gvc", "protobuf", "gtest_main", "gtest", ])
 
 onnx_parser_cpps = [ "examples/OnnxParser.cpp", ".dependencies/onnx/onnx/onnx.pb.cc", ".dependencies/onnx/onnx/defs/tensor_proto_util.cc", ".dependencies/onnx/onnx/defs/data_type_utils.cc", ".dependencies/onnx/onnx/defs/shape_inference.cc", ] + Glob("src/*.cpp")
 env.Program(str(build_dir / "onnx_parser"), onnx_parser_cpps)

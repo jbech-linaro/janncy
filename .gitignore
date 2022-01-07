@@ -11,3 +11,4 @@ bazel.gpg
 .sconsign.dblite
 .pip3_list
 build
+*.swp
