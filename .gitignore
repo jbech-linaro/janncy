@@ -12,3 +12,4 @@ bazel.gpg
 .pip3_list
 build
 *.swp
+*.json
