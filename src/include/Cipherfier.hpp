@@ -7,6 +7,8 @@
 
 #include <unordered_map>
 
+namespace janncy {
+
 class FlowNode;
 class Flow;
 
@@ -44,5 +46,7 @@ class Cipherfier : public FlowVisitor {
     std::unordered_map<const FlowNode*, CtTensor> ct_map_;
     CtGraph* ct_graph_;
 };
+
+}  // namespace janncy
 
 #endif  // CIPHERFIER_HPP_

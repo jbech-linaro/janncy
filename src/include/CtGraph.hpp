@@ -6,6 +6,8 @@
 
 #include <vector>
 
+namespace janncy {
+
 class CtGraphVisitor;
 
 class CtGraph : public Graph<CtOp> {
@@ -15,5 +17,7 @@ class CtGraph : public Graph<CtOp> {
     std::vector<std::vector<double>> evaluate(
         std::vector<std::vector<double>> init_values);
 };
+
+}  // namespace janncy
 
 #endif  // CTGRAPH_HPP_

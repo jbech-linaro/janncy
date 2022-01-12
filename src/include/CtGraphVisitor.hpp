@@ -1,6 +1,8 @@
 #ifndef CTGRAPHVISITOR_HPP_
 #define CTGRAPHVISITOR_HPP_
 
+namespace janncy {
+
 class CtGraph;
 
 class CtOp;
@@ -20,5 +22,7 @@ class CtGraphVisitor {
     virtual void visit(CtGraph* ct_graph, CtPtMul* node) = 0;
     virtual void visit(CtGraph* ct_graph, CtRotate* node) = 0;
 };
+
+}  // namespace janncy
 
 #endif  // CTGRAPHVISITOR_HPP_

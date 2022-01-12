@@ -5,6 +5,8 @@
 
 #include <string>
 
+namespace janncy {
+
 class CtGraphVisitor;
 
 class CtMul : public CtOp {
@@ -13,5 +15,7 @@ class CtMul : public CtOp {
 
     void visit(CtGraph* ct_graph, CtGraphVisitor* visitor) override;
 };
+
+}  // namespace janncy
 
 #endif  // CTMUL_HPP_

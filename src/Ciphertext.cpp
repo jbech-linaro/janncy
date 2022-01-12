@@ -2,21 +2,23 @@
 
 #include "include/utils.hpp"
 
-#include <vector>
 #include <algorithm>
-#include <iostream>
 #include <cassert>
+#include <iostream>
+#include <vector>
+
+namespace janncy {
 
 static int N = 16;
 
-Ciphertext::Ciphertext(double value) : values_(N/2, value) {}
+Ciphertext::Ciphertext(double value) : values_(N / 2, value) {}
 
-Ciphertext::Ciphertext() : values_(N/2) {
+Ciphertext::Ciphertext() : values_(N / 2) {
     std::generate(values_.begin(), values_.end(), get_uniform_random);
 }
 
 Ciphertext::Ciphertext(std::vector<double> values) : values_(values) {
-    assert(int(values_.size()) == N/2);
+    assert(int(values_.size()) == N / 2);
 }
 
 Ciphertext operator*(const Ciphertext& lhs, const Ciphertext& rhs) {
@@ -24,7 +26,6 @@ Ciphertext operator*(const Ciphertext& lhs, const Ciphertext& rhs) {
     result *= rhs;
     return result;
 }
-
 
 Ciphertext operator+(const Ciphertext& lhs, const Ciphertext& rhs) {
     Ciphertext result(lhs);
@@ -40,26 +41,22 @@ Ciphertext operator-(const Ciphertext& lhs, const Ciphertext& rhs) {
 
 Ciphertext& Ciphertext::operator*=(const Ciphertext& rhs) {
     assert(values_.size() == rhs.values_.size());
-    std::transform(rhs.values_.cbegin(), rhs.values_.cend(),
-            values_.begin(),
-            values_.begin(), std::multiplies<double>());
+    std::transform(rhs.values_.cbegin(), rhs.values_.cend(), values_.begin(),
+                   values_.begin(), std::multiplies<double>());
     return *this;
 }
 
-
 Ciphertext& Ciphertext::operator+=(const Ciphertext& rhs) {
     assert(values_.size() == rhs.values_.size());
-    std::transform(rhs.values_.cbegin(), rhs.values_.cend(),
-            values_.begin(),
-            values_.begin(), std::plus<double>());
+    std::transform(rhs.values_.cbegin(), rhs.values_.cend(), values_.begin(),
+                   values_.begin(), std::plus<double>());
     return *this;
 }
 
 Ciphertext& Ciphertext::operator-=(const Ciphertext& rhs) {
     assert(values_.size() == rhs.values_.size());
-    std::transform(rhs.values_.cbegin(), rhs.values_.cend(),
-            values_.begin(),
-            values_.begin(), std::minus<double>());
+    std::transform(rhs.values_.cbegin(), rhs.values_.cend(), values_.begin(),
+                   values_.begin(), std::minus<double>());
     return *this;
 }
 
@@ -68,10 +65,11 @@ Ciphertext Ciphertext::rotate(int amount) const {
         amount += int(values_.size());
     }
     std::vector<double> new_values = this->values_;
-    std::rotate(new_values.begin(), new_values.begin() + amount, new_values.end());
+    std::rotate(new_values.begin(), new_values.begin() + amount,
+                new_values.end());
     return Ciphertext(new_values);
 }
 
-std::vector<double> Ciphertext::decrypt() const {
-    return values_;
-}
+std::vector<double> Ciphertext::decrypt() const { return values_; }
+
+}  // namespace janncy

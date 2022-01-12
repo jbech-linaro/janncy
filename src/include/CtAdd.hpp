@@ -5,6 +5,8 @@
 
 #include <string>
 
+namespace janncy {
+
 class CtGraphVisitor;
 
 class CtAdd : public CtOp {
@@ -15,5 +17,7 @@ class CtAdd : public CtOp {
 
   private:
 };
+
+}  // namespace janncy
 
 #endif  // CTADD_HPP_

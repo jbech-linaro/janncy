@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+namespace janncy {
+
 class CtGraphVisitor;
 template <class T> class Graph;
 
@@ -15,5 +17,7 @@ class CtInput : public CtOp {
 
     void visit(CtGraph* ct_graph, CtGraphVisitor* visitor) override;
 };
+
+}  // namespace janncy
 
 #endif  // CTINPUT_HPP_

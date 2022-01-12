@@ -3,6 +3,8 @@
 
 #include <vector>
 
+namespace janncy {
+
 class CtOp;
 
 class CtTensor {
@@ -13,5 +15,7 @@ class CtTensor {
   private:
     std::vector<CtOp*> parents_;
 };
+
+}  // namespace janncy
 
 #endif  // ENCRYPTED_TENSOR_HPP_

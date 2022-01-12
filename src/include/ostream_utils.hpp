@@ -4,8 +4,10 @@
 #include <ostream>
 #include <vector>
 
+namespace janncy {
+
 template <typename T>
-std::ostream& operator<<(std::ostream &out, const std::vector<T> &v) {
+std::ostream &operator<<(std::ostream &out, const std::vector<T> &v) {
     out << "[";
     for (const auto &x : v) {
         out << x << ", ";
@@ -13,5 +15,6 @@ std::ostream& operator<<(std::ostream &out, const std::vector<T> &v) {
     return out << "]";
 }
 
-#endif  // OSTREAM_UTILS_HPP_
+}  // namespace janncy
 
+#endif  // OSTREAM_UTILS_HPP_

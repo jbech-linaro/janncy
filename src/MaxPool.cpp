@@ -6,6 +6,8 @@
 
 #include <vector>
 
+namespace janncy {
+
 MaxPool::MaxPool(std::vector<int> output_shape, std::vector<int> kernel_shape,
                  std::vector<int> stride, std::vector<int> padding)
     : FlowNode(output_shape, "MaxPool"),
@@ -20,3 +22,5 @@ std::vector<int> MaxPool::kernel_shape() const { return kernel_shape_; }
 void MaxPool::visit(Flow* flow, FlowVisitor* visitor) {
     visitor->visit(flow, this);
 }
+
+}  // namespace janncy

@@ -9,6 +9,8 @@
 #include "include/CtPtMul.hpp"
 #include "include/CtRotate.hpp"
 
+namespace janncy {
+
 CtInput* ct_input(CtGraph* ct_graph) {
     auto node = new CtInput();
     ct_graph->add_node(node, {});
@@ -44,3 +46,5 @@ CtRotate* ct_rotate(CtGraph* ct_graph, CtOp* parent) {
     ct_graph->add_node(result, {parent});
     return result;
 }
+
+}  // namespace janncy

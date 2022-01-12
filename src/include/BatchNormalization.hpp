@@ -6,11 +6,15 @@
 class FlowVisitor;
 class Flow;
 
+namespace janncy {
+
 class BatchNormalization : public FlowNode {
   public:
     BatchNormalization(std::vector<int> output_shape);
 
     void visit(Flow* flow, FlowVisitor* visitor);
 };
+
+}  // namespace janncy
 
 #endif  // BATCHNORMALIZATION_HPP_

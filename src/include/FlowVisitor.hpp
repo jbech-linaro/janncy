@@ -1,6 +1,8 @@
 #ifndef FLOWVISITOR_HPP_
 #define FLOWVISITOR_HPP_
 
+namespace janncy {
+
 class Flow;
 
 class FlowNode;
@@ -26,5 +28,7 @@ class FlowVisitor {
     virtual void visit(Flow* flow, MaxPool* node) = 0;
     virtual void visit(Flow* flow, Flatten* node) = 0;
 };
+
+}  // namespace janncy
 
 #endif  // FLOWVISITOR_HPP_

@@ -25,6 +25,8 @@
 #include <string>
 #include <unordered_map>
 
+using namespace janncy;
+
 std::unordered_map<std::string, FlowNode *> flownode_map;
 std::unordered_map<std::string, std::vector<int> > shape_map;
 std::unordered_map<std::string, onnx::TensorProto> ini_map;

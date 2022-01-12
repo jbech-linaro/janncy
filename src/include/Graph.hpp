@@ -13,6 +13,8 @@
 #include <graphviz/gvc.h>
 #include <graphviz/types.h>
 
+namespace janncy {
+
 template <class T> class Graph {
   public:
     void add_node(T* node, const std::vector<T*>& parents) {
@@ -71,9 +73,13 @@ template <class T> class Graph {
         gvFreeContext(gvc);
     }
 
-    const std::vector<T*>& parents(T* node) const { return parent_map_.at(node); }
+    const std::vector<T*>& parents(T* node) const {
+        return parent_map_.at(node);
+    }
 
-    const std::vector<T*>& children(T* node) const { return child_map_.at(node); }
+    const std::vector<T*>& children(T* node) const {
+        return child_map_.at(node);
+    }
 
     const std::vector<T*>& nodes() const { return nodes_; }
 
@@ -82,5 +88,7 @@ template <class T> class Graph {
     std::unordered_map<T*, std::vector<T*> > child_map_;
     std::unordered_map<T*, std::vector<T*> > parent_map_;
 };
+
+}  // namespace janncy
 
 #endif  // GRAPH_HPP_

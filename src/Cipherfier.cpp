@@ -24,6 +24,8 @@
 
 #include <unordered_map>
 
+namespace janncy {
+
 Cipherfier::Cipherfier() { ct_graph_ = new CtGraph(); };
 
 void Cipherfier::register_node(const FlowNode* node,
@@ -211,3 +213,5 @@ void Cipherfier::visit(Flow* flow, ReLU* node) {
                    [&](auto& x) { return relu_function(ct_graph_, x); });
     register_node(node, result);
 }
+
+}  // namespace janncy

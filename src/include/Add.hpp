@@ -3,6 +3,8 @@
 
 #include "FlowNode.hpp"
 
+namespace janncy {
+
 class FlowVisitor;
 class Flow;
 
@@ -11,5 +13,7 @@ class Add : public FlowNode {
     Add(std::vector<int> output_shape);
     void visit(Flow* flow, FlowVisitor* visitor);
 };
+
+}  // namespace janncy
 
 #endif  // ADD_HPP_

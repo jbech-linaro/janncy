@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+namespace janncy {
+
 template <class T> class Graph;
 
 FlowNode::FlowNode(std::vector<int> output_shape, std::string op_type)
@@ -28,3 +30,5 @@ std::string FlowNode::str() const {
     }
     return result.str();
 }
+
+}  // namespace janncy

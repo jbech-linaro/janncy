@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+namespace janncy {
+
 class FlowVisitor;
 class Flow;
 
@@ -25,5 +27,7 @@ class AveragePool : public FlowNode {
     std::vector<int> stride_;
     std::vector<int> padding_;
 };
+
+}  // namespace janncy
 
 #endif  // AVERAGEPOOL_HPP_

@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+namespace janncy {
+
 class Flow;
 class FlowVisitor;
 
@@ -31,5 +33,7 @@ class FlowNode {
     std::vector<int> output_shape_;
     std::string op_type_;
 };
+
+}  // namespace janncy
 
 #endif  // FLOWNODE_HPP_

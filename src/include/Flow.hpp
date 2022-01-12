@@ -5,6 +5,8 @@
 
 #include <vector>
 
+namespace janncy {
+
 class CtGraph;
 class FlowNode;
 
@@ -12,5 +14,7 @@ class Flow : public Graph<FlowNode> {
   public:
     CtGraph* cipherfy();
 };
+
+}  // namespace janncy
 
 #endif  // FLOWNODE_HPP_

@@ -6,6 +6,8 @@
 
 #include <vector>
 
+namespace janncy {
+
 AveragePool::AveragePool(std::vector<int> output_shape,
                          std::vector<int> kernel_shape, std::vector<int> stride,
                          std::vector<int> padding)
@@ -22,3 +24,4 @@ std::vector<int> AveragePool::stride() const { return stride_; }
 std::vector<int> AveragePool::padding() const { return padding_; }
 std::vector<int> AveragePool::kernel_shape() const { return kernel_shape_; }
 
+}  // namespace janncy

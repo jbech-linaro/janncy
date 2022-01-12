@@ -5,6 +5,8 @@
 
 #include <vector>
 
+namespace janncy {
+
 CtGraph* Flow::cipherfy() {
     Cipherfier cfv;
     for (auto& node : nodes()) {
@@ -14,3 +16,4 @@ CtGraph* Flow::cipherfy() {
     return cfv.ct_graph();
 }
 
+}  // namespace janncy

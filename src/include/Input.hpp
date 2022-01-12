@@ -5,6 +5,8 @@
 
 #include <vector>
 
+namespace janncy {
+
 class Flow;
 class FlowVisitor;
 
@@ -14,5 +16,7 @@ class Input : public FlowNode {
 
     void visit(Flow* flow, FlowVisitor* visitor);
 };
+
+}  // namespace janncy
 
 #endif  // INPUT_HPP_

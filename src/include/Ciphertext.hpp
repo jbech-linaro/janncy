@@ -3,8 +3,10 @@
 
 #include <vector>
 
+namespace janncy {
+
 class Ciphertext {
-public:
+  public:
     explicit Ciphertext(std::vector<double> values);
     explicit Ciphertext(double value);
     Ciphertext();
@@ -17,12 +19,14 @@ public:
 
     std::vector<double> decrypt() const;
 
-private:
+  private:
     std::vector<double> values_;
 };
 
 Ciphertext operator*(const Ciphertext& lhs, const Ciphertext& rhs);
 Ciphertext operator+(const Ciphertext& lhs, const Ciphertext& rhs);
 Ciphertext operator-(const Ciphertext& lhs, const Ciphertext& rhs);
+
+}  // namespace janncy
 
 #endif  // CIPHERTEXT_HPP_

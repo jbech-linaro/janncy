@@ -3,6 +3,8 @@
 
 #include <vector>
 
+namespace janncy {
+
 class Flow;
 class FlowNode;
 
@@ -64,5 +66,7 @@ std::vector<int> get_shape_fully_connected(
 
 std::vector<int> get_shape_flatten(const std::vector<int>& input_shape,
                                    int axis);
+
+}  // namespace janncy
 
 #endif  // FLOW_UTILS_HPP_

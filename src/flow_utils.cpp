@@ -18,6 +18,8 @@
 #include "include/MaxPool.hpp"
 #include "include/ReLU.hpp"
 
+namespace janncy {
+
 Add* add(Flow* flow, std::vector<FlowNode*> parents) {
     if (parents.size() < 2) {
         panic("An add object expects at least two parents!");
@@ -28,7 +30,7 @@ Add* add(Flow* flow, std::vector<FlowNode*> parents) {
     for (auto parent : parents) {
         if (parents[0]->shape() != parent->shape()) {
             panic("Parents of Add layer do not all have the same shape!",
-                    parents[0]->shape(), parent->shape());
+                  parents[0]->shape(), parent->shape());
         }
     }
     auto shape = parents[0]->shape();
@@ -91,7 +93,8 @@ Flatten* flatten(Flow* flow, FlowNode* parent, int axis) {
 FullyConnected* fully_connected(Flow* flow, FlowNode* parent,
                                 const std::vector<int>& kernel_shape) {
     if (kernel_shape.size() != 2) {
-        panic("FullyConnected layer expects a two-dimensional kernel!", kernel_shape);
+        panic("FullyConnected layer expects a two-dimensional kernel!",
+              kernel_shape);
     }
     auto input_shape = parent->shape();
     auto shape = get_shape_fully_connected(input_shape, kernel_shape);
@@ -141,13 +144,11 @@ std::vector<int> get_shape_average_pool(const std::vector<int>& input_shape,
 
     int channels = input_shape[0];
     auto effective_kernel_shape = std::vector<int>{channels, channels};
-    effective_kernel_shape.insert(
-        effective_kernel_shape.end(), kernel_shape.begin(), kernel_shape.end()
-    );
+    effective_kernel_shape.insert(effective_kernel_shape.end(),
+                                  kernel_shape.begin(), kernel_shape.end());
 
-    auto shape = get_shape_conv_layer(
-        input_shape, effective_kernel_shape, stride, padding
-    );
+    auto shape = get_shape_conv_layer(input_shape, effective_kernel_shape,
+                                      stride, padding);
     std::cout << "output shape: " << shape << "\n";
     std::cout << std::endl;
     return shape;
@@ -163,18 +164,18 @@ std::vector<int> get_shape_conv_layer(const std::vector<int>& input_shape,
     std::cout << "stride (not a shape!): " << stride << "\n";
     std::cout << "padding (not a shape!): " << padding << "\n";
 
-    //TODO we're assuming symetric padding on both sides of each
+    // TODO we're assuming symetric padding on both sides of each
 
     std::vector<int> output_shape(input_shape.size());
-    output_shape[0] = kernel_shape[0]; // number of output channels
+    output_shape[0] = kernel_shape[0];  // number of output channels
 
     // Actual dimensions
-    for (unsigned i = 0; i + 1  < input_shape.size(); ++i) {
+    for (unsigned i = 0; i + 1 < input_shape.size(); ++i) {
         // From https://pytorch.org/docs/1.10.1/generated/torch.nn.Conv2d.html
         output_shape[i + 1] =
-            (input_shape[i + 1] + 2 * padding[i] - kernel_shape[i + 2])
-            / stride[i]
-            + 1;
+            (input_shape[i + 1] + 2 * padding[i] - kernel_shape[i + 2]) /
+                stride[i] +
+            1;
     }
     std::cout << "output shape: " << output_shape << "\n";
     std::cout << std::endl;
@@ -222,3 +223,5 @@ std::vector<int> get_shape_fully_connected(
     }
     return std::vector<int>{kernel_shape[0]};
 }
+
+}  // namespace janncy

@@ -6,6 +6,8 @@
 
 #include <vector>
 
+namespace janncy {
+
 ConvLayer::ConvLayer(std::vector<int> output_shape,
                      std::vector<int> kernel_shape, std::vector<int> stride,
                      std::vector<int> padding)
@@ -21,3 +23,5 @@ std::vector<int> ConvLayer::padding() const { return padding_; }
 void ConvLayer::visit(Flow* flow, FlowVisitor* visitor) {
     visitor->visit(flow, this);
 }
+
+}  // namespace janncy

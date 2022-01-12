@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+namespace janncy {
+
 template <class T> class Graph;
 
 class CtGraph;
@@ -20,5 +22,7 @@ class CtOp {
   private:
     std::string type_str_;
 };
+
+}  // namespace janncy
 
 #endif  // CTOP_HPP_

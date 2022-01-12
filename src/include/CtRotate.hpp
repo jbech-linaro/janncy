@@ -5,6 +5,8 @@
 
 #include <string>
 
+namespace janncy {
+
 class CtGraphVisitor;
 
 class CtRotate : public CtOp {
@@ -18,5 +20,7 @@ class CtRotate : public CtOp {
   private:
     int amt_;
 };
+
+}  // namespace janncy
 
 #endif  // CTROTATE_HPP_

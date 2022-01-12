@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+namespace janncy {
+
 class CtGraphVisitor;
 
 class CtPtAdd : public CtOp {
@@ -19,5 +21,7 @@ class CtPtAdd : public CtOp {
   private:
     std::vector<double> value_;
 };
+
+}  // namespace janncy
 
 #endif  // CTPTADD_HPP_

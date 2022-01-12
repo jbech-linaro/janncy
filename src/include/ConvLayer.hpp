@@ -5,6 +5,8 @@
 
 #include <vector>
 
+namespace janncy {
+
 class FlowVisitor;
 class Flow;
 
@@ -24,5 +26,7 @@ class ConvLayer : public FlowNode {
     std::vector<int> stride_;
     std::vector<int> padding_;
 };
+
+}  // namespace janncy
 
 #endif  // CONVLAYER_HPP_

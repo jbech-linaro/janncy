@@ -16,6 +16,7 @@ install_cmd = "sudo apt-get install -y"
 clangpp_path = Path(f"/usr/bin/clang++-{clang_version}")
 clang_path = Path(f"/usr/bin/clang-{clang_version}")
 onnx_path = Path(".dependencies/onnx")
+heaanlib_path = Path(".dependencies/HEAAN/HEAAN/lib/libHEAAN.a")
 pip3_list_path = Path(".pip3_list")
 
 def cmd_allow_fail(cmd_str : str) -> str:
@@ -74,6 +75,14 @@ def install_onnx() -> None:
     cmd("protoc -I=.dependencies/onnx/onnx/ --cpp_out=.dependencies/onnx/onnx .dependencies/onnx/onnx/onnx.proto")
     cmd("protoc -I=.dependencies/onnx/ -I=.dependencies/onnx/onnx/ --cpp_out=.dependencies/onnx/onnx .dependencies/onnx/onnx/onnx-operators.proto")
 
+def install_heaan() -> None:
+    if os.path.exists(heaanlib_path):
+        return
+    cmd("mkdir -p .dependencies")
+    if not os.path.exists(".dependencies/HEAAN"):
+        cmd("cd .dependencies; git clone git@github.com:n-samar/HEAAN.git; cd HEAAN; git branch namespace-fix-minimal")
+    cmd("cd .dependencies/HEAAN/HEAAN/lib; make all")
+
 def install_graphviz() -> None:
     install_if_missing("graphviz")
     install_if_missing("libgraphviz-dev")
@@ -120,6 +129,7 @@ def install_dependencies() -> None:
     install_protobuf()
     install_graphviz()
     install_onnx()
+    install_heaan()
     install_torch()
     install_gtest()
     download_models()
@@ -130,8 +140,14 @@ env = Environment(CXX = f'/usr/bin/clang++-{clang_version}', ENV = os.environ)
 env.VariantDir(build_dir, src_dir, duplicate=0)
 env.Append(CPPFLAGS = [ "-fsanitize=address", ])
 env.Append(CPPFLAGS = [ "-g", f"-std=c++{cpp_version}", "-Wall", "-DONNX_NAMESPACE=onnx", ])
-env.Append(CPPPATH = [ onnx_path, src_dir, gtest_dir, ])
+# TODO(nsamar): Uncomment once HEAAN namespace issue is resolved
+# env.Append(CPPPATH = [ onnx_path, src_dir, gtest_dir, heaanlib_path.parent.parent / "src", ])
+env.Append(CPPPATH = [ onnx_path, src_dir, gtest_dir ])
+# TODO(nsamar): Uncomment once HEAAN namespace issue is resolved
+# env.Append(LIBS = [ "HEAAN", "asan", "stdc++fs", "pthread", "cgraph", "gvc", "protobuf", "gtest_main", "gtest", ])
 env.Append(LIBS = [ "asan", "stdc++fs", "pthread", "cgraph", "gvc", "protobuf", "gtest_main", "gtest", ])
+# TODO(nsamar): Uncomment once HEAAN namespace issue is resolved
+# env.Append( LIBPATH = [ heaanlib_path.parent ])
 
 onnx_parser_cpps = [ "examples/OnnxParser.cpp", ".dependencies/onnx/onnx/onnx.pb.cc", ".dependencies/onnx/onnx/defs/tensor_proto_util.cc", ".dependencies/onnx/onnx/defs/data_type_utils.cc", ".dependencies/onnx/onnx/defs/shape_inference.cc", ] + Glob("src/*.cpp")
 env.Program(str(build_dir / "onnx_parser"), onnx_parser_cpps)

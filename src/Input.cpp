@@ -6,8 +6,12 @@
 
 #include <vector>
 
+namespace janncy {
+
 Input::Input(std::vector<int> input_shape) : FlowNode(input_shape, "Input") {}
 
 void Input::visit(Flow* flow, FlowVisitor* visitor) {
     visitor->visit(flow, this);
 }
+
+}  // namespace janncy

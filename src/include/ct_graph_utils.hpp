@@ -1,6 +1,8 @@
 #ifndef CT_GRAPH_UTILS_HPP_
 #define CT_GRAPH_UTILS_HPP_
 
+namespace janncy {
+
 class CtGraph;
 class CtAdd;
 class CtPtAdd;
@@ -16,5 +18,7 @@ CtMul* ct_mul(CtGraph* ct_graph, CtOp* parent0, CtOp* parent1);
 CtPtAdd* ct_pt_add(CtGraph* ct_graph, CtOp* parent);
 CtPtMul* ct_pt_mul(CtGraph* ct_graph, CtOp* parent);
 CtRotate* ct_rotate(CtGraph* ct_graph, CtOp* parent);
+
+}  // namespace janncy
 
 #endif  // CT_GRAPH_UTILS_HPP_

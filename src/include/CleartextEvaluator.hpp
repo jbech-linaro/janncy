@@ -6,6 +6,8 @@
 #include <unordered_map>
 #include <vector>
 
+namespace janncy {
+
 class CtGraph;
 
 class CtAdd;
@@ -33,5 +35,7 @@ class CleartextEvaluator : public CtGraphVisitor {
     std::vector<std::vector<double> > inputs_;
     std::unordered_map<CtOp*, std::vector<double> > node_map_;
 };
+
+}  // namespace janncy
 
 #endif  // CLEARTEXTEVALUATOR_HPP_

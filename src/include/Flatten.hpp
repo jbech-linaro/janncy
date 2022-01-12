@@ -3,6 +3,8 @@
 
 #include "FlowNode.hpp"
 
+namespace janncy {
+
 class FlowVisitor;
 class Flow;
 
@@ -12,5 +14,7 @@ class Flatten : public FlowNode {
 
     void visit(Flow* flow, FlowVisitor* visitor);
 };
+
+}  // namespace janncy
 
 #endif  // FLATTEN_HPP_

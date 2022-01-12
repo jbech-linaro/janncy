@@ -13,6 +13,8 @@
 #include "include/CtPtMul.hpp"
 #include "include/CtRotate.hpp"
 
+namespace janncy {
+
 void CleartextEvaluator::visit(CtGraph* ct_graph, CtInput* node) {
     node_map_[node] = inputs_.back();
     inputs_.pop_back();
@@ -66,3 +68,4 @@ std::vector<std::vector<double> > CleartextEvaluator::result(
     return result;
 }
 
+}  // namespace janncy
