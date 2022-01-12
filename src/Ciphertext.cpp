@@ -2,6 +2,7 @@
 
 #include "include/utils.hpp"
 
+#include <HEAAN/src/HEAAN.h>
 #include <algorithm>
 #include <cassert>
 #include <iostream>
@@ -9,17 +10,12 @@
 
 namespace janncy {
 
-static int N = 16;
+heaan::Scheme* Ciphertext::scheme_ = nullptr;
+heaan::Ring* Ciphertext::ring_ = nullptr;
+heaan::SecretKey* Ciphertext::secret_key_ = nullptr;
+int Ciphertext::num_slots_ = 8;
 
-Ciphertext::Ciphertext(double value) : values_(N / 2, value) {}
-
-Ciphertext::Ciphertext() : values_(N / 2) {
-    std::generate(values_.begin(), values_.end(), get_uniform_random);
-}
-
-Ciphertext::Ciphertext(std::vector<double> values) : values_(values) {
-    assert(int(values_.size()) == N / 2);
-}
+Ciphertext::Ciphertext(heaan::Ciphertext ciphertext) : ciphertext_(ciphertext) {}
 
 Ciphertext operator*(const Ciphertext& lhs, const Ciphertext& rhs) {
     Ciphertext result(lhs);
@@ -39,37 +35,67 @@ Ciphertext operator-(const Ciphertext& lhs, const Ciphertext& rhs) {
     return result;
 }
 
-Ciphertext& Ciphertext::operator*=(const Ciphertext& rhs) {
-    assert(values_.size() == rhs.values_.size());
-    std::transform(rhs.values_.cbegin(), rhs.values_.cend(), values_.begin(),
-                   values_.begin(), std::multiplies<double>());
+Ciphertext& Ciphertext::operator*=(Ciphertext rhs) {
+    scheme_->multAndEqual(ciphertext_, rhs.ciphertext_);
     return *this;
 }
 
-Ciphertext& Ciphertext::operator+=(const Ciphertext& rhs) {
-    assert(values_.size() == rhs.values_.size());
-    std::transform(rhs.values_.cbegin(), rhs.values_.cend(), values_.begin(),
-                   values_.begin(), std::plus<double>());
+Ciphertext& Ciphertext::operator+=(Ciphertext rhs) {
+    scheme_->addAndEqual(ciphertext_, rhs.ciphertext_);
     return *this;
 }
 
-Ciphertext& Ciphertext::operator-=(const Ciphertext& rhs) {
-    assert(values_.size() == rhs.values_.size());
-    std::transform(rhs.values_.cbegin(), rhs.values_.cend(), values_.begin(),
-                   values_.begin(), std::minus<double>());
+Ciphertext& Ciphertext::operator-=(Ciphertext rhs) {
+    scheme_->subAndEqual(ciphertext_, rhs.ciphertext_);
     return *this;
 }
 
-Ciphertext Ciphertext::rotate(int amount) const {
-    while (amount <= 0) {
-        amount += int(values_.size());
+Ciphertext Ciphertext::rotate(int amount) {
+    auto ct_result = heaan::Ciphertext();
+    scheme_->leftRotateFast(ct_result, ciphertext_, amount);
+    return Ciphertext(ct_result);
+}
+
+std::vector<std::complex<double> > Ciphertext::decrypt() {
+    auto ptr_result = scheme_->decrypt(*secret_key_, ciphertext_);
+    auto result = std::vector<std::complex<double> >{};
+    for (int idx = 0; idx < num_slots_; idx++) {
+        result.push_back(ptr_result[idx]);
     }
-    std::vector<double> new_values = this->values_;
-    std::rotate(new_values.begin(), new_values.begin() + amount,
-                new_values.end());
-    return Ciphertext(new_values);
+    delete [] ptr_result;
+    return result;
 }
 
-std::vector<double> Ciphertext::decrypt() const { return values_; }
+void Ciphertext::init_scheme() {
+    assert(!scheme_);
+    ring_ = new heaan::Ring();
+    secret_key_ = new heaan::SecretKey(*ring_);
+    scheme_ = new heaan::Scheme(*secret_key_, *ring_);
+    scheme_->addLeftRotKeys(*secret_key_);
+    num_slots_ = 8;
+}
+
+heaan::Scheme* Ciphertext::scheme() {
+    if (!scheme_) {
+        init_scheme();
+    }
+    return scheme_;
+}
+
+int Ciphertext::num_slots() {
+    return num_slots_;
+}
+
+Ciphertext encrypt(const std::vector<std::complex<double> >& values) {
+    assert(values.size() == Ciphertext::num_slots());
+    auto ct = heaan::Ciphertext();
+    std::complex<double>* value_array = new std::complex<double>[Ciphertext::num_slots()];
+    for (int idx = 0; idx < Ciphertext::num_slots(); idx++) {
+        value_array[idx] = values[idx];
+    }
+    Ciphertext::scheme()->encrypt(ct, value_array, Ciphertext::num_slots(), /*logp=*/30, heaan::logQ);
+    delete [] value_array;
+    return Ciphertext(ct);
+}
 
 }  // namespace janncy

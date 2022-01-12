@@ -140,16 +140,11 @@ env = Environment(CXX = f'/usr/bin/clang++-{clang_version}', ENV = os.environ)
 env.VariantDir(build_dir, src_dir, duplicate=0)
 env.Append(CPPFLAGS = [ "-fsanitize=address", ])
 env.Append(CPPFLAGS = [ "-g", f"-std=c++{cpp_version}", "-Wall", "-DONNX_NAMESPACE=onnx", ])
-# TODO(nsamar): Uncomment once HEAAN namespace issue is resolved
-# env.Append(CPPPATH = [ onnx_path, src_dir, gtest_dir, heaanlib_path.parent.parent / "src", ])
-env.Append(CPPPATH = [ onnx_path, src_dir, gtest_dir ])
-# TODO(nsamar): Uncomment once HEAAN namespace issue is resolved
-# env.Append(LIBS = [ "HEAAN", "asan", "stdc++fs", "pthread", "cgraph", "gvc", "protobuf", "gtest_main", "gtest", ])
-env.Append(LIBS = [ "asan", "stdc++fs", "pthread", "cgraph", "gvc", "protobuf", "gtest_main", "gtest", ])
-# TODO(nsamar): Uncomment once HEAAN namespace issue is resolved
-# env.Append( LIBPATH = [ heaanlib_path.parent ])
+env.Append(CPPPATH = [ onnx_path, src_dir, gtest_dir, heaanlib_path.parent.parent.parent, ])
+env.Append(LIBS = [ "HEAAN", "asan", "stdc++fs", "pthread", "ntl", "gmp", "m", "cgraph", "gvc", "protobuf", "gtest_main", "gtest", ])
+env.Append( LIBPATH = [ heaanlib_path.parent ])
 
 onnx_parser_cpps = [ "examples/OnnxParser.cpp", ".dependencies/onnx/onnx/onnx.pb.cc", ".dependencies/onnx/onnx/defs/tensor_proto_util.cc", ".dependencies/onnx/onnx/defs/data_type_utils.cc", ".dependencies/onnx/onnx/defs/shape_inference.cc", ] + Glob("src/*.cpp")
 env.Program(str(build_dir / "onnx_parser"), onnx_parser_cpps)
 
-env.Program(str(build_dir / "tests"), Glob("test/*.cpp"))
+env.Program(str(build_dir / "tests"), Glob("test/*.cpp") + Glob("src/*.cpp"))
