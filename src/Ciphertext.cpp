@@ -3,6 +3,7 @@
 #include "include/utils.hpp"
 
 #include <HEAAN/src/HEAAN.h>
+#include <NTL/ZZ.h>
 #include <algorithm>
 #include <cassert>
 #include <iostream>
@@ -96,6 +97,24 @@ Ciphertext encrypt(const std::vector<std::complex<double> >& values) {
     Ciphertext::scheme()->encrypt(ct, value_array, Ciphertext::num_slots(), /*logp=*/30, heaan::logQ);
     delete [] value_array;
     return Ciphertext(ct);
+}
+
+Ciphertext Ciphertext::addPtVec(std::vector<std::complex<double> > pt_vec) {
+    auto pt = encrypt(pt_vec);
+    heaan::Ciphertext ct_result;
+    scheme_->add(ct_result, ciphertext_, pt.ciphertext_);
+    return Ciphertext(ct_result);
+}
+
+Ciphertext Ciphertext::multPtVec(std::vector<std::complex<double> > pt_vec) {
+    heaan::Ciphertext ct_result;
+    std::complex<double>* const_vec = new std::complex<double>[Ciphertext::num_slots()];
+    for (int idx = 0; idx < Ciphertext::num_slots(); idx++) {
+        const_vec[idx] = pt_vec[idx];
+    }
+    scheme_->multByConstVec(ct_result, ciphertext_, const_vec, /*logp/2=*/15);
+    delete [] const_vec;
+    return Ciphertext(ct_result);
 }
 
 }  // namespace janncy

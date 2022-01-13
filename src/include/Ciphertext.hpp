@@ -4,6 +4,7 @@
 #include <HEAAN/src/HEAAN.h>
 
 #include <vector>
+#include <complex>
 
 namespace janncy {
 
@@ -16,6 +17,9 @@ class Ciphertext {
     Ciphertext& operator*=(Ciphertext rhs);
     Ciphertext& operator+=(Ciphertext rhs);
     Ciphertext& operator-=(Ciphertext rhs);
+
+    Ciphertext addPtVec(std::vector<std::complex<double> > pt_vec);
+    Ciphertext multPtVec(std::vector<std::complex<double> > pt_vec);
 
     std::vector<std::complex<double> > decrypt();
 
