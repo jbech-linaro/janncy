@@ -1,30 +1,28 @@
 #ifndef CONVLAYER_HPP_
 #define CONVLAYER_HPP_
 
-#include "FlowNode.hpp"
-
 #include <vector>
+
+#include "FlowNode.hpp"
+#include "KernelAttributes.hpp"
 
 namespace janncy {
 
 class FlowVisitor;
-class Flow;
 
 class ConvLayer : public FlowNode {
   public:
-    ConvLayer(std::vector<int> output_shape, std::vector<int> kernel_shape,
-              std::vector<int> stride, std::vector<int> padding);
+    ConvLayer(std::vector<int> input_shape,
+              KernelAttributes kernel, int output_ch);
 
-    void visit(Flow* flow, FlowVisitor* visitor);
+    void accept(FlowVisitor& visitor) override;
+    std::string op_type() const override;
+    std::vector<int> shape() const override;
 
-    std::vector<int> stride() const;
-    std::vector<int> padding() const;
-    std::vector<int> kernel_shape() const;
-
+    const KernelAttributes& kernel() const;
   private:
-    std::vector<int> kernel_shape_;
-    std::vector<int> stride_;
-    std::vector<int> padding_;
+    KernelAttributes kernel_;
+    std::vector<int> output_shape_;
 };
 
 }  // namespace janncy

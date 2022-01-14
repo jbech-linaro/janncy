@@ -1,12 +1,11 @@
 #ifndef GRAPH_HPP_
 #define GRAPH_HPP_
 
-#include "Panic.hpp"
-
 #include <algorithm>
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <memory>
 #include <vector>
 
 #include <graphviz/cgraph.h>
@@ -17,17 +16,26 @@ namespace janncy {
 
 template <class T> class Graph {
   public:
-    void add_node(T* node, const std::vector<T*>& parents) {
-        if (!node) {
-            panic("Cannot insert nullptr node!");
+    // Transfers ownership of `new_node` to the Graph object
+    T* add_node(T* new_node, const std::vector<const T*>& parents) {
+        nodes_.emplace_back(new_node);
+
+        child_map_[new_node] = {};
+        parent_map_[new_node] = {};
+
+        for (const T* parent : parents) {
+            assert(child_map_.count(parent) == 1);
+            child_map_[parent].push_back(new_node);
+
+            // alex: This is safe because the assert guarantees that `parent`
+            //       points to an object owned by this object and has been
+            //       allocated as non-const.
+            //       It looks a bit dodgy, but is neccessary to achieve const
+            //       correctness if using pointers as indices.
+            parent_map_[new_node].push_back(const_cast<T*>(parent));
         }
-        nodes_.push_back(node);
-        child_map_.insert(std::make_pair(node, std::vector<T*>{}));
-        parent_map_.insert(std::make_pair(node, std::vector<T*>{}));
-        for (auto parent : parents) {
-            child_map_.at(parent).push_back(node);
-            parent_map_.at(node).push_back(parent);
-        }
+
+        return new_node;
     }
 
     std::string str() const {
@@ -43,7 +51,8 @@ template <class T> class Graph {
     }
 
     void draw(const std::string& filename) const {
-        std::unordered_map<T*, Agnode_t*> node_map;
+        /*
+        std::unordered_map<const T*, Agnode_t*> node_map;
         Agraph_t* g;
         GVC_t* gvc;
 
@@ -71,22 +80,46 @@ template <class T> class Graph {
         gvFreeLayout(gvc, g);
         agclose(g);
         gvFreeContext(gvc);
+        */
     }
 
-    const std::vector<T*>& parents(T* node) const {
+    const std::vector<const T*>& parents(const T* node) const {
+        return parent_map_.at(node);
+    }
+    const std::vector<T*>& parents(const T* node) {
         return parent_map_.at(node);
     }
 
-    const std::vector<T*>& children(T* node) const {
+    const std::vector<const T*>& children(const T* node) const {
+        return child_map_.at(node);
+    }
+    const std::vector<T*>& children(const T* node) {
         return child_map_.at(node);
     }
 
-    const std::vector<T*>& nodes() const { return nodes_; }
+    std::vector<const T*> nodes() const {
+        return get_raw_node_pointers();
+    }
+    std::vector<T*> nodes() {
+        return get_raw_node_pointers();
+    }
+
+    bool contains(const T* node) const {
+        return child_map_.count(node) == 1;
+    }
 
   private:
-    std::vector<T*> nodes_;
-    std::unordered_map<T*, std::vector<T*> > child_map_;
-    std::unordered_map<T*, std::vector<T*> > parent_map_;
+    std::vector<std::unique_ptr<T>> nodes_;
+    std::unordered_map<const T*, std::vector<T*> > child_map_;
+    std::unordered_map<const T*, std::vector<T*> > parent_map_;
+
+    std::vector<T*> get_raw_node_pointers() const {
+        std::vector<T*> result(nodes_.size());
+        std::transform(nodes_.begin(), nodes_.end(), result.begin(),
+                [](const auto& ptr) { return ptr.get(); }
+        );
+        return result;
+    }
 };
 
 }  // namespace janncy

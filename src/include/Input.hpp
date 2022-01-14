@@ -1,20 +1,24 @@
 #ifndef INPUT_HPP_
 #define INPUT_HPP_
 
-#include "FlowNode.hpp"
-
 #include <vector>
+
+#include "FlowNode.hpp"
 
 namespace janncy {
 
-class Flow;
 class FlowVisitor;
 
 class Input : public FlowNode {
   public:
-    Input(std::vector<int> input_tensor);
+    Input(std::vector<int> shape);
 
-    void visit(Flow* flow, FlowVisitor* visitor);
+    void accept(FlowVisitor& visitor) override;
+    std::string op_type() const override;
+    std::vector<int> shape() const override;
+
+  private:
+    std::vector<int> shape_;
 };
 
 }  // namespace janncy

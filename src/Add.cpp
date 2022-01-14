@@ -1,17 +1,16 @@
 #include "include/Add.hpp"
 
-#include "include/Flow.hpp"
-#include "include/FlowNode.hpp"
-#include "include/FlowVisitor.hpp"
-
 #include <vector>
+#include <utility>
+
+#include "include/FlowVisitor.hpp"
 
 namespace janncy {
 
-Add::Add(std::vector<int> output_shape) : FlowNode(output_shape, "Add"){};
+Add::Add(std::vector<int> shape) : shape_(std::move(shape)) {}
 
-void Add::visit(Flow* flow, FlowVisitor* visitor) {
-    visitor->visit(flow, this);
-}
+void Add::accept(FlowVisitor& visitor) { visitor.visit(*this); }
+std::vector<int> Add::shape() const { return shape_; }
+std::string Add::op_type() const { return "Add"; }
 
 }  // namespace janncy

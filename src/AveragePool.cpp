@@ -1,27 +1,22 @@
 #include "include/AveragePool.hpp"
 
-#include "include/Flow.hpp"
-#include "include/FlowNode.hpp"
-#include "include/FlowVisitor.hpp"
-
 #include <vector>
+#include <utility>
+
+#include "include/FlowVisitor.hpp"
+#include "include/KernelAttributes.hpp"
 
 namespace janncy {
 
-AveragePool::AveragePool(std::vector<int> output_shape,
-                         std::vector<int> kernel_shape, std::vector<int> stride,
-                         std::vector<int> padding)
-    : FlowNode(output_shape, "AveragePool"),
-      kernel_shape_(kernel_shape),
-      stride_(stride),
-      padding_(padding){};
+AveragePool::AveragePool(std::vector<int> input_shape,
+                         KernelAttributes kernel)
+        : kernel_(std::move(kernel)),
+          output_shape_(kernel_.output_shape(input_shape)) {}
 
-void AveragePool::visit(Flow* flow, FlowVisitor* visitor) {
-    visitor->visit(flow, this);
-}
+void AveragePool::accept(FlowVisitor& visitor) { visitor.visit(*this); }
+std::string AveragePool::op_type() const { return "AveragePool"; }
+std::vector<int> AveragePool::shape() const { return output_shape_; }
 
-std::vector<int> AveragePool::stride() const { return stride_; }
-std::vector<int> AveragePool::padding() const { return padding_; }
-std::vector<int> AveragePool::kernel_shape() const { return kernel_shape_; }
+const KernelAttributes& AveragePool::kernel() const { return kernel_; }
 
 }  // namespace janncy

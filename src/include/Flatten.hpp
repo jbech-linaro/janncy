@@ -6,13 +6,17 @@
 namespace janncy {
 
 class FlowVisitor;
-class Flow;
 
 class Flatten : public FlowNode {
   public:
-    Flatten(std::vector<int> output_shape);
+    Flatten(const std::vector<int> &input_shape);
 
-    void visit(Flow* flow, FlowVisitor* visitor);
+    void accept(FlowVisitor& visitor) override;
+    std::string op_type() const override;
+    std::vector<int> shape() const override;
+
+  private:
+    int output_dim_;
 };
 
 }  // namespace janncy

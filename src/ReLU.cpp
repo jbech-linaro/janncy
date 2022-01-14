@@ -1,17 +1,15 @@
 #include "include/ReLU.hpp"
 
-#include "include/Flow.hpp"
-#include "include/FlowNode.hpp"
-#include "include/FlowVisitor.hpp"
-
 #include <vector>
+
+#include "include/FlowVisitor.hpp"
 
 namespace janncy {
 
-ReLU::ReLU(std::vector<int> output_shape) : FlowNode(output_shape, "Relu"){};
+ReLU::ReLU(std::vector<int> shape) : shape_(std::move(shape)) {}
 
-void ReLU::visit(Flow* flow, FlowVisitor* visitor) {
-    visitor->visit(flow, this);
-}
+void ReLU::accept(FlowVisitor& visitor) { visitor.visit(*this); }
+std::string ReLU::op_type() const { return "Relu"; }
+std::vector<int> ReLU::shape() const { return shape_; }
 
 }  // namespace janncy

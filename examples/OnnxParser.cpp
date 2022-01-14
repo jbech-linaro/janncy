@@ -1,23 +1,3 @@
-#include "include/flow_utils.hpp"
-
-#include "include/Add.hpp"
-#include "include/AveragePool.hpp"
-#include "include/Cipherfier.hpp"
-#include "include/ConvLayer.hpp"
-#include "include/CtGraph.hpp"
-#include "include/Flatten.hpp"
-#include "include/Flow.hpp"
-#include "include/FullyConnected.hpp"
-#include "include/Input.hpp"
-#include "include/MaxPool.hpp"
-#include "include/Panic.hpp"
-#include "include/ReLU.hpp"
-#include "include/utils.hpp"
-
-#include "onnx/defs/tensor_proto_util.h"
-#include "onnx/onnx_pb.h"
-#include "onnx/proto_utils.h"
-
 #include <algorithm>
 #include <experimental/filesystem>
 #include <fstream>
@@ -25,17 +5,24 @@
 #include <string>
 #include <unordered_map>
 
+#include "onnx/defs/tensor_proto_util.h"
+#include "onnx/onnx_pb.h"
+#include "onnx/proto_utils.h"
+
+#include "include/Cipherfier.hpp"
+#include "include/Flow.hpp"
+#include "include/Panic.hpp"
+
 using namespace janncy;
 
-std::unordered_map<std::string, FlowNode *> flownode_map;
-std::unordered_map<std::string, std::vector<int> > shape_map;
-std::unordered_map<std::string, onnx::TensorProto> ini_map;
+std::unordered_map<std::string, FlowNode*> flownode_map;
+std::unordered_map<std::string, std::vector<int>> shape_map;
 
-std::string ATTR_STRIDES = "strides";
-std::string ATTR_PADDING = "pads";
-std::string ATTR_AUTO_PAD = "auto_pad";
-std::string ATTR_KERNEL_SHAPE = "kernel_shape";
-std::string ATTR_AXIS = "axis";
+const std::string ATTR_STRIDES = "strides";
+const std::string ATTR_PADDING = "pads";
+const std::string ATTR_AUTO_PAD = "auto_pad";
+const std::string ATTR_KERNEL_SHAPE = "kernel_shape";
+const std::string ATTR_AXIS = "axis";
 
 const onnx::AttributeProto* get_attribute(const onnx::NodeProto &node,
                                           const std::string &attr_name) {
@@ -67,184 +54,172 @@ bool attribute_exists(const onnx::NodeProto &node, const std::string &attr_name)
 int get_attribute_int(const onnx::NodeProto &node,
                       const std::string &attr_name) {
     auto attr = get_typed_attribute(node, attr_name, onnx::AttributeProto::INT);
-    if (attr == nullptr) {
-        panic("INT attribute `" + attr_name + "' not found!");
-    } else {
-        return attr->i();
-    }
+    PANIC_IF(attr == nullptr, "INT attribute `" + attr_name + "' not found!");
+    return attr->i();
 }
 
-std::vector<int> get_attribute_ints(onnx::NodeProto &node,
+std::vector<int> get_ints_attribute(onnx::NodeProto &node,
                                     const std::string &attr_name) {
     auto attr = get_typed_attribute(node, attr_name, onnx::AttributeProto::INTS);
+    PANIC_IF(attr == nullptr, "INTS attribute `" + attr_name + "' not found!");
+    return std::vector<int>(attr->ints().begin(), attr->ints().end());
+}
+std::vector<int> get_optional_ints_attribute(onnx::NodeProto &node,
+                                             const std::string &attr_name) {
+    auto attr = get_typed_attribute(node, attr_name, onnx::AttributeProto::INTS);
     if (attr == nullptr) {
-        panic("INTS attribute `" + attr_name + "' not found!");
+        return {};
     } else {
         return std::vector<int>(attr->ints().begin(), attr->ints().end());
     }
 }
 
-std::vector<FlowNode *> get_parents(onnx::NodeProto &node) {
-    auto parents = std::vector<FlowNode *>{};
+
+std::vector<const FlowNode *> get_parent_nodes(onnx::NodeProto &node) {
+    std::vector<const FlowNode*> parent_nodes;
     for (auto p : node.input()) {
-        // alex: `flownode_map[p]` defaults to `nullptr` if element is missing.
-        parents.push_back(flownode_map[p]);
+        auto it = flownode_map.find(p);
+        if (it != flownode_map.end()) {
+            parent_nodes.push_back(it->second);
+        } else {
+            parent_nodes.push_back(nullptr);
+        }
     }
-    return parents;
+    return parent_nodes;
 }
 
-std::vector<std::vector<int> > get_weights(onnx::NodeProto &node) {
-    auto weights = std::vector<std::vector<int> >{};
-    std::transform(
-        node.input().begin(), node.input().end(), std::back_inserter(weights),
-        [&](auto weight) {
-            if (shape_map.find(std::string(weight)) != shape_map.end()) {
-                return shape_map.at(std::string(weight));
-            } else {
-                return std::vector<int>{};
-            }
-        });
-    std::cerr << "Weights " << weights << "\n";
-    return weights;
-}
+std::vector<std::vector<int> > get_input_shapes(onnx::NodeProto &onnx_node) {
+    std::vector<std::vector<int>> input_shapes;
 
-
-std::vector<int> get_strides(onnx::NodeProto &node) {
-    if (attribute_exists(node, ATTR_STRIDES)) {
-        return get_attribute_ints(node, ATTR_STRIDES);
-    } else {
-        auto parent = get_parents(node)[0];
-        return std::vector<int>(parent->shape().size() - 1, 1);
+    for (const std::string &input_name : onnx_node.input()) {
+        auto shape_it = shape_map.find(input_name);
+        PANIC_IF(shape_it == shape_map.end(), "Unknown input to node",
+                 onnx_node.name(), input_name);
+        input_shapes.push_back(shape_it->second);
     }
+    return input_shapes;
 }
 
-std::vector<int> get_padding(onnx::NodeProto &node) {
-    if (attribute_exists(node, ATTR_PADDING)) {
-        return get_attribute_ints(node, ATTR_PADDING);
-    } else {
-        auto parent = get_parents(node)[0];
-        return std::vector<int>((parent->shape().size() - 1) * 2, 0);
+std::vector<int> get_strides(onnx::NodeProto &onnx_node) {
+    return get_optional_ints_attribute(onnx_node, ATTR_STRIDES);
+}
+std::vector<int> get_padding(onnx::NodeProto &onnx_node) {
+    return get_optional_ints_attribute(onnx_node, ATTR_PADDING);
+}
+
+FlowNode* create_relu(Flow &flow, onnx::NodeProto &onnx_node) {
+    const FlowNode *par = get_parent_nodes(onnx_node)[0];
+    return flow.create_relu(par);
+}
+
+FlowNode* create_add(Flow &flow, onnx::NodeProto &onnx_node) {
+    return flow.create_add(get_parent_nodes(onnx_node));
+}
+
+FlowNode* create_conv(Flow &flow, onnx::NodeProto &onnx_node) {
+    std::vector<std::vector<int>> input_shapes = get_input_shapes(onnx_node);
+
+    // Infer from weights input shape
+    std::vector<int> raw_kernel_shape = get_input_shapes(onnx_node)[1];
+    int output_channel_cnt = raw_kernel_shape[0];
+    PANIC_IF(raw_kernel_shape[1] != input_shapes[0][0]);
+
+    std::vector<int> spatial_kernel_shape(raw_kernel_shape.begin() + 2,
+                                          raw_kernel_shape.end());
+    KernelAttributes kernel(spatial_kernel_shape, get_strides(onnx_node),
+                            get_padding(onnx_node));
+
+    const FlowNode *par = get_parent_nodes(onnx_node)[0];
+    return flow.create_conv_layer(par, kernel, output_channel_cnt);
+}
+
+FlowNode* create_max_pool(Flow &flow, onnx::NodeProto &onnx_node) {
+    const FlowNode *par = get_parent_nodes(onnx_node)[0];
+    KernelAttributes kernel(get_ints_attribute(onnx_node, ATTR_KERNEL_SHAPE),
+                            get_strides(onnx_node), get_padding(onnx_node));
+    return flow.create_max_pool(par, kernel);
+}
+
+FlowNode* create_average_pool(Flow &flow, onnx::NodeProto &onnx_node) {
+    const FlowNode *par = get_parent_nodes(onnx_node)[0];
+    KernelAttributes kernel(get_ints_attribute(onnx_node, ATTR_KERNEL_SHAPE),
+                            get_strides(onnx_node), get_padding(onnx_node));
+    return flow.create_average_pool(par, kernel);
+}
+
+FlowNode* create_global_average_pool(Flow &flow, onnx::NodeProto &onnx_node) {
+    const FlowNode *par = get_parent_nodes(onnx_node)[0];
+    return flow.create_global_average_pool(par);
+}
+
+FlowNode* create_fully_connected(Flow &flow, onnx::NodeProto &onnx_node) {
+    std::vector<std::vector<int>> input_shapes = get_input_shapes(onnx_node);
+
+    PANIC_IF(input_shapes.size() < 2 || input_shapes.size() > 3);
+    if (input_shapes.size() == 3) {
+        std::cerr << "WARNING: ignorring bias of fully connected layer "
+                  << onnx_node.name() << "\n";
     }
+    PANIC_IF(input_shapes[0].size() != 1);
+    PANIC_IF(input_shapes[1].size() != 2);
+    PANIC_IF(input_shapes[0][0] != input_shapes[1][1]);
+    PANIC_IF(input_shapes.size() >= 3 &&
+             input_shapes[2][0] != input_shapes[1][0]);
+
+    const FlowNode *par = get_parent_nodes(onnx_node)[0];
+    return flow.create_fully_connected(par, input_shapes[1][0]);
 }
 
-int get_axis(onnx::NodeProto &node) {
+FlowNode* create_flatten(Flow &flow, onnx::NodeProto &onnx_node) {
     int axis = 1;
-    if (attribute_exists(node, ATTR_AXIS)) {
-        axis = get_attribute_int(node, ATTR_AXIS);
+    if (attribute_exists(onnx_node, ATTR_AXIS)) {
+        axis = get_attribute_int(onnx_node, ATTR_AXIS);
     }
-    return axis;
-}
+    PANIC_IF(axis != 1, axis, "We support only flattening all axes!");
 
-void create_relu(Flow *flow, onnx::NodeProto &node) {
-    assert(node.op_type() == "Relu");
-    auto parents = get_parents(node);
-    auto new_node = relu(flow, parents[0]);
-    flownode_map[node.output(0)] = new_node;
-}
-
-
-void create_conv(Flow *flow, onnx::NodeProto &node) {
-    assert(node.op_type() == "Conv");
-    auto parents = get_parents(node);
-    auto weights = get_weights(node);
-    auto real_weights = onnx::ParseData<float>(&ini_map.at(node.input(1)));
-    auto strides = get_strides(node);
-    auto padding = get_padding(node);
-    auto new_node = conv_layer(flow, parents[0], weights[1], strides, padding);
-    flownode_map.insert(std::make_pair(std::string(node.output(0)), new_node));
-}
-
-void create_add(Flow *flow, onnx::NodeProto &node) {
-    auto parents = get_parents(node);
-    auto new_node = add(flow, {parents[0], parents[1]});
-    flownode_map.insert(std::make_pair(std::string(node.output(0)), new_node));
-}
-
-void create_max_pool(Flow *flow, onnx::NodeProto &node) {
-    auto parents = get_parents(node);
-    auto weights = get_weights(node);
-    auto strides = get_strides(node);
-    auto padding = get_padding(node);
-    auto kernel_shape = get_attribute_ints(node, ATTR_KERNEL_SHAPE);
-    auto new_node = max_pool(flow, parents[0], kernel_shape, strides, padding);
-    flownode_map.insert(std::make_pair(std::string(node.output(0)), new_node));
-}
-
-void create_average_pool(Flow *flow, onnx::NodeProto &node) {
-    auto parents = get_parents(node);
-    auto strides = get_strides(node);
-    auto padding = get_padding(node);
-    auto kernel_shape = get_attribute_ints(node, ATTR_KERNEL_SHAPE);
-    auto new_node =
-        average_pool(flow, parents[0], kernel_shape, strides, padding);
-    flownode_map.insert(std::make_pair(std::string(node.output(0)), new_node));
-}
-
-void create_global_average_pool(Flow *flow, onnx::NodeProto &node) {
-    auto parents = get_parents(node);
-    std::cout << parents[0]->shape().size() << std::endl;
-    std::vector<int> tensor(parents[0]->shape().begin() + 1,
-                            parents[0]->shape().end());
-    std::cout << "kernel shape size: " << tensor.size() << std::endl;
-    auto new_node =
-        average_pool(flow, parents[0], tensor,
-                     std::vector<int>(parents[0]->shape().size(), 1),
-                     std::vector<int>(parents[0]->shape().size(), 0));
-    flownode_map.insert(std::make_pair(std::string(node.output(0)), new_node));
-}
-
-void create_fully_connected(Flow *flow, onnx::NodeProto &node) {
-    auto parents = get_parents(node);
-    auto weights = get_weights(node);
-    auto new_node = fully_connected(flow, parents[0], weights[1]);
-    flownode_map.insert(std::make_pair(std::string(node.output(0)), new_node));
-}
-
-
-void create_flatten(Flow *flow, onnx::NodeProto &node) {
-    auto parents = get_parents(node);
-    auto axis = get_axis(node);
-    if (axis < 1) {
-        panic(
-            "Nikola only knows how to support axis >= 1. If "
-            "you "
-            "need axis < 1, please create an issue!");
-    }
-    auto new_node = flatten(flow, parents[0], axis);
-    flownode_map.insert(std::make_pair(std::string(node.output(0)), new_node));
+    const FlowNode *par = get_parent_nodes(onnx_node)[0];
+    return flow.create_flatten(par);
 }
 /**
  * Specification of ONNX operations:
- * https://github.com/onnx/onnx/blob/master/docs/Operators.md#MaxPool
+ * https://github.com/onnx/onnx/blob/master/docs/Operators.md
  */
-void create_node(Flow *flow, onnx::NodeProto &node) {
-    if (node.op_type() == "Relu") {
-        create_relu(flow, node);
-    } else if (node.op_type() == "Conv") {
-        create_conv(flow, node);
-    } else if (node.op_type() == "Add") {
-        create_add(flow, node);
-    } else if (node.op_type() == "MaxPool") {
-        create_max_pool(flow, node);
-    } else if (node.op_type() == "AveragePool") {
-        create_average_pool(flow, node);
-    } else if (node.op_type() == "GlobalAveragePool") {
-        create_global_average_pool(flow, node);
-    } else if (node.op_type() == "Gemm") {
-        create_fully_connected(flow, node);
-    } else if (node.op_type() == "Flatten") {
-        create_flatten(flow, node);
+void create_node(Flow &flow, onnx::NodeProto &onnx_node) {
+    FlowNode *new_node = nullptr;
+
+    if (onnx_node.op_type() == "Add") {
+        new_node = create_add(flow, onnx_node);
+    } else if (onnx_node.op_type() == "AveragePool") {
+        new_node = create_average_pool(flow, onnx_node);
+    } else if (onnx_node.op_type() == "Conv") {
+        new_node = create_conv(flow, onnx_node);
+    } else if (onnx_node.op_type() == "Flatten") {
+        new_node = create_flatten(flow, onnx_node);
+     } else if (onnx_node.op_type() == "Gemm") {
+        new_node = create_fully_connected(flow, onnx_node);
+    } else if (onnx_node.op_type() == "GlobalAveragePool") {
+        new_node = create_global_average_pool(flow, onnx_node);
+    } else if (onnx_node.op_type() == "MaxPool") {
+        new_node = create_max_pool(flow, onnx_node);
+    } else if (onnx_node.op_type() == "Relu") {
+        new_node = create_relu(flow, onnx_node);
     } else {
-        panic("ONNX operation `" + node.op_type() + "' not supported!");
+        PANIC("ONNX operation `" + onnx_node.op_type() + "' not supported!");
     }
+
+    const std::string& output_name = onnx_node.output(0);
+    shape_map[output_name] = new_node->shape();
+    std::cerr << "Found " << onnx_node.op_type() << " with name " << output_name
+              << " and shape " << new_node->shape() << "\n";
+    flownode_map[output_name] = new_node;
 }
 
 std::unique_ptr<onnx::ModelProto> parse_model(const std::string &filepath) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
-    if (!std::experimental::filesystem::exists(
-            std::experimental::filesystem::path(filepath))) {
-        panic("ONNX file does not exist!");
-    }
+    bool file_exists = std::experimental::filesystem::exists(
+            std::experimental::filesystem::path(filepath));
+    PANIC_IF(!file_exists,"ONNX file does not exist!", filepath);
+
     std::ifstream in(filepath, std::ios::ate | std::ios::binary);
     std::streamsize size = in.tellg();
     in.seekg(0, std::ios::beg);
@@ -258,11 +233,8 @@ std::unique_ptr<onnx::ModelProto> parse_model(const std::string &filepath) {
 }
 
 int main(int argc, char **argv) {
-    if (argc != 2) {
-        panic(
-            "Please provide filepath to *.onnx file as command-line "
-            "argument!");
-    }
+    PANIC_IF(argc != 2, "Please provide filepath to *.onnx file as "
+            "command-line argument!");
     /**
      * TODO(nsamar): For some reason, I get a logic_error for the
      * model->graph() line if I do not print the value of has_graph(). This
@@ -271,47 +243,49 @@ int main(int argc, char **argv) {
     auto model = parse_model(argv[1]);
     std::cout << model->has_graph() << std::endl;
     if (!model->has_graph()) {
-        panic("Model does not have a graph!");
+        PANIC("Model does not have a graph!");
     }
     auto graph = model->graph();
 
     auto flow = std::make_unique<Flow>();
 
+
     for (auto ini : graph.initializer()) {
-        ini_map.insert(std::make_pair(ini.name(), ini));
-        std::vector<int> dim_vec(ini.dims().begin(), ini.dims().end());
-        shape_map[ini.name()] = dim_vec;
+        std::vector<int> shape(ini.dims().begin(), ini.dims().end());
+        shape_map[ini.name()] = shape;
+        std::cerr << "Found initializer " << ini.name() << " with shape " << shape << "\n";
     }
+
     for (const auto &node : graph.input()) {
         const auto &type = node.type();
-        if (!type.has_tensor_type()) {
-            panic("Only tensor inputs are supported!");
-        }
-        const auto &tensor_type = type.tensor_type();
-        if (!tensor_type.has_shape()) {
-            panic("Input tensor with unknown shape!");
-        }
-        const auto &tensor_shape = tensor_type.shape();
+        PANIC_IF(!type.has_tensor_type(), "Only tensor inputs are supported!");
 
+        const auto &tensor_type = type.tensor_type();
+        PANIC_IF(!tensor_type.has_shape(), "Input tensor with unknown shape!");
+
+        const auto &tensor_shape = tensor_type.shape();
         std::vector<int> shape;
         for (const auto &dim : tensor_shape.dim()) {
-            if (!dim.has_dim_value()) {
-                panic("Only numeric tensor dimensions are supported "
-                      "(no parameters)");
-            }
+            PANIC_IF(!dim.has_dim_value(), "Only numeric tensor dimensions "
+                    "are supported (no parameters)");
             shape.push_back(dim.dim_value());
         }
         // Drop batch size dimension
         shape.erase(shape.begin());
-        flownode_map[node.name()] = input(flow.get(), shape);
+        shape_map[node.name()] = shape;
+        std::cerr << "Found input " << node.name() << " with shape " << shape << "\n";
+        flownode_map[node.name()] = flow->create_input(shape);
     }
 
     for (auto node : graph.node()) {
-        create_node(flow.get(), node);
+        create_node(*flow, node);
     }
-    flow->draw("test");
-    flow->cipherfy();
-
     google::protobuf::ShutdownProtobufLibrary();
-    // ct_graph->draw("ct_graph");
+
+    flow->draw("test");
+    std::cerr << "Nodes in flow: " << flow->nodes().size() << "\n";
+    CtGraph ct_graph = Cipherfier::cipherfy(*flow);
+
+    ct_graph.draw("ct_graph");
+    std::cerr << "Nodes in ct_graph: " << ct_graph.nodes().size() << "\n";
 }

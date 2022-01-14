@@ -1,21 +1,20 @@
-#ifndef ENCRYPTED_TENSOR_HPP_
-#define ENCRYPTED_TENSOR_HPP_
+#ifndef CT_TENSOR_HPP_
+#define CT_TENSOR_HPP_
 
 #include <vector>
 
-namespace janncy {
+#include "CtOp.hpp"
 
-class CtOp;
+namespace janncy {
 
 class CtTensor {
   public:
-    explicit CtTensor(std::vector<CtOp*> parents);
-    std::vector<CtOp*> get_ct_ops() const;
+    explicit CtTensor(std::vector<const CtOp*> ciphertexts);
+    const std::vector<const CtOp*>& ciphertexts() const;
 
   private:
-    std::vector<CtOp*> parents_;
+    std::vector<const CtOp*> ciphertexts_;
 };
 
 }  // namespace janncy
-
-#endif  // ENCRYPTED_TENSOR_HPP_
+#endif  // CT_TENSOR_HPP_

@@ -10,9 +10,14 @@ namespace janncy {
 
 class BatchNormalization : public FlowNode {
   public:
-    BatchNormalization(std::vector<int> output_shape);
+    BatchNormalization(std::vector<int> shape);
 
-    void visit(Flow* flow, FlowVisitor* visitor);
+    void accept(FlowVisitor& visitor) override;
+    std::string op_type() const override;
+    std::vector<int> shape() const override;
+
+  private:
+    std::vector<int> shape_;
 };
 
 }  // namespace janncy

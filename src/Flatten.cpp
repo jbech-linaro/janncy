@@ -6,11 +6,21 @@
 
 namespace janncy {
 
-Flatten::Flatten(std::vector<int> output_shape)
-    : FlowNode(output_shape, "Flatten") {}
+Flatten::Flatten(const std::vector<int> &input_shape) {
+    output_dim_ = 1;
+    for (int d : input_shape) {
+        output_dim_ *= d;
+    }
+}
 
-void Flatten::visit(Flow* flow, FlowVisitor* visitor) {
-    visitor->visit(flow, this);
+void Flatten::accept(FlowVisitor &visitor) {
+    visitor.visit(*this);
+}
+std::string Flatten::op_type() const {
+    return "Flatten";
+}
+std::vector<int> Flatten::shape() const {
+    return {output_dim_};
 }
 
 }  // namespace janncy

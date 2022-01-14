@@ -1,12 +1,16 @@
 #include "include/CtTensor.hpp"
-#include "include/CtOp.hpp"
 
 #include <vector>
 
+#include "include/CtOp.hpp"
+
 namespace janncy {
 
-CtTensor::CtTensor(std::vector<CtOp*> parents) : parents_(parents) {}
+CtTensor::CtTensor(std::vector<const CtOp*> ciphertexts)
+        : ciphertexts_(std::move(ciphertexts)) {}
 
-std::vector<CtOp*> CtTensor::get_ct_ops() const { return parents_; }
+const std::vector<const CtOp*>& CtTensor::ciphertexts() const {
+    return ciphertexts_;
+}
 
 }  // namespace janncy

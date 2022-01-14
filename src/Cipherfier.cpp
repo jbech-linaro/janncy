@@ -1,217 +1,223 @@
 #include "include/Cipherfier.hpp"
 
-#include "include/ct_graph_utils.hpp"
+#include <unordered_map>
 
 #include "include/Add.hpp"
 #include "include/AveragePool.hpp"
 #include "include/BatchNormalization.hpp"
 #include "include/ConvLayer.hpp"
-#include "include/CtAdd.hpp"
 #include "include/CtGraph.hpp"
-#include "include/CtInput.hpp"
-#include "include/CtMul.hpp"
-#include "include/CtPtAdd.hpp"
-#include "include/CtPtMul.hpp"
-#include "include/CtRotate.hpp"
 #include "include/Flatten.hpp"
 #include "include/Flow.hpp"
-#include "include/FlowNode.hpp"
 #include "include/FullyConnected.hpp"
 #include "include/Input.hpp"
 #include "include/MaxPool.hpp"
 #include "include/Panic.hpp"
 #include "include/ReLU.hpp"
-
-#include <unordered_map>
+#include "include/ostream_utils.hpp"
 
 namespace janncy {
 
-Cipherfier::Cipherfier() { ct_graph_ = new CtGraph(); };
-
-void Cipherfier::register_node(const FlowNode* node,
-                               const std::vector<CtOp*>& ct_ops) {
-    ct_map_.insert(std::make_pair(node, CtTensor(ct_ops)));
-}
-
-template <class T>
-CtAdd* accumulate(CtGraph* ct_graph, const std::vector<T*>& cts) {
-    assert(cts.size() >= 2);
-    if (cts.size() == 2) {
-        return ct_add(ct_graph, cts[0], cts[1]);
+CtGraph Cipherfier::cipherfy(Flow &flow) {
+    Cipherfier cipherfier(flow);
+    for (FlowNode *node : flow.nodes()) {
+        int old_graph_size = cipherfier.ct_graph_.nodes().size();
+        std::cout << "Visiting " << node->op_type() << "(" << node << ") "
+                  << node->shape() << "; ";
+        node->accept(cipherfier);
+        int new_graph_size = cipherfier.ct_graph_.nodes().size();
+        std::cerr << "Added " << new_graph_size - old_graph_size
+                  << " nodes (total " << new_graph_size << ")";
+        std::cerr << "; tensor size: "
+                  << cipherfier.tensor_map_.at(node).ciphertexts().size()
+                  << "\n";
     }
-    if (cts.size() == 3) {
-        return ct_add(ct_graph, cts[0], ct_add(ct_graph, cts[1], cts[2]));
+    return std::move(cipherfier.ct_graph_);
+}
+
+Cipherfier::Cipherfier(Flow &flow): flow_(flow) {}
+
+const CtTensor& Cipherfier::get_parent_tensor(const FlowNode& node) const {
+    return get_parent_tensor(node, 0);
+}
+const CtTensor& Cipherfier::get_parent_tensor(const FlowNode& node,
+                                              int parent_ind) const {
+    return tensor_map_.at(flow_.parents(&node)[parent_ind]);
+}
+
+const CtOp* Cipherfier::sum_ciphertexts(const std::vector<const CtOp*>& cts) {
+    assert(!cts.empty());
+    if (cts.size() == 1) {
+        return cts[0];
+    } else {
+        auto cts_mid = cts.begin() + cts.size() / 2;
+        std::vector<const CtOp*> first_half(cts.begin(), cts_mid);
+        std::vector<const CtOp*> second_half(cts_mid, cts.end());
+
+        return ct_graph_.create_add(sum_ciphertexts(first_half),
+                                    sum_ciphertexts(second_half));
     }
-    return ct_add(
-        ct_graph,
-        accumulate(ct_graph,
-                   std::vector<T*>(cts.begin(), cts.begin() + cts.size() / 2)),
-        accumulate(ct_graph,
-                   std::vector<T*>(cts.begin() + cts.size() / 2, cts.end())));
 }
-
-template <class T>
-std::vector<CtOp*> create_many(CtGraph* ct_graph, int amt, T* obj) {
-    auto result = std::vector<CtOp*>{obj};
-    for (auto idx = 1ul; idx < amt; ++idx) {
-        auto new_obj = new T(*obj);
-        ct_graph->add_node(new_obj, ct_graph->parents(obj));
-        result.push_back(new_obj);
+const CtOp* Cipherfier::prefix_sums(const CtOp *ct, int sum_length) {
+    int current_sum_length = 1;
+    while (current_sum_length < sum_length) {
+        int rotate_by = std::min(current_sum_length,
+                                 sum_length - current_sum_length);
+        current_sum_length += rotate_by;
+        ct = ct_graph_.create_add(ct, ct_graph_.create_rotate(ct));
     }
-    return result;
+    assert(current_sum_length == sum_length);
+    return ct;
 }
-
-std::vector<CtOp*> pt_mul(CtGraph* ct_graph, const std::vector<CtOp*>& cts) {
-    auto multiplied = std::vector<CtOp*>();
-    std::transform(cts.begin(), cts.end(), std::back_inserter(multiplied),
-                   [&](auto& x) { return ct_pt_mul(ct_graph, x); });
-    return multiplied;
-}
-
-CtTensor Cipherfier::ct_op(const FlowNode* node) {
-    if (ct_map_.find(node) == ct_map_.end()) {
-        return CtTensor({});
+const CtOp* Cipherfier::flatten_slots(const std::vector<const CtOp*> &cts) {
+    std::vector<const CtOp*> slots;
+    for (const CtOp* ct : cts) {
+        slots.push_back(ct_graph_.create_rotate(ct));
     }
-    return ct_map_.at(node);
+    return sum_ciphertexts(slots);
 }
-
-std::vector<CtTensor> Cipherfier::parents(Flow* flow, FlowNode* node) {
-    auto prnts = flow->parents(node);
-    auto result = std::vector<CtTensor>();
-    std::transform(prnts.begin(), prnts.end(), std::back_inserter(result),
-                   [&](auto& x) { return ct_op(x); });
-    return result;
-}
-
-CtAdd* apply_filter(CtGraph* ct_graph, const std::vector<CtOp*>& parents,
-                    int filter_size) {
-    auto filtered_channels = std::vector<CtOp*>{};
-    for (auto p : parents) {
-        auto rot = ct_rotate(ct_graph, p);
-        auto cm = create_many(ct_graph, filter_size, rot);
-        auto pt_m = pt_mul(ct_graph, cm);
-        filtered_channels.push_back(accumulate(ct_graph, pt_m));
+const CtOp* Cipherfier::apply_filter(const CtTensor &input,
+                                     const KernelAttributes &kernel) {
+    int kernel_size = 1;
+    for (int d : kernel.kernel_shape()) {
+        kernel_size *= d;
     }
-    return accumulate(ct_graph, filtered_channels);
+    std::vector<const CtOp*> partial_filters;
+    for (const CtOp* channel : input.ciphertexts()) {
+        for (int i = 0;i < kernel_size;++i) {
+            CtOp* rotated = ct_graph_.create_rotate(channel);
+            CtOp* multiplied = ct_graph_.create_pt_mul(rotated);
+            partial_filters.push_back(multiplied);
+        }
+    }
+    return sum_ciphertexts(partial_filters);
 }
 
-void Cipherfier::visit(Flow* flow, ConvLayer* node) {
-    auto parent = parents(flow, node)[0].get_ct_ops();
-    auto output_channels = node->shape()[0];
-    auto filter_size = node->kernel_shape()[1] * node->kernel_shape()[1];
-    auto result = create_many(ct_graph_, output_channels,
-                              apply_filter(ct_graph_, parent, filter_size));
-    register_node(node, result);
-}
-
-void Cipherfier::visit(Flow* flow, FullyConnected* node) {
-    auto parent = parents(flow, node)[0].get_ct_ops();
-    auto result = create_many(ct_graph_, node->shape()[0],
-                              accumulate(ct_graph_, pt_mul(ct_graph_, parent)));
-    register_node(node, result);
-}
-
-void Cipherfier::visit(Flow* flow, MaxPool* node) {
-    // TODO(nsamar): this node is currently just bypassed
-    register_node(node, parents(flow, node)[0].get_ct_ops());
-}
-
-void Cipherfier::visit(Flow* flow, Flatten* node) {
-    // TODO(nsamar): this node is currently just bypassed
-    register_node(node, parents(flow, node)[0].get_ct_ops());
-}
-
-void Cipherfier::visit(Flow* flow, AveragePool* node) {
-    auto parent = parents(flow, node)[0].get_ct_ops();
-    auto result = std::vector<CtOp*>();
-    auto amt = log2(node->kernel_shape()[1]);
-    std::transform(
-        parent.begin(), parent.end(), std::back_inserter(result), [&](auto x) {
-            return accumulate(ct_graph_, create_many(ct_graph_, amt,
-                                                     ct_rotate(ct_graph_, x)));
-        });
-    std::transform(parent.begin(), parent.end(), result.begin(), [&](auto x) {
-        return accumulate(ct_graph_,
-                          create_many(ct_graph_, amt, ct_rotate(ct_graph_, x)));
-    });
-    register_node(node, result);
-}
-
-void Cipherfier::visit(Flow* flow, BatchNormalization* node) {
-    auto parent = parents(flow, node)[0].get_ct_ops();
-    std::vector<CtOp*> result;
-    std::transform(
-        parent.begin(), parent.end(), std::back_inserter(result),
-        [&](auto x) { return ct_pt_mul(ct_graph_, ct_pt_add(ct_graph_, x)); });
-    register_node(node, result);
-}
-
-void Cipherfier::visit(Flow* flow, Add* node) {
-    auto p0 = parents(flow, node)[0].get_ct_ops();
-    auto p1 = parents(flow, node)[1].get_ct_ops();
-    std::vector<CtOp*> result;
-    std::transform(p0.begin(), p0.end(), p1.begin(), std::back_inserter(result),
-                   [&](auto x, auto y) { return ct_add(ct_graph_, x, y); });
-    register_node(node, result);
-}
-
-void Cipherfier::visit(Flow* flow, Input* node) {
-    auto in_node = ct_input(ct_graph_);
-    auto result = create_many(ct_graph_, node->shape()[0], in_node);
-    register_node(node, result);
-}
-
-std::vector<CtOp*> get_exponents(CtGraph* ct_graph, CtOp* ct, int degree) {
+std::vector<const CtOp*> Cipherfier::get_ct_powers(const CtOp* ct, int degree) {
     if (degree == 1) {
         return {ct};
     }
-    auto exponents = get_exponents(ct_graph, ct, degree / 2);
-    auto exponent_degree_half = *(exponents.end() - 1);
-    auto remaining_exponents = std::vector<CtOp*>();
-    std::transform(exponents.begin(), exponents.end(),
-                   std::back_inserter(remaining_exponents), [&](auto& x) {
-                       return ct_mul(ct_graph, exponent_degree_half, x);
-                   });
-    exponents.insert(exponents.end(),
-                     std::make_move_iterator(remaining_exponents.begin()),
-                     std::make_move_iterator(remaining_exponents.end()));
-    if (degree % 2 == 1) {
-        exponents.push_back(ct_mul(ct_graph, ct, *(exponents.end() - 1)));
+    int low_degrees = (degree + 1) / 2;  // ceil(degree / 2)
+    std::vector<const CtOp*> powers = get_ct_powers(ct, low_degrees);
+    const CtOp* mid_power = powers.back();
+    for (int i = low_degrees;i < degree;++i) {
+        powers.push_back(ct_graph_.create_mul(powers[i - low_degrees], mid_power));
     }
-    return exponents;
+    return powers;
+}
+const CtOp* Cipherfier::poly_eval(const CtOp* parent, int degree) {
+    std::vector<const CtOp*> multiplied_powers;
+    for (const CtOp *p : get_ct_powers(parent, degree)) {
+        multiplied_powers.push_back(ct_graph_.create_pt_mul(p));
+    }
+    const CtOp *summed_powers = sum_ciphertexts(multiplied_powers);
+    return ct_graph_.create_pt_add(summed_powers);  // add in constant factor
+}
+const CtOp* Cipherfier::relu_polynomial(CtGraph& ct_graph, const CtOp* parent) {
+    const CtOp* first_poly = poly_eval(parent, 16);
+    const CtOp* second_poly = poly_eval(first_poly, 7);
+    const CtOp* third_poly = poly_eval(second_poly, 7);
+    return third_poly;
 }
 
-CtOp* poly_eval(CtGraph* ct_graph, CtOp* parent, int degree) {
-    auto exponents = get_exponents(ct_graph, parent, degree);
-    auto multiplied_exponents = pt_mul(ct_graph, exponents);
-    return accumulate(ct_graph, multiplied_exponents);
-}
+void Cipherfier::visit(ConvLayer& node) {
+    const CtTensor& parent_tensor = get_parent_tensor(node);
+    int output_channel_cnt = node.shape()[0];
+    //std::cerr << "in_cts " << parent_tensor.ciphertexts().size()
+    //          << " out_ch " << output_channel_cnt
+    //          << " kernel " << node.kernel().kernel_shape() << "\n";
 
-CtOp* first_poly(CtGraph* ct_graph, CtOp* parent) {
-    return poly_eval(ct_graph, parent, 16);
+    std::vector<const CtOp*> output_channels;
+    for (int i = 0;i < output_channel_cnt;++i) {
+        output_channels.push_back(apply_filter(parent_tensor, node.kernel()));
+    }
+    tensor_map_.emplace(&node, CtTensor(std::move(output_channels)));
 }
+void Cipherfier::visit(AveragePool& node) {
 
-CtOp* second_poly(CtGraph* ct_graph, CtOp* parent) {
-    return poly_eval(ct_graph, parent, 7);
-}
+    // TODO verify correctness and make it work for non-global Average pool
+    // TODO make it work for non 2D stuff (or explicitly decide not to support
+    //      them)
+    // TODO(alex): this node is currently just bypassed
+    CtTensor tensor = get_parent_tensor(node); // copies parent tensor
+    tensor_map_.emplace(&node, tensor);
 
-CtOp* third_poly(CtGraph* ct_graph, CtOp* parent) {
-    return poly_eval(ct_graph, parent, 7);
-}
-
-CtOp* relu_function(CtGraph* ct_graph, CtOp* parent) {
-    auto result = third_poly(
-        ct_graph, second_poly(ct_graph, first_poly(ct_graph, parent)));
-    return result;
-}
-
-void Cipherfier::visit(Flow* flow, ReLU* node) {
-    std::vector<CtOp*> result;
-    auto parent_cts = parents(flow, node)[0].get_ct_ops();
-    std::transform(parent_cts.begin(), parent_cts.end(),
-                   std::back_inserter(result),
-                   [&](auto& x) { return relu_function(ct_graph_, x); });
+    /*
+    std::vector<const CtOp*> result;
+    // TODO using floats / double can cause weird errors
+    auto amt = std::log2(node->kernel_shape()[1]);
+    std::transform(
+        parent.begin(), parent.end(), std::back_inserter(result), [&](auto x) {
+            return accumulate(ct_graph_,
+                    create_many(ct_graph_, amt, ct_rotate(ct_graph_, x)));
+        });
+    std::transform(parent.begin(), parent.end(), result.begin(),
+        [&](auto x) {
+            return accumulate(ct_graph_,
+                          create_many(ct_graph_, amt, ct_rotate(ct_graph_, x)));
+    });
     register_node(node, result);
+    */
+}
+void Cipherfier::visit(MaxPool& node) {
+    // TODO(nsamar): this node is currently just bypassed
+    CtTensor tensor = get_parent_tensor(node); // copies parent tensor
+    tensor_map_.emplace(&node, tensor);
+}
+void Cipherfier::visit(FullyConnected& node) {
+    const CtTensor& parent_tensor = get_parent_tensor(node);
+    PANIC_IF(parent_tensor.ciphertexts().size() != 1);
+    const CtOp* input_ct = parent_tensor.ciphertexts()[0];
+
+    std::vector<const CtOp*> slots;
+    for (int i = 0;i < node.output_size();i++) {
+        const CtOp* weighted_row = ct_graph_.create_pt_mul(input_ct);
+        const CtOp* summed = prefix_sums(weighted_row, node.input_size());
+        const CtOp* masked = ct_graph_.create_pt_mul(summed);
+        slots.push_back(masked);
+    }
+    tensor_map_.emplace(&node, CtTensor({flatten_slots(slots)}));
+}
+void Cipherfier::visit(Flatten& node) {
+    // alex: Not super correct, but forces things into a single CT as expected
+    // by FullyConnected
+    const CtOp *result = flatten_slots(get_parent_tensor(node).ciphertexts());
+    tensor_map_.emplace(&node, CtTensor({result}));
+}
+void Cipherfier::visit(BatchNormalization& node) {
+    std::vector<const CtOp*> result;
+    for (const CtOp* ct : get_parent_tensor(node).ciphertexts()) {
+        result.push_back(ct_graph_.create_pt_mul(ct_graph_.create_pt_add(ct)));
+    }
+    tensor_map_.emplace(&node, CtTensor(result));
+}
+void Cipherfier::visit(Add& node) {
+    const std::vector<const CtOp*>& p0_cts = get_parent_tensor(node, 0)
+                                             .ciphertexts();
+    const std::vector<const CtOp*>& p1_cts = get_parent_tensor(node, 1)
+                                             .ciphertexts();
+
+    std::vector<const CtOp*> sum_cts(p0_cts.size());
+    for(int i = 0;i < int(p0_cts.size());++i) {
+        sum_cts[i] = ct_graph_.create_add(p0_cts[i], p1_cts[i]);
+    }
+    tensor_map_.emplace(&node, CtTensor(std::move(sum_cts)));
+}
+void Cipherfier::visit(Input& node) {
+    int channel_cnt = node.shape()[0];
+    std::vector<const CtOp*> input_cts;
+    for (int i = 0;i < channel_cnt;++i) {
+        input_cts.push_back(ct_graph_.create_input());
+    }
+    tensor_map_.emplace(&node, CtTensor(std::move(input_cts)));
+}
+void Cipherfier::visit(ReLU& node) {
+    const CtTensor &parent_tensor = get_parent_tensor(node);
+    std::vector<const CtOp*> output_cts;
+    for (const CtOp* ct : parent_tensor.ciphertexts()) {
+        output_cts.push_back(relu_polynomial(ct_graph_, ct));
+    }
+    tensor_map_.emplace(&node, CtTensor(std::move(output_cts)));
 }
 
 }  // namespace janncy

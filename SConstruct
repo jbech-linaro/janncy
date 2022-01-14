@@ -81,6 +81,7 @@ def install_heaan() -> None:
     cmd("mkdir -p .dependencies")
     if not os.path.exists(".dependencies/HEAAN"):
         cmd("cd .dependencies; git clone git@github.com:n-samar/HEAAN.git; cd HEAAN")
+        cmd("git config pull.ff only")
     cmd("cd .dependencies/HEAAN/HEAAN/lib; make all")
 
 def install_graphviz() -> None:
@@ -138,7 +139,7 @@ install_dependencies()
 
 env = Environment(CXX = f'/usr/bin/clang++-{clang_version}', ENV = os.environ)
 env.VariantDir(build_dir, src_dir, duplicate=0)
-env.Append(CPPFLAGS = [ "-fsanitize=address", ])
+env.Append(CPPFLAGS = [ "-fsanitize=address", "-O3", ])
 env.Append(CPPFLAGS = [ "-ggdb", "-fno-omit-frame-pointer", "-g", f"-std=c++{cpp_version}", "-Wall", "-DONNX_NAMESPACE=onnx", ])
 env.Append(CPPPATH = [ onnx_path, src_dir, gtest_dir, heaanlib_path.parent.parent.parent, ])
 env.Append(LIBS = [ "HEAAN", "asan", "stdc++fs", "pthread", "ntl", "gmp", "m", "cgraph", "gvc", "protobuf", "gtest_main", "gtest", ])

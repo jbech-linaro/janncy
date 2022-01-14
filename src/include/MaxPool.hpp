@@ -1,31 +1,27 @@
 #ifndef MAXPOOL_HPP_
 #define MAXPOOL_HPP_
 
-#include "FlowNode.hpp"
-
 #include <string>
 #include <vector>
+
+#include "FlowNode.hpp"
+#include "KernelAttributes.hpp"
 
 namespace janncy {
 
 class FlowVisitor;
-class Flow;
 
 class MaxPool : public FlowNode {
   public:
-    MaxPool(std::vector<int> output_shape, std::vector<int> kernel_shape,
-            std::vector<int> stride, std::vector<int> padding);
+    MaxPool(std::vector<int> input_shape, KernelAttributes kernel);
 
-    void visit(Flow* flow, FlowVisitor* visitor);
-
-    std::vector<int> stride() const;
-    std::vector<int> padding() const;
-    std::vector<int> kernel_shape() const;
+    void accept(FlowVisitor& visitor) override;
+    std::string op_type() const override;
+    std::vector<int> shape() const override;
 
   private:
-    std::vector<int> kernel_shape_;
-    std::vector<int> stride_;
-    std::vector<int> padding_;
+    KernelAttributes kernel_;
+    std::vector<int> output_shape_;
 };
 
 }  // namespace janncy

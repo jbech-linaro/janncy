@@ -6,13 +6,20 @@
 namespace janncy {
 
 class FlowVisitor;
-class Flow;
 
 class FullyConnected : public FlowNode {
   public:
-    FullyConnected(std::vector<int> output_shape);
+    FullyConnected(int input_size, int output_size);
 
-    void visit(Flow* flow, FlowVisitor* visitor);
+    void accept(FlowVisitor& visitor) override;
+    std::string op_type() const override;
+    std::vector<int> shape() const override;
+
+    int input_size() const;
+    int output_size() const;
+  private:
+    int input_size_;
+    int output_size_;
 };
 
 }  // namespace janncy

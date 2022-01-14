@@ -1,50 +1,56 @@
 #ifndef CIPHERFIER_HPP_
 #define CIPHERFIER_HPP_
 
+#include <unordered_map>
+
+#include "CtGraph.hpp"
 #include "CtTensor.hpp"
 #include "FlowVisitor.hpp"
-#include "Panic.hpp"
-
-#include <unordered_map>
+#include "KernelAttributes.hpp"
 
 namespace janncy {
 
-class FlowNode;
-class Flow;
-
-class ConvLayer;
-class FullyConnected;
-class AveragePool;
-class BatchNormalization;
-class Add;
-class Input;
-class ReLU;
-class Flatten;
-
-class CtGraph;
-
 class Cipherfier : public FlowVisitor {
   public:
-    Cipherfier();
+    static CtGraph cipherfy(Flow &flow);
 
-    void visit(Flow* flow, ConvLayer* node) override;
-    void visit(Flow* flow, FullyConnected* node) override;
-    void visit(Flow* flow, AveragePool* node) override;
-    void visit(Flow* flow, BatchNormalization* node) override;
-    void visit(Flow* flow, Add* node) override;
-    void visit(Flow* flow, Input* node) override;
-    void visit(Flow* flow, ReLU* node) override;
-    void visit(Flow* flow, MaxPool* node) override;
-    void visit(Flow* flow, Flatten* node) override;
-
-    CtGraph* ct_graph() const { return ct_graph_; }
+    void visit(ConvLayer& node) override;
+    void visit(FullyConnected& node) override;
+    void visit(AveragePool& node) override;
+    void visit(BatchNormalization& node) override;
+    void visit(Add& node) override;
+    void visit(Input& node) override;
+    void visit(ReLU& node) override;
+    void visit(MaxPool& node) override;
+    void visit(Flatten& node) override;
 
   private:
-    void register_node(const FlowNode* node, const std::vector<CtOp*>& ct_ops);
-    CtTensor ct_op(const FlowNode* node);
-    std::vector<CtTensor> parents(Flow* flow, FlowNode* node);
-    std::unordered_map<const FlowNode*, CtTensor> ct_map_;
-    CtGraph* ct_graph_;
+    CtGraph ct_graph_;
+    Flow& flow_;
+    std::unordered_map<const FlowNode*, CtTensor> tensor_map_;
+
+    Cipherfier(Flow& flow);
+
+    const CtTensor& get_parent_tensor(const FlowNode& node) const;
+    const CtTensor& get_parent_tensor(const FlowNode& node,
+                                      int parent_ind) const;
+
+    const CtOp* sum_ciphertexts(const std::vector<const CtOp*>& cts);
+
+    // slot i of result is the sum of ct[i:i + sum_length]
+    // Should also be doable with strides
+    const CtOp* prefix_sums(const CtOp* ct, int sum_length);
+
+    // return a ct consisting of the first element from each of `cts`
+    // Assumes the remaining elements are all 0s
+    const CtOp* flatten_slots(const std::vector<const CtOp*> &cts);
+    const CtOp* apply_filter(const CtTensor &input,
+                             const KernelAttributes &kernel);
+
+    // return {ct^1, ct^2, ..., ct^degree}
+    std::vector<const CtOp*> get_ct_powers(const CtOp* ct, int degree);
+    const CtOp* poly_eval(const CtOp* parent, int degree);
+    const CtOp* relu_polynomial(CtGraph& ct_graph, const CtOp* parent);
 };
 
 }  // namespace janncy
