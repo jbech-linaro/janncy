@@ -16,7 +16,8 @@ heaan::Ring* Ciphertext::ring_ = nullptr;
 heaan::SecretKey* Ciphertext::secret_key_ = nullptr;
 int Ciphertext::num_slots_ = 8;
 
-Ciphertext::Ciphertext(heaan::Ciphertext ciphertext) : ciphertext_(ciphertext) {}
+Ciphertext::Ciphertext(heaan::Ciphertext ciphertext)
+    : ciphertext_(ciphertext) {}
 
 Ciphertext operator*(const Ciphertext& lhs, const Ciphertext& rhs) {
     Ciphertext result(lhs);
@@ -63,7 +64,7 @@ std::vector<std::complex<double> > Ciphertext::decrypt() {
     for (int idx = 0; idx < num_slots_; idx++) {
         result.push_back(ptr_result[idx]);
     }
-    delete [] ptr_result;
+    delete[] ptr_result;
     return result;
 }
 
@@ -71,7 +72,7 @@ void Ciphertext::init_scheme() {
     assert(!scheme_);
     ring_ = new heaan::Ring();
     secret_key_ = new heaan::SecretKey(*ring_);
-    scheme_ = new heaan::Scheme(*secret_key_, *ring_);
+    scheme_ = new heaan::Scheme(*secret_key_, *ring_, /*isSerialized=*/true);
     scheme_->addLeftRotKeys(*secret_key_);
     num_slots_ = 8;
 }
@@ -83,19 +84,19 @@ heaan::Scheme* Ciphertext::scheme() {
     return scheme_;
 }
 
-int Ciphertext::num_slots() {
-    return num_slots_;
-}
+int Ciphertext::num_slots() { return num_slots_; }
 
 Ciphertext encrypt(const std::vector<std::complex<double> >& values) {
     assert(values.size() == Ciphertext::num_slots());
     auto ct = heaan::Ciphertext();
-    std::complex<double>* value_array = new std::complex<double>[Ciphertext::num_slots()];
+    std::complex<double>* value_array =
+        new std::complex<double>[Ciphertext::num_slots()];
     for (int idx = 0; idx < Ciphertext::num_slots(); idx++) {
         value_array[idx] = values[idx];
     }
-    Ciphertext::scheme()->encrypt(ct, value_array, Ciphertext::num_slots(), /*logp=*/30, heaan::logQ);
-    delete [] value_array;
+    Ciphertext::scheme()->encrypt(ct, value_array, Ciphertext::num_slots(),
+                                  /*logp=*/30, heaan::logQ);
+    delete[] value_array;
     return Ciphertext(ct);
 }
 
@@ -108,12 +109,13 @@ Ciphertext Ciphertext::addPtVec(std::vector<std::complex<double> > pt_vec) {
 
 Ciphertext Ciphertext::multPtVec(std::vector<std::complex<double> > pt_vec) {
     heaan::Ciphertext ct_result;
-    std::complex<double>* const_vec = new std::complex<double>[Ciphertext::num_slots()];
+    std::complex<double>* const_vec =
+        new std::complex<double>[Ciphertext::num_slots()];
     for (int idx = 0; idx < Ciphertext::num_slots(); idx++) {
         const_vec[idx] = pt_vec[idx];
     }
     scheme_->multByConstVec(ct_result, ciphertext_, const_vec, /*logp/2=*/15);
-    delete [] const_vec;
+    delete[] const_vec;
     return Ciphertext(ct_result);
 }
 
