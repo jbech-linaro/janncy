@@ -1,13 +1,14 @@
 #include "include/Ciphertext.hpp"
 
-#include "include/utils.hpp"
-
 #include <HEAAN/src/HEAAN.h>
 #include <NTL/ZZ.h>
+
 #include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <vector>
+
+#include "include/utils.hpp"
 
 namespace janncy {
 

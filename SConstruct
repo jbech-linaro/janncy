@@ -77,10 +77,10 @@ def install_onnx() -> None:
 
 def install_heaan() -> None:
     if os.path.exists(heaanlib_path):
-        return
+        cmd("cd .dependencies/HEAAN; git pull; cd HEAAN/lib; make all")
     cmd("mkdir -p .dependencies")
     if not os.path.exists(".dependencies/HEAAN"):
-        cmd("cd .dependencies; git clone git@github.com:n-samar/HEAAN.git; cd HEAAN; git branch namespace-fix-minimal")
+        cmd("cd .dependencies; git clone git@github.com:n-samar/HEAAN.git; cd HEAAN")
     cmd("cd .dependencies/HEAAN/HEAAN/lib; make all")
 
 def install_graphviz() -> None:
