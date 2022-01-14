@@ -107,6 +107,12 @@ def install_gtest() -> None:
     cmd("cd /usr/src/gtest; sudo make")
     cmd("cd /usr/src/gtest; sudo cp *.a /usr/lib")
 
+def install_ntl() -> None:
+    if not os.path.exists(".dependencies/ntl/README"):
+        cmd("mkdir -p .dependencies && cd .dependencies && git clone git@github.com:libntl/ntl.git")
+    if not os.path.exists(".dependencies/ntl/src/ntl.a"):
+        cmd("cd .dependencies/ntl/src && ./configure && make -j8")
+
 def download_models() -> None:
     cmd("mkdir -p .pytorch")
     pytorch_path = Path(".pytorch")
@@ -126,13 +132,14 @@ def install_cmake() -> None:
 def install_dependencies() -> None:
     install_cmake()
     install_clang()
-    install_protobuf()
-    install_graphviz()
+    #install_protobuf()
+    #install_graphviz()
     install_onnx()
+    install_ntl()
     install_heaan()
-    install_torch()
-    install_gtest()
-    download_models()
+    #install_torch()
+    #install_gtest()
+    #download_models()
 
 install_dependencies()
 
@@ -140,13 +147,14 @@ env = Environment(CXX = f'/usr/bin/clang++-{clang_version}', ENV = os.environ)
 env.VariantDir(build_dir, src_dir, duplicate=0)
 env.Append(CPPFLAGS = [ "-fsanitize=address", ])
 env.Append(CPPFLAGS = [ "-ggdb", "-fno-omit-frame-pointer", "-g", f"-std=c++{cpp_version}", "-Wall", "-DONNX_NAMESPACE=onnx", ])
-env.Append(CPPPATH = [ onnx_path, src_dir, gtest_dir, heaanlib_path.parent.parent.parent, ])
+env.Append(CPPPATH = [ onnx_path, src_dir, gtest_dir, heaanlib_path.parent.parent.parent ])
 env.Append(LIBS = [ "HEAAN", "asan", "stdc++fs", "pthread", "ntl", "gmp", "m", "cgraph", "gvc", "protobuf", "gtest_main", "gtest", ])
 env.Append( LIBPATH = [ heaanlib_path.parent ])
 env.Tool('compilation_db')
 env.CompilationDatabase()
 
 onnx_parser_cpps = [ "examples/OnnxParser.cpp", ".dependencies/onnx/onnx/onnx.pb.cc", ".dependencies/onnx/onnx/defs/tensor_proto_util.cc", ".dependencies/onnx/onnx/defs/data_type_utils.cc", ".dependencies/onnx/onnx/defs/shape_inference.cc", ] + Glob("src/*.cpp")
+env.Append(CPPPATH = [ '.dependencies/ntl/include' ])
 env.Program(str(build_dir / "onnx_parser"), onnx_parser_cpps)
 
-env.Program(str(build_dir / "tests"), Glob("test/*.cpp") + Glob("src/*.cpp"))
+#env.Program(str(build_dir / "tests"), Glob("test/*.cpp") + Glob("src/*.cpp"))
