@@ -5,7 +5,7 @@ repository.
 
 # Formatting
 
-We use `clang-format` for C++ codo formatting. To format all files, you can run
+We use `clang-format` for C++ code formatting. To format all files, you can run
 the following from the repository root:
 
 ``` find -name "*.hpp" -or -name "*.cpp" | xargs clang-format -i ```
