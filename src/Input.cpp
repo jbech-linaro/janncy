@@ -1,7 +1,7 @@
 #include "include/Input.hpp"
 
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "include/Flow.hpp"
 #include "include/FlowVisitor.hpp"

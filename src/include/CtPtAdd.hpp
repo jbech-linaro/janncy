@@ -1,25 +1,25 @@
 #ifndef CTPTADD_HPP_
 #define CTPTADD_HPP_
 
-#include "CtOp.hpp"
-
 #include <string>
 #include <vector>
+
+#include "CtOp.hpp"
 
 namespace janncy {
 
 class CtGraphVisitor;
 
 class CtPtAdd : public CtOp {
-  public:
-    CtPtAdd();
+ public:
+  CtPtAdd();
 
-    std::vector<double> value() const;
+  std::vector<double> value() const;
 
-    void visit(CtGraph* ct_graph, CtGraphVisitor* visitor) override;
+  void visit(CtGraph* ct_graph, CtGraphVisitor* visitor) override;
 
-  private:
-    std::vector<double> value_;
+ private:
+  std::vector<double> value_;
 };
 
 }  // namespace janncy

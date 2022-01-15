@@ -10,16 +10,16 @@ namespace janncy {
 class FlowVisitor;
 
 class FlowNode {
-  public:
-    virtual void accept(FlowVisitor& visitor) = 0;
-    virtual std::string op_type() const = 0;
-    virtual std::vector<int> shape() const = 0;
+ public:
+  virtual void accept(FlowVisitor& visitor) = 0;
+  virtual std::string op_type() const = 0;
+  virtual std::vector<int> shape() const = 0;
 
-    FlowNode() {}
+  FlowNode() {}
 
-    virtual ~FlowNode() {}
+  virtual ~FlowNode() {}
 
-    std::string str() const;
+  std::string str() const;
 };
 
 }  // namespace janncy

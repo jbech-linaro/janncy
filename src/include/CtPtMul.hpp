@@ -1,25 +1,25 @@
 #ifndef CTPTMUL_HPP_
 #define CTPTMUL_HPP_
 
-#include "CtOp.hpp"
-
 #include <string>
 #include <vector>
+
+#include "CtOp.hpp"
 
 namespace janncy {
 
 class CtGraphVisitor;
 
 class CtPtMul : public CtOp {
-  public:
-    CtPtMul();
+ public:
+  CtPtMul();
 
-    std::vector<double> value() const;
+  std::vector<double> value() const;
 
-    void visit(CtGraph* ct_graph, CtGraphVisitor* visitor) override;
+  void visit(CtGraph* ct_graph, CtGraphVisitor* visitor) override;
 
-  private:
-    std::vector<double> value_;
+ private:
+  std::vector<double> value_;
 };
 
 }  // namespace janncy

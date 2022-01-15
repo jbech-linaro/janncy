@@ -1,19 +1,19 @@
 #ifndef CTMUL_HPP_
 #define CTMUL_HPP_
 
-#include "CtOp.hpp"
-
 #include <string>
+
+#include "CtOp.hpp"
 
 namespace janncy {
 
 class CtGraphVisitor;
 
 class CtMul : public CtOp {
-  public:
-    CtMul();
+ public:
+  CtMul();
 
-    void visit(CtGraph* ct_graph, CtGraphVisitor* visitor) override;
+  void visit(CtGraph* ct_graph, CtGraphVisitor* visitor) override;
 };
 
 }  // namespace janncy

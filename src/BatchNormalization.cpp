@@ -1,7 +1,7 @@
 #include "include/BatchNormalization.hpp"
 
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "include/FlowVisitor.hpp"
 

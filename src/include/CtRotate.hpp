@@ -1,24 +1,24 @@
 #ifndef CTROTATE_HPP_
 #define CTROTATE_HPP_
 
-#include "CtOp.hpp"
-
 #include <string>
+
+#include "CtOp.hpp"
 
 namespace janncy {
 
 class CtGraphVisitor;
 
 class CtRotate : public CtOp {
-  public:
-    CtRotate();
+ public:
+  CtRotate();
 
-    int amt() const;
+  int amt() const;
 
-    void visit(CtGraph* ct_graph, CtGraphVisitor* visitor) override;
+  void visit(CtGraph* ct_graph, CtGraphVisitor* visitor) override;
 
-  private:
-    int amt_;
+ private:
+  int amt_;
 };
 
 }  // namespace janncy

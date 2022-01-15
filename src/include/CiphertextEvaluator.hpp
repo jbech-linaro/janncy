@@ -1,12 +1,11 @@
 #ifndef CIPHERTEXTEVALUATOR_HPP_
 #define CIPHERTEXTEVALUATOR_HPP_
 
-#include "CtGraphVisitor.hpp"
-
+#include <complex>
 #include <unordered_map>
 #include <vector>
-#include <complex>
 
+#include "CtGraphVisitor.hpp"
 #include "include/Ciphertext.hpp"
 
 namespace janncy {
@@ -21,22 +20,23 @@ class CtRotate;
 class CtInput;
 
 class CiphertextEvaluator : public CtGraphVisitor {
-  public:
-    CiphertextEvaluator(std::vector<std::vector<std::complex<double> > > inputs)
-        : inputs_(inputs){};
+ public:
+  CiphertextEvaluator(std::vector<std::vector<std::complex<double> > > inputs)
+      : inputs_(inputs){};
 
-    void visit(CtGraph* ct_graph, CtAdd* node) override;
-    void visit(CtGraph* ct_graph, CtMul* node) override;
-    void visit(CtGraph* ct_graph, CtPtAdd* node) override;
-    void visit(CtGraph* ct_graph, CtPtMul* node) override;
-    void visit(CtGraph* ct_graph, CtRotate* node) override;
-    void visit(CtGraph* ct_graph, CtInput* node) override;
+  void visit(CtGraph* ct_graph, CtAdd* node) override;
+  void visit(CtGraph* ct_graph, CtMul* node) override;
+  void visit(CtGraph* ct_graph, CtPtAdd* node) override;
+  void visit(CtGraph* ct_graph, CtPtMul* node) override;
+  void visit(CtGraph* ct_graph, CtRotate* node) override;
+  void visit(CtGraph* ct_graph, CtInput* node) override;
 
-    std::vector<std::vector<std::complex<double> > > result(CtGraph* ct_graph) const;
+  std::vector<std::vector<std::complex<double> > > result(
+      CtGraph* ct_graph) const;
 
-  private:
-    std::vector<std::vector<std::complex<double> > > inputs_;
-    std::unordered_map<CtOp*, Ciphertext > node_map_;
+ private:
+  std::vector<std::vector<std::complex<double> > > inputs_;
+  std::unordered_map<CtOp*, Ciphertext> node_map_;
 };
 
 }  // namespace janncy
