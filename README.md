@@ -3,7 +3,10 @@ Dependencies: scons, python3
 You can run a clang-tidy check via `scripts/clang-tidy.sh` from the root of the
 repository.
 
-# Formatting
+# Style and Formatting
+
+We defer all formatting and style decisions to the [Google C++ Style
+Guide](https://google.github.io/styleguide/cppguide.html).
 
 We use `clang-format` for C++ code formatting. To format all files, you can run
 the following from the repository root:
