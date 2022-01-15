@@ -109,11 +109,11 @@ std::vector<int> get_padding(onnx::NodeProto &onnx_node) {
 
 FlowNode* create_relu(Flow &flow, onnx::NodeProto &onnx_node) {
     const FlowNode *par = get_parent_nodes(onnx_node)[0];
-    return flow.create_relu(par);
+    return flow::create_relu(flow, par);
 }
 
 FlowNode* create_add(Flow &flow, onnx::NodeProto &onnx_node) {
-    return flow.create_add(get_parent_nodes(onnx_node));
+    return flow::create_add(flow, get_parent_nodes(onnx_node));
 }
 
 FlowNode* create_conv(Flow &flow, onnx::NodeProto &onnx_node) {
@@ -130,26 +130,26 @@ FlowNode* create_conv(Flow &flow, onnx::NodeProto &onnx_node) {
                             get_padding(onnx_node));
 
     const FlowNode *par = get_parent_nodes(onnx_node)[0];
-    return flow.create_conv_layer(par, kernel, output_channel_cnt);
+    return flow::create_conv_layer(flow, par, kernel, output_channel_cnt);
 }
 
 FlowNode* create_max_pool(Flow &flow, onnx::NodeProto &onnx_node) {
     const FlowNode *par = get_parent_nodes(onnx_node)[0];
     KernelAttributes kernel(get_ints_attribute(onnx_node, ATTR_KERNEL_SHAPE),
                             get_strides(onnx_node), get_padding(onnx_node));
-    return flow.create_max_pool(par, kernel);
+    return flow::create_max_pool(flow, par, kernel);
 }
 
 FlowNode* create_average_pool(Flow &flow, onnx::NodeProto &onnx_node) {
     const FlowNode *par = get_parent_nodes(onnx_node)[0];
     KernelAttributes kernel(get_ints_attribute(onnx_node, ATTR_KERNEL_SHAPE),
                             get_strides(onnx_node), get_padding(onnx_node));
-    return flow.create_average_pool(par, kernel);
+    return flow::create_average_pool(flow, par, kernel);
 }
 
 FlowNode* create_global_average_pool(Flow &flow, onnx::NodeProto &onnx_node) {
     const FlowNode *par = get_parent_nodes(onnx_node)[0];
-    return flow.create_global_average_pool(par);
+    return flow::create_global_average_pool(flow, par);
 }
 
 FlowNode* create_fully_connected(Flow &flow, onnx::NodeProto &onnx_node) {
@@ -167,7 +167,7 @@ FlowNode* create_fully_connected(Flow &flow, onnx::NodeProto &onnx_node) {
              input_shapes[2][0] != input_shapes[1][0]);
 
     const FlowNode *par = get_parent_nodes(onnx_node)[0];
-    return flow.create_fully_connected(par, input_shapes[1][0]);
+    return flow::create_fully_connected(flow, par, input_shapes[1][0]);
 }
 
 FlowNode* create_flatten(Flow &flow, onnx::NodeProto &onnx_node) {
@@ -178,7 +178,7 @@ FlowNode* create_flatten(Flow &flow, onnx::NodeProto &onnx_node) {
     PANIC_IF(axis != 1, axis, "We support only flattening all axes!");
 
     const FlowNode *par = get_parent_nodes(onnx_node)[0];
-    return flow.create_flatten(par);
+    return flow::create_flatten(flow, par);
 }
 /**
  * Specification of ONNX operations:
@@ -274,7 +274,7 @@ int main(int argc, char **argv) {
         shape.erase(shape.begin());
         shape_map[node.name()] = shape;
         std::cerr << "Found input " << node.name() << " with shape " << shape << "\n";
-        flownode_map[node.name()] = flow->create_input(shape);
+        flownode_map[node.name()] = flow::create_input(*flow, shape);
     }
 
     for (auto node : graph.node()) {

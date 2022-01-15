@@ -3,8 +3,6 @@
 
 namespace janncy {
 
-class Flow;
-
 class FlowNode;
 class ConvLayer;
 class FullyConnected;

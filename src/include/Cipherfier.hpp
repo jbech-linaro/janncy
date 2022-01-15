@@ -5,6 +5,7 @@
 
 #include "CtGraph.hpp"
 #include "CtTensor.hpp"
+#include "Flow.hpp"
 #include "FlowVisitor.hpp"
 #include "KernelAttributes.hpp"
 
