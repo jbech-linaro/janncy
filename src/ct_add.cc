@@ -6,8 +6,6 @@ namespace janncy {
 
 CtAdd::CtAdd() : CtOp("CtAdd"){};
 
-void CtAdd::Visit(CtGraph* ct_graph, CtGraphVisitor* visitor) {
-  return visitor->Visit(ct_graph, this);
-}
+void CtAdd::Accept(CtGraphVisitor& visitor) { return visitor.Visit(this); }
 
 }  // namespace janncy

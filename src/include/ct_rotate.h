@@ -13,7 +13,7 @@ class CtRotate : public CtOp {
 
   int amt() const;
 
-  void Visit(CtGraph* ct_graph, CtGraphVisitor* visitor) override;
+  void Accept(CtGraphVisitor& visitor) override;
 
  private:
   int amt_;

@@ -12,21 +12,30 @@
 
 namespace janncy {
 
-CtOp* CtGraph::CreateInput() { return AddNode(new CtInput(), {}); }
-CtOp* CtGraph::CreateAdd(const CtOp* parent_1, const CtOp* parent_2) {
-  return AddNode(new CtAdd(), {parent_1, parent_2});
+CtOp* ct_graph::CreateInput(CtGraph& ct_graph) {
+  return ct_graph.AddNode(new CtInput(), {});
 }
-CtOp* CtGraph::CreateMul(const CtOp* parent_1, const CtOp* parent_2) {
-  return AddNode(new CtMul(), {parent_1, parent_2});
+
+CtOp* ct_graph::CreateAdd(CtGraph& ct_graph, const CtOp* parent_1,
+                          const CtOp* parent_2) {
+  return ct_graph.AddNode(new CtAdd(), {parent_1, parent_2});
 }
-CtOp* CtGraph::CreatePtAdd(const CtOp* parent) {
-  return AddNode(new CtPtAdd(), {parent});
+
+CtOp* ct_graph::CreateMul(CtGraph& ct_graph, const CtOp* parent_1,
+                          const CtOp* parent_2) {
+  return ct_graph.AddNode(new CtMul(), {parent_1, parent_2});
 }
-CtOp* CtGraph::CreatePtMul(const CtOp* parent) {
-  return AddNode(new CtPtMul(), {parent});
+
+CtOp* ct_graph::CreatePtAdd(CtGraph& ct_graph, const CtOp* parent) {
+  return ct_graph.AddNode(new CtPtAdd(), {parent});
 }
-CtOp* CtGraph::CreateRotate(const CtOp* parent) {
-  return AddNode(new CtRotate(), {parent});
+
+CtOp* ct_graph::CreatePtMul(CtGraph& ct_graph, const CtOp* parent) {
+  return ct_graph.AddNode(new CtPtMul(), {parent});
+}
+
+CtOp* ct_graph::CreateRotate(CtGraph& ct_graph, const CtOp* parent) {
+  return ct_graph.AddNode(new CtRotate(), {parent});
 }
 
 }  // namespace janncy

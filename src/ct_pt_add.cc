@@ -9,8 +9,6 @@ CtPtAdd::CtPtAdd() : CtOp("CtPtAdd"){};
 
 std::vector<double> CtPtAdd::value() const { return value_; }
 
-void CtPtAdd::Visit(CtGraph* ct_graph, CtGraphVisitor* visitor) {
-  return visitor->Visit(ct_graph, this);
-}
+void CtPtAdd::Accept(CtGraphVisitor& visitor) { return visitor.Visit(this); }
 
 }  // namespace janncy

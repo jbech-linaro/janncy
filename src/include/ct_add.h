@@ -13,7 +13,7 @@ class CtAdd : public CtOp {
  public:
   CtAdd();
 
-  void Visit(CtGraph* ct_graph, CtGraphVisitor* visitor) override;
+  void Accept(CtGraphVisitor& visitor) override;
 
  private:
 };

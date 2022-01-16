@@ -3,8 +3,6 @@
 
 namespace janncy {
 
-class CtGraph;
-
 class CtOp;
 class CtAdd;
 class CtMul;
@@ -15,12 +13,12 @@ class CtInput;
 
 class CtGraphVisitor {
  public:
-  virtual void Visit(CtGraph* ct_graph, CtInput* node) = 0;
-  virtual void Visit(CtGraph* ct_graph, CtAdd* node) = 0;
-  virtual void Visit(CtGraph* ct_graph, CtMul* node) = 0;
-  virtual void Visit(CtGraph* ct_graph, CtPtAdd* node) = 0;
-  virtual void Visit(CtGraph* ct_graph, CtPtMul* node) = 0;
-  virtual void Visit(CtGraph* ct_graph, CtRotate* node) = 0;
+  virtual void Visit(CtInput* node) = 0;
+  virtual void Visit(CtAdd* node) = 0;
+  virtual void Visit(CtMul* node) = 0;
+  virtual void Visit(CtPtAdd* node) = 0;
+  virtual void Visit(CtPtMul* node) = 0;
+  virtual void Visit(CtRotate* node) = 0;
 };
 
 }  // namespace janncy

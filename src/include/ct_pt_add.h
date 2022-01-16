@@ -15,7 +15,7 @@ class CtPtAdd : public CtOp {
 
   std::vector<double> value() const;
 
-  void Visit(CtGraph* ct_graph, CtGraphVisitor* visitor) override;
+  void Accept(CtGraphVisitor& visitor) override;
 
  private:
   std::vector<double> value_;

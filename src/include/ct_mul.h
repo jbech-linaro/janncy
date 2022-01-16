@@ -13,7 +13,7 @@ class CtMul : public CtOp {
  public:
   CtMul();
 
-  void Visit(CtGraph* ct_graph, CtGraphVisitor* visitor) override;
+  void Accept(CtGraphVisitor& visitor) override;
 };
 
 }  // namespace janncy

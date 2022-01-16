@@ -8,22 +8,22 @@
 
 namespace janncy {
 
-class CtGraphVisitor;
+typedef Graph<CtOp> CtGraph;
 
-class CtGraph : public Graph<CtOp> {
- public:
-  // TODO(nsamar): Make evaluate() and cipherfy() const
-  // TODO(alex): Move this evaluate directly to the visitor class?
-  std::vector<std::vector<double>> Evaluate(
-      std::vector<std::vector<double>> init_values);
+namespace ct_graph {
 
-  CtOp* CreateInput();
-  CtOp* CreateAdd(const CtOp* parent_1, const CtOp* parent_2);
-  CtOp* CreateMul(const CtOp* parent_1, const CtOp* parent_2);
-  CtOp* CreatePtAdd(const CtOp* parent);
-  CtOp* CreatePtMul(const CtOp* parent);
-  CtOp* CreateRotate(const CtOp* parent);
-};
+// TODO(alex): Move this evaluate directly to the visitor class?
+std::vector<std::vector<double>> Evaluate(
+    CtGraph& ct_graph, std::vector<std::vector<double>> init_values);
+
+CtOp* CreateInput(CtGraph& ct_graph);
+CtOp* CreateAdd(CtGraph& ct_graph, const CtOp* parent_1, const CtOp* parent_2);
+CtOp* CreateMul(CtGraph& ct_graph, const CtOp* parent_1, const CtOp* parent_2);
+CtOp* CreatePtAdd(CtGraph& ct_graph, const CtOp* parent);
+CtOp* CreatePtMul(CtGraph& ct_graph, const CtOp* parent);
+CtOp* CreateRotate(CtGraph& ct_graph, const CtOp* parent);
+
+}  // namespace ct_graph
 
 }  // namespace janncy
 

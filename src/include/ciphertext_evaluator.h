@@ -6,11 +6,10 @@
 #include <vector>
 
 #include "include/ciphertext.h"
+#include "include/ct_graph.h"
 #include "include/ct_graph_visitor.h"
 
 namespace janncy {
-
-class CtGraph;
 
 class CtAdd;
 class CtMul;
@@ -21,21 +20,23 @@ class CtInput;
 
 class CiphertextEvaluator : public CtGraphVisitor {
  public:
-  CiphertextEvaluator(std::vector<std::vector<std::complex<double> > > inputs)
-      : inputs_(inputs){};
+  static std::vector<std::vector<std::complex<double>>> Evaluate(
+      CtGraph& ct_graph, std::vector<std::vector<std::complex<double>>> inputs);
 
-  void Visit(CtGraph* ct_graph, CtAdd* node) override;
-  void Visit(CtGraph* ct_graph, CtMul* node) override;
-  void Visit(CtGraph* ct_graph, CtPtAdd* node) override;
-  void Visit(CtGraph* ct_graph, CtPtMul* node) override;
-  void Visit(CtGraph* ct_graph, CtRotate* node) override;
-  void Visit(CtGraph* ct_graph, CtInput* node) override;
+  void Visit(CtAdd* node) override;
+  void Visit(CtMul* node) override;
+  void Visit(CtPtAdd* node) override;
+  void Visit(CtPtMul* node) override;
+  void Visit(CtRotate* node) override;
+  void Visit(CtInput* node) override;
 
-  std::vector<std::vector<std::complex<double> > > result(
-      CtGraph* ct_graph) const;
+  std::vector<std::vector<std::complex<double>>> result() const;
 
  private:
-  std::vector<std::vector<std::complex<double> > > inputs_;
+  CiphertextEvaluator(CtGraph& ct_graph,
+                      std::vector<std::vector<std::complex<double>>> inputs);
+  CtGraph& ct_graph_;
+  std::vector<std::vector<std::complex<double>>> inputs_;
   std::unordered_map<CtOp*, Ciphertext> node_map_;
 };
 

@@ -9,7 +9,6 @@ namespace janncy {
 template <class T>
 class Graph;
 
-class CtGraph;
 class CtGraphVisitor;
 
 class CtOp {
@@ -17,7 +16,7 @@ class CtOp {
   CtOp(std::string type_str);
   virtual ~CtOp(){};
 
-  virtual void Visit(CtGraph* ct_graph, CtGraphVisitor* visitor) = 0;
+  virtual void Accept(CtGraphVisitor& visitor) = 0;
   std::string str() const;
 
  private:

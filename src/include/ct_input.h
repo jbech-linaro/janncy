@@ -16,7 +16,7 @@ class CtInput : public CtOp {
  public:
   CtInput();
 
-  void Visit(CtGraph* ct_graph, CtGraphVisitor* visitor) override;
+  void Accept(CtGraphVisitor& visitor) override;
 };
 
 }  // namespace janncy
