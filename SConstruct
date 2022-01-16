@@ -147,7 +147,7 @@ env.Append( LIBPATH = [ heaanlib_path.parent ])
 env.Tool('compilation_db')
 env.CompilationDatabase()
 
-onnx_parser_cpps = [ "examples/OnnxParser.cpp", ".dependencies/onnx/onnx/onnx.pb.cc", ".dependencies/onnx/onnx/defs/tensor_proto_util.cc", ".dependencies/onnx/onnx/defs/data_type_utils.cc", ".dependencies/onnx/onnx/defs/shape_inference.cc", ] + Glob("src/*.cpp")
+onnx_parser_cpps = [ "examples/onnx_parser.cc", ".dependencies/onnx/onnx/onnx.pb.cc", ".dependencies/onnx/onnx/defs/tensor_proto_util.cc", ".dependencies/onnx/onnx/defs/data_type_utils.cc", ".dependencies/onnx/onnx/defs/shape_inference.cc", ] + Glob("src/*.cc")
 env.Program(str(build_dir / "onnx_parser"), onnx_parser_cpps)
 
-env.Program(str(build_dir / "tests"), Glob("test/*.cpp") + Glob("src/*.cpp"))
+env.Program(str(build_dir / "tests"), Glob("test/*.cc") + Glob("src/*.cc"))
