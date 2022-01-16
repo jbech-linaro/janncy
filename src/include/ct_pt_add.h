@@ -1,7 +1,6 @@
 #ifndef JANNCY_CT_PT_ADD_H_
 #define JANNCY_CT_PT_ADD_H_
 
-#include <string>
 #include <vector>
 
 #include "include/ct_op.h"
@@ -16,7 +15,7 @@ class CtPtAdd : public CtOp {
 
   std::vector<double> value() const;
 
-  void visit(CtGraph* ct_graph, CtGraphVisitor* visitor) override;
+  void Visit(CtGraph* ct_graph, CtGraphVisitor* visitor) override;
 
  private:
   std::vector<double> value_;

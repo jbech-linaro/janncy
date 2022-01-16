@@ -7,8 +7,8 @@ namespace janncy {
 
 CtInput::CtInput() : CtOp("CtInput"){};
 
-void CtInput::visit(CtGraph* ct_graph, CtGraphVisitor* visitor) {
-  return visitor->visit(ct_graph, this);
+void CtInput::Visit(CtGraph* ct_graph, CtGraphVisitor* visitor) {
+  return visitor->Visit(ct_graph, this);
 }
 
 }  // namespace janncy

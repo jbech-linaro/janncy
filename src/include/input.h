@@ -13,7 +13,7 @@ class Input : public FlowNode {
  public:
   Input(std::vector<int> shape);
 
-  void accept(FlowVisitor& visitor) override;
+  void Accept(FlowVisitor& visitor) override;
   std::string op_type() const override;
   std::vector<int> shape() const override;
 

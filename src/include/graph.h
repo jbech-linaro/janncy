@@ -18,7 +18,7 @@ template <class T>
 class Graph {
  public:
   // Transfers ownership of `new_node` to the Graph object
-  T* add_node(T* new_node, const std::vector<const T*>& parents) {
+  T* AddNode(T* new_node, const std::vector<const T*>& parents) {
     nodes_.emplace_back(new_node);
 
     child_map_[new_node] = {};
@@ -51,7 +51,7 @@ class Graph {
     return result.str();
   }
 
-  void draw(const std::string& filename) const {
+  void Draw(const std::string& filename) const {
     /*
     std::unordered_map<const T*, Agnode_t*> node_map;
     Agraph_t* g;
@@ -94,17 +94,17 @@ class Graph {
   }
   const std::vector<T*>& children(const T* node) { return child_map_.at(node); }
 
-  std::vector<const T*> nodes() const { return get_raw_node_pointers(); }
-  std::vector<T*> nodes() { return get_raw_node_pointers(); }
+  std::vector<const T*> nodes() const { return GetRawNodePointers(); }
+  std::vector<T*> nodes() { return GetRawNodePointers(); }
 
-  bool contains(const T* node) const { return child_map_.count(node) == 1; }
+  bool Contains(const T* node) const { return child_map_.count(node) == 1; }
 
  private:
   std::vector<std::unique_ptr<T>> nodes_;
   std::unordered_map<const T*, std::vector<T*>> child_map_;
   std::unordered_map<const T*, std::vector<T*>> parent_map_;
 
-  std::vector<T*> get_raw_node_pointers() const {
+  std::vector<T*> GetRawNodePointers() const {
     std::vector<T*> result(nodes_.size());
     std::transform(nodes_.begin(), nodes_.end(), result.begin(),
                    [](const auto& ptr) { return ptr.get(); });

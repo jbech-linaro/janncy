@@ -1,6 +1,7 @@
 #ifndef JANNCY_AVERAGE_POOL_H_
 #define JANNCY_AVERAGE_POOL_H_
 
+#include <string>
 #include <vector>
 
 #include "include/flow_node.h"
@@ -14,7 +15,7 @@ class AveragePool : public FlowNode {
  public:
   AveragePool(std::vector<int> input_shape, KernelAttributes kernel);
 
-  void accept(FlowVisitor& visitor) override;
+  void Accept(FlowVisitor& visitor) override;
   std::string op_type() const override;
   std::vector<int> shape() const override;
 

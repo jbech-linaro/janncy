@@ -1,6 +1,7 @@
 #ifndef JANNCY_ADD_H_
 #define JANNCY_ADD_H_
 
+#include <string>
 #include <vector>
 
 #include "include/flow_node.h"
@@ -13,7 +14,7 @@ class Add : public FlowNode {
  public:
   Add(std::vector<int> shape);
 
-  void accept(FlowVisitor& visitor) override;
+  void Accept(FlowVisitor& visitor) override;
   std::vector<int> shape() const override;
   std::string op_type() const override;
 

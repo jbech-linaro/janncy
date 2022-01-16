@@ -15,7 +15,7 @@ class ConvLayer : public FlowNode {
   ConvLayer(std::vector<int> input_shape, KernelAttributes kernel,
             int output_ch);
 
-  void accept(FlowVisitor& visitor) override;
+  void Accept(FlowVisitor& visitor) override;
   std::string op_type() const override;
   std::vector<int> shape() const override;
 

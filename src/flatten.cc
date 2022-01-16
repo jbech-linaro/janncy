@@ -13,8 +13,10 @@ Flatten::Flatten(const std::vector<int> &input_shape) {
   }
 }
 
-void Flatten::accept(FlowVisitor &visitor) { visitor.visit(*this); }
+void Flatten::Accept(FlowVisitor &visitor) { visitor.Visit(*this); }
+
 std::string Flatten::op_type() const { return "Flatten"; }
+
 std::vector<int> Flatten::shape() const { return {output_dim_}; }
 
 }  // namespace janncy

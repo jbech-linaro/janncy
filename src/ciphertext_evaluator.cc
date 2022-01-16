@@ -17,41 +17,41 @@
 
 namespace janncy {
 
-void CiphertextEvaluator::visit(CtGraph* ct_graph, CtInput* node) {
-  auto in_ct = encrypt(inputs_.back());
+void CiphertextEvaluator::Visit(CtGraph* ct_graph, CtInput* node) {
+  auto in_ct = Encrypt(inputs_.back());
   node_map_.insert(std::make_pair(node, in_ct));
   inputs_.pop_back();
 }
 
-void CiphertextEvaluator::visit(CtGraph* ct_graph, CtAdd* node) {
+void CiphertextEvaluator::Visit(CtGraph* ct_graph, CtAdd* node) {
   auto ct0 = node_map_.at(ct_graph->parents(node)[0]);
   auto ct1 = node_map_.at(ct_graph->parents(node)[1]);
   node_map_.insert(std::make_pair(node, ct0 + ct1));
 }
 
-void CiphertextEvaluator::visit(CtGraph* ct_graph, CtMul* node) {
+void CiphertextEvaluator::Visit(CtGraph* ct_graph, CtMul* node) {
   auto ct0 = node_map_.at(ct_graph->parents(node)[0]);
   auto ct1 = node_map_.at(ct_graph->parents(node)[1]);
   node_map_.insert(std::make_pair(node, ct0 * ct1));
 }
 
-void CiphertextEvaluator::visit(CtGraph* ct_graph, CtRotate* node) {
+void CiphertextEvaluator::Visit(CtGraph* ct_graph, CtRotate* node) {
   auto parent_ct = node_map_.at(ct_graph->parents(node)[0]);
-  node_map_.insert(std::make_pair(node, parent_ct.rotate(node->amt())));
+  node_map_.insert(std::make_pair(node, parent_ct.Rotate(node->amt())));
 }
 
-void CiphertextEvaluator::visit(CtGraph* ct_graph, CtPtAdd* node) {
+void CiphertextEvaluator::Visit(CtGraph* ct_graph, CtPtAdd* node) {
   auto parent_ct = node_map_.at(ct_graph->parents(node)[0]);
   std::vector<std::complex<double>> pt_values(node->value().begin(),
                                               node->value().end());
-  node_map_.insert(std::make_pair(node, parent_ct.addPtVec(pt_values)));
+  node_map_.insert(std::make_pair(node, parent_ct.AddPtVec(pt_values)));
 }
 
-void CiphertextEvaluator::visit(CtGraph* ct_graph, CtPtMul* node) {
+void CiphertextEvaluator::Visit(CtGraph* ct_graph, CtPtMul* node) {
   auto parent_ct = node_map_.at(ct_graph->parents(node)[0]);
   std::vector<std::complex<double>> pt_values(node->value().begin(),
                                               node->value().end());
-  node_map_.insert(std::make_pair(node, parent_ct.addPtVec(pt_values)));
+  node_map_.insert(std::make_pair(node, parent_ct.AddPtVec(pt_values)));
 }
 
 std::vector<std::vector<std::complex<double>>> CiphertextEvaluator::result(
@@ -62,7 +62,7 @@ std::vector<std::vector<std::complex<double>>> CiphertextEvaluator::result(
       [&](auto& x) { return ct_graph->children(x.first).size() == 0; });
   auto result = std::vector<std::vector<std::complex<double>>>();
   std::transform(childless.begin(), childless.end(), std::back_inserter(result),
-                 [&](auto& x) { return x.second.decrypt(); });
+                 [&](auto& x) { return x.second.Decrypt(); });
   return result;
 }
 

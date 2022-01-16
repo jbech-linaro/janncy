@@ -3,7 +3,7 @@
 
 namespace janncy {
 
-double get_uniform_random();
+double GetUniformRandom();
 
 }  // namespace janncy
 

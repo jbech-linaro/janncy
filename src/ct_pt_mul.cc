@@ -9,8 +9,8 @@ CtPtMul::CtPtMul() : CtOp("CtPtMul"){};
 
 std::vector<double> CtPtMul::value() const { return value_; }
 
-void CtPtMul::visit(CtGraph* ct_graph, CtGraphVisitor* visitor) {
-  return visitor->visit(ct_graph, this);
+void CtPtMul::Visit(CtGraph* ct_graph, CtGraphVisitor* visitor) {
+  return visitor->Visit(ct_graph, this);
 }
 
 }  // namespace janncy

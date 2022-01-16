@@ -53,13 +53,13 @@ Ciphertext& Ciphertext::operator-=(Ciphertext rhs) {
   return *this;
 }
 
-Ciphertext Ciphertext::rotate(int amount) {
+Ciphertext Ciphertext::Rotate(int amount) {
   auto ct_result = heaan::Ciphertext();
   scheme_->leftRotateFast(ct_result, ciphertext_, amount);
   return Ciphertext(ct_result);
 }
 
-std::vector<std::complex<double> > Ciphertext::decrypt() {
+std::vector<std::complex<double> > Ciphertext::Decrypt() {
   auto ptr_result = scheme_->decrypt(*secret_key_, ciphertext_);
   auto result = std::vector<std::complex<double> >{};
   for (int idx = 0; idx < num_slots_; idx++) {
@@ -69,7 +69,7 @@ std::vector<std::complex<double> > Ciphertext::decrypt() {
   return result;
 }
 
-void Ciphertext::init_scheme() {
+void Ciphertext::InitScheme() {
   assert(!scheme_);
   ring_ = new heaan::Ring();
   secret_key_ = new heaan::SecretKey(*ring_);
@@ -80,14 +80,14 @@ void Ciphertext::init_scheme() {
 
 heaan::Scheme* Ciphertext::scheme() {
   if (!scheme_) {
-    init_scheme();
+    InitScheme();
   }
   return scheme_;
 }
 
 int Ciphertext::num_slots() { return num_slots_; }
 
-Ciphertext encrypt(const std::vector<std::complex<double> >& values) {
+Ciphertext Encrypt(const std::vector<std::complex<double> >& values) {
   assert(values.size() == Ciphertext::num_slots());
   auto ct = heaan::Ciphertext();
   std::complex<double>* value_array =
@@ -101,14 +101,14 @@ Ciphertext encrypt(const std::vector<std::complex<double> >& values) {
   return Ciphertext(ct);
 }
 
-Ciphertext Ciphertext::addPtVec(std::vector<std::complex<double> > pt_vec) {
-  auto pt = encrypt(pt_vec);
+Ciphertext Ciphertext::AddPtVec(std::vector<std::complex<double> > pt_vec) {
+  auto pt = Encrypt(pt_vec);
   heaan::Ciphertext ct_result;
   scheme_->add(ct_result, ciphertext_, pt.ciphertext_);
   return Ciphertext(ct_result);
 }
 
-Ciphertext Ciphertext::multPtVec(std::vector<std::complex<double> > pt_vec) {
+Ciphertext Ciphertext::MultPtVec(std::vector<std::complex<double> > pt_vec) {
   heaan::Ciphertext ct_result;
   std::complex<double>* const_vec =
       new std::complex<double>[Ciphertext::num_slots()];

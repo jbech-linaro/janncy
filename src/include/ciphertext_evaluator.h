@@ -24,12 +24,12 @@ class CiphertextEvaluator : public CtGraphVisitor {
   CiphertextEvaluator(std::vector<std::vector<std::complex<double> > > inputs)
       : inputs_(inputs){};
 
-  void visit(CtGraph* ct_graph, CtAdd* node) override;
-  void visit(CtGraph* ct_graph, CtMul* node) override;
-  void visit(CtGraph* ct_graph, CtPtAdd* node) override;
-  void visit(CtGraph* ct_graph, CtPtMul* node) override;
-  void visit(CtGraph* ct_graph, CtRotate* node) override;
-  void visit(CtGraph* ct_graph, CtInput* node) override;
+  void Visit(CtGraph* ct_graph, CtAdd* node) override;
+  void Visit(CtGraph* ct_graph, CtMul* node) override;
+  void Visit(CtGraph* ct_graph, CtPtAdd* node) override;
+  void Visit(CtGraph* ct_graph, CtPtMul* node) override;
+  void Visit(CtGraph* ct_graph, CtRotate* node) override;
+  void Visit(CtGraph* ct_graph, CtInput* node) override;
 
   std::vector<std::vector<std::complex<double> > > result(
       CtGraph* ct_graph) const;

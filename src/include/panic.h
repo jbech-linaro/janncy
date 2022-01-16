@@ -8,12 +8,12 @@
 
 namespace janncy {
 
-inline void cerr_variadic_() {}
+inline void CerrVariadic_() {}
 
 template <typename T, typename... TArgs>
-inline void cerr_variadic_(T value, TArgs... args) {
+inline void CerrVariadic_(T value, TArgs... args) {
   std::cerr << value << "\n";
-  cerr_variadic_(args...);
+  CerrVariadic_(args...);
 }
 
 }  // namespace janncy
@@ -21,7 +21,7 @@ inline void cerr_variadic_(T value, TArgs... args) {
 #define PANIC(...)                                                             \
   {                                                                            \
     std::cerr << "Panic in " << __FILE__ << " on line " << __LINE__ << ": \n"; \
-    ::janncy::cerr_variadic_(__VA_ARGS__);                                     \
+    ::janncy::CerrVariadic_(__VA_ARGS__);                                      \
     std::exit(1);                                                              \
   }
 
@@ -32,7 +32,7 @@ inline void cerr_variadic_(T value, TArgs... args) {
       std::cerr << "Panic in " << __FILE__ << " on line " << __LINE__ \
                 << ": \n"                                             \
                 << "Triggered by " << #CONDITION << "\n";             \
-      ::janncy::cerr_variadic_(__VA_ARGS__);                          \
+      ::janncy::CerrVariadic_(__VA_ARGS__);                           \
       std::exit(1);                                                   \
     }                                                                 \
   }

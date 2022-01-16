@@ -22,12 +22,12 @@ class CleartextEvaluator : public CtGraphVisitor {
   CleartextEvaluator(std::vector<std::vector<double> > inputs)
       : inputs_(inputs){};
 
-  void visit(CtGraph* ct_graph, CtAdd* node) override;
-  void visit(CtGraph* ct_graph, CtMul* node) override;
-  void visit(CtGraph* ct_graph, CtPtAdd* node) override;
-  void visit(CtGraph* ct_graph, CtPtMul* node) override;
-  void visit(CtGraph* ct_graph, CtRotate* node) override;
-  void visit(CtGraph* ct_graph, CtInput* node) override;
+  void Visit(CtGraph* ct_graph, CtAdd* node) override;
+  void Visit(CtGraph* ct_graph, CtMul* node) override;
+  void Visit(CtGraph* ct_graph, CtPtAdd* node) override;
+  void Visit(CtGraph* ct_graph, CtPtMul* node) override;
+  void Visit(CtGraph* ct_graph, CtRotate* node) override;
+  void Visit(CtGraph* ct_graph, CtInput* node) override;
 
   std::vector<std::vector<double> > result(CtGraph* ct_graph) const;
 

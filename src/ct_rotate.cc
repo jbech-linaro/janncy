@@ -7,8 +7,8 @@ namespace janncy {
 
 CtRotate::CtRotate() : CtOp("CtRotate"){};
 int CtRotate::amt() const { return amt_; }
-void CtRotate::visit(CtGraph* ct_graph, CtGraphVisitor* visitor) {
-  visitor->visit(ct_graph, this);
+void CtRotate::Visit(CtGraph* ct_graph, CtGraphVisitor* visitor) {
+  visitor->Visit(ct_graph, this);
 }
 
 }  // namespace janncy

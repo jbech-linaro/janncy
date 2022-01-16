@@ -15,19 +15,19 @@
 
 namespace janncy {
 
-void CleartextEvaluator::visit(CtGraph* ct_graph, CtInput* node) {
+void CleartextEvaluator::Visit(CtGraph* ct_graph, CtInput* node) {
   node_map_[node] = inputs_.back();
   inputs_.pop_back();
 }
 
-void CleartextEvaluator::visit(CtGraph* ct_graph, CtAdd* node) {
+void CleartextEvaluator::Visit(CtGraph* ct_graph, CtAdd* node) {
   auto p0 = node_map_[ct_graph->parents(node)[0]];
   auto p1 = node_map_[ct_graph->parents(node)[1]];
   std::transform(p0.begin(), p0.end(), p1.begin(),
                  std::back_inserter(node_map_[node]), std::plus<double>());
 }
 
-void CleartextEvaluator::visit(CtGraph* ct_graph, CtMul* node) {
+void CleartextEvaluator::Visit(CtGraph* ct_graph, CtMul* node) {
   auto p0 = node_map_[ct_graph->parents(node)[0]];
   auto p1 = node_map_[ct_graph->parents(node)[1]];
   std::transform(p0.begin(), p0.end(), p1.begin(),
@@ -35,20 +35,20 @@ void CleartextEvaluator::visit(CtGraph* ct_graph, CtMul* node) {
                  std::multiplies<double>());
 }
 
-void CleartextEvaluator::visit(CtGraph* ct_graph, CtRotate* node) {
+void CleartextEvaluator::Visit(CtGraph* ct_graph, CtRotate* node) {
   auto p = ct_graph->parents(node)[0];
   node_map_[node] = node_map_[p];
   std::rotate(node_map_[node].begin(), node_map_[node].begin() + node->amt(),
               node_map_[node].end());
 }
 
-void CleartextEvaluator::visit(CtGraph* ct_graph, CtPtAdd* node) {
+void CleartextEvaluator::Visit(CtGraph* ct_graph, CtPtAdd* node) {
   auto p = node_map_[ct_graph->parents(node)[0]];
   std::transform(p.begin(), p.end(), node->value().begin(),
                  std::back_inserter(node_map_[node]), std::plus<double>());
 }
 
-void CleartextEvaluator::visit(CtGraph* ct_graph, CtPtMul* node) {
+void CleartextEvaluator::Visit(CtGraph* ct_graph, CtPtMul* node) {
   auto p = node_map_[ct_graph->parents(node)[0]];
   std::transform(p.begin(), p.end(), node->value().begin(),
                  std::back_inserter(node_map_[node]),

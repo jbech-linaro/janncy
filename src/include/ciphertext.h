@@ -12,23 +12,24 @@ class Ciphertext {
  public:
   explicit Ciphertext(heaan::Ciphertext ciphertext);
 
-  Ciphertext rotate(int amount);
+  Ciphertext Rotate(int amount);
 
   Ciphertext& operator*=(Ciphertext rhs);
   Ciphertext& operator+=(Ciphertext rhs);
   Ciphertext& operator-=(Ciphertext rhs);
 
-  Ciphertext addPtVec(std::vector<std::complex<double> > pt_vec);
-  Ciphertext multPtVec(std::vector<std::complex<double> > pt_vec);
+  Ciphertext AddPtVec(std::vector<std::complex<double> > pt_vec);
+  Ciphertext MultPtVec(std::vector<std::complex<double> > pt_vec);
 
-  std::vector<std::complex<double> > decrypt();
+  std::vector<std::complex<double> > Decrypt();
 
   static heaan::Scheme* scheme();
 
   static int num_slots();
 
  private:
-  static void init_scheme();
+  static void InitScheme();
+
   heaan::Ciphertext ciphertext_;
   static heaan::Scheme* scheme_;
   static heaan::Ring* ring_;
@@ -36,7 +37,7 @@ class Ciphertext {
   static int num_slots_;
 };
 
-Ciphertext encrypt(const std::vector<std::complex<double> >& values);
+Ciphertext Encrypt(const std::vector<std::complex<double> >& values);
 Ciphertext operator*(const Ciphertext& lhs, const Ciphertext& rhs);
 Ciphertext operator+(const Ciphertext& lhs, const Ciphertext& rhs);
 Ciphertext operator-(const Ciphertext& lhs, const Ciphertext& rhs);

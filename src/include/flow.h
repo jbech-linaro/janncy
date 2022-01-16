@@ -12,21 +12,21 @@ namespace janncy {
 typedef Graph<FlowNode> Flow;
 
 namespace flow {
-FlowNode* create_add(Flow& flow, std::vector<const FlowNode*> parents);
+FlowNode* CreateAdd(Flow& flow, std::vector<const FlowNode*> parents);
 
-FlowNode* create_conv_layer(Flow& flow, const FlowNode* parent,
-                            KernelAttributes kernel, int output_channel_cnt);
-FlowNode* create_average_pool(Flow& Flow, const FlowNode* parent,
-                              KernelAttributes kernel);
-FlowNode* create_max_pool(Flow& flow, const FlowNode* parent,
-                          KernelAttributes kernel);
-FlowNode* create_global_average_pool(Flow& flow, const FlowNode* parent);
+FlowNode* CreateConvLayer(Flow& flow, const FlowNode* parent,
+                          KernelAttributes kernel, int output_channel_cnt);
+FlowNode* CreateAveragePool(Flow& Flow, const FlowNode* parent,
+                            KernelAttributes kernel);
+FlowNode* CreateMaxPool(Flow& flow, const FlowNode* parent,
+                        KernelAttributes kernel);
+FlowNode* CreateGlobalAveragePool(Flow& flow, const FlowNode* parent);
 
-FlowNode* create_input(Flow& flow, std::vector<int> shape);
-FlowNode* create_relu(Flow& flow, const FlowNode* parent);
-FlowNode* create_flatten(Flow& flow, const FlowNode* parent);
-FlowNode* create_fully_connected(Flow& flow, const FlowNode* parent,
-                                 int output_dim);
+FlowNode* CreateInput(Flow& flow, std::vector<int> shape);
+FlowNode* CreateRelu(Flow& flow, const FlowNode* parent);
+FlowNode* CreateFlatten(Flow& flow, const FlowNode* parent);
+FlowNode* CreateFullyConnected(Flow& flow, const FlowNode* parent,
+                               int output_dim);
 
 }  // namespace flow
 

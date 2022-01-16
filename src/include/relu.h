@@ -1,6 +1,7 @@
 #ifndef JANNCY_RELU_H_
 #define JANNCY_RELU_H_
 
+#include <string>
 #include <vector>
 
 #include "include/flow_node.h"
@@ -13,7 +14,7 @@ class ReLU : public FlowNode {
  public:
   ReLU(std::vector<int> shape);
 
-  void accept(FlowVisitor& visitor) override;
+  void Accept(FlowVisitor& visitor) override;
   std::string op_type() const override;
   std::vector<int> shape() const override;
 
