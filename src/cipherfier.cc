@@ -1,5 +1,6 @@
 #include "include/cipherfier.h"
 
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -18,6 +19,8 @@
 #include "include/relu.h"
 
 namespace janncy {
+
+static const std::string kAllKeysAddedStamp = "serkey/AllKeysAddedStamp";
 
 CtGraph Cipherfier::Cipherfy(Flow& flow) {
   Cipherfier cipherfier(flow);

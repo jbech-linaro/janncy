@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <fstream>
 #include <iostream>
 #include <vector>
 
@@ -16,6 +17,7 @@ heaan::Scheme* Ciphertext::scheme_ = nullptr;
 heaan::Ring* Ciphertext::ring_ = nullptr;
 heaan::SecretKey* Ciphertext::secret_key_ = nullptr;
 int Ciphertext::num_slots_ = 8;
+std::string kAllKeysAddedStamp = "/tmp/AllKeysAddedStamp";
 
 Ciphertext::Ciphertext(heaan::Ciphertext ciphertext)
     : ciphertext_(ciphertext) {}
@@ -69,12 +71,38 @@ std::vector<std::complex<double> > Ciphertext::Decrypt() {
   return result;
 }
 
+namespace {
+
+bool KeysExist() {
+  std::ifstream stamp_file_in;
+  stamp_file_in.open(kAllKeysAddedStamp);
+  if (stamp_file_in.fail()) {
+    stamp_file_in.close();
+    std::ofstream stamp_file;
+    stamp_file.open(kAllKeysAddedStamp);
+    stamp_file << "dummy" << std::endl;
+    stamp_file.close();
+    return false;
+  }
+  stamp_file_in.close();
+  return true;
+}
+
+}  // namespace
+
 void Ciphertext::InitScheme() {
   assert(!scheme_);
   ring_ = new heaan::Ring();
   secret_key_ = new heaan::SecretKey(*ring_);
   scheme_ = new heaan::Scheme(*secret_key_, *ring_, /*isSerialized=*/true);
-  scheme_->addLeftRotKeys(*secret_key_);
+  std::ifstream stamp_file_in;
+  stamp_file_in.open(kAllKeysAddedStamp);
+  if (!KeysExist()) {
+    std::cout << "Adding rotate keys..." << std::endl;
+    scheme_->addLeftRotKeys(*secret_key_);
+    std::cout << "Adding bootstrapping keys..." << std::endl;
+    scheme_->addBootKey(*secret_key_, 10, 35);
+  }
   num_slots_ = 8;
 }
 
