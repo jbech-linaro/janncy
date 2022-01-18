@@ -77,8 +77,11 @@ IncludeCategories:
   - Regex:           '^<.*'
     Priority:        2
     SortPriority:    0
-  - Regex:           '.*'
+  - Regex:           '^"onnx/.*\.h"'
     Priority:        3
+    SortPriority:    0
+  - Regex:           '.*'
+    Priority:        4
     SortPriority:    0
 IncludeIsMainRegex: '([-_](test|unittest))?$'
 IncludeIsMainSourceRegex: ''
@@ -165,4 +168,3 @@ TabWidth:        8
 UseCRLF:         false
 UseTab:          Never
 ...
-
