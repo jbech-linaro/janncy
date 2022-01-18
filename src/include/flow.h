@@ -9,7 +9,7 @@
 
 namespace janncy {
 
-typedef Graph<FlowNode> Flow;
+using Flow = Graph<FlowNode>;
 
 namespace flow {
 FlowNode* CreateAdd(Flow& flow, std::vector<const FlowNode*> parents);
