@@ -18,25 +18,27 @@ template <class T>
 class Graph {
  public:
   // Transfers ownership of `new_node` to the Graph object
-  T* AddNode(T* new_node, const std::vector<const T*>& parents) {
-    nodes_.emplace_back(new_node);
+  T* AddNode(std::unique_ptr<T> new_node,
+             const std::vector<const T*>& parents) {
+    T* raw_new_node = new_node.get();
+    nodes_.emplace_back(std::move(new_node));
 
-    child_map_[new_node] = {};
-    parent_map_[new_node] = {};
+    child_map_[raw_new_node] = {};
+    parent_map_[raw_new_node] = {};
 
     for (const T* parent : parents) {
       assert(child_map_.count(parent) == 1);
-      child_map_[parent].push_back(new_node);
+      child_map_[parent].push_back(raw_new_node);
 
       // alex: This is safe because the assert guarantees that `parent`
       //       points to an object owned by this object and has been
       //       allocated as non-const.
       //       It looks a bit dodgy, but is neccessary to achieve const
       //       correctness if using pointers as indices.
-      parent_map_[new_node].push_back(const_cast<T*>(parent));
+      parent_map_[raw_new_node].push_back(const_cast<T*>(parent));
     }
 
-    return new_node;
+    return raw_new_node;
   }
 
   std::string str() const {

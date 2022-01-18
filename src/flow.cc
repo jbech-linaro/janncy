@@ -24,22 +24,25 @@ FlowNode* CreateAdd(Flow& flow, std::vector<const FlowNode*> parents) {
       PANIC("All add inputs must have the same shape!", shape, par->shape());
     }
   }
-  return flow.AddNode(new Add(shape), parents);
+  return flow.AddNode(std::make_unique<Add>(shape), parents);
 }
 
 FlowNode* CreateConvLayer(Flow& flow, const FlowNode* parent,
                           KernelAttributes kernel, int output_channel_cnt) {
   return flow.AddNode(
-      new ConvLayer(parent->shape(), kernel, output_channel_cnt), {parent});
+      std::make_unique<ConvLayer>(parent->shape(), kernel, output_channel_cnt),
+      {parent});
 }
 
 FlowNode* CreateAveragePool(Flow& flow, const FlowNode* parent,
                             KernelAttributes kernel) {
-  return flow.AddNode(new AveragePool(parent->shape(), kernel), {parent});
+  return flow.AddNode(std::make_unique<AveragePool>(parent->shape(), kernel),
+                      {parent});
 }
 FlowNode* CreateMaxPool(Flow& flow, const FlowNode* parent,
                         KernelAttributes kernel) {
-  return flow.AddNode(new MaxPool(parent->shape(), kernel), {parent});
+  return flow.AddNode(std::make_unique<MaxPool>(parent->shape(), kernel),
+                      {parent});
 }
 FlowNode* CreateGlobalAveragePool(Flow& flow, const FlowNode* parent) {
   auto input_shape = parent->shape();
@@ -50,13 +53,13 @@ FlowNode* CreateGlobalAveragePool(Flow& flow, const FlowNode* parent) {
 }
 
 FlowNode* CreateInput(Flow& flow, std::vector<int> shape) {
-  return flow.AddNode(new Input(std::move(shape)), {});
+  return flow.AddNode(std::make_unique<Input>(std::move(shape)), {});
 }
 FlowNode* CreateRelu(Flow& flow, const FlowNode* parent) {
-  return flow.AddNode(new ReLU(parent->shape()), {parent});
+  return flow.AddNode(std::make_unique<ReLU>(parent->shape()), {parent});
 }
 FlowNode* CreateFlatten(Flow& flow, const FlowNode* parent) {
-  return flow.AddNode(new Flatten(parent->shape()), {parent});
+  return flow.AddNode(std::make_unique<Flatten>(parent->shape()), {parent});
 }
 FlowNode* CreateFullyConnected(Flow& flow, const FlowNode* parent,
                                int output_dim) {
@@ -66,7 +69,8 @@ FlowNode* CreateFullyConnected(Flow& flow, const FlowNode* parent,
   }
 
   int input_dim = input_shape[0];
-  return flow.AddNode(new FullyConnected(input_dim, output_dim), {parent});
+  return flow.AddNode(std::make_unique<FullyConnected>(input_dim, output_dim),
+                      {parent});
 }
 
 }  // namespace flow
