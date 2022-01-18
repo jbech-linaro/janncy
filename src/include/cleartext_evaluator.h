@@ -10,24 +10,17 @@
 
 namespace janncy {
 
-class CtAdd;
-class CtMul;
-class CtPtAdd;
-class CtPtMul;
-class CtRotate;
-class CtInput;
-
 class CleartextEvaluator : public CtGraphVisitor {
  public:
   static std::vector<std::vector<double>> Evaluate(
       CtGraph& ct_graph, std::vector<std::vector<double>> inputs);
 
-  void Visit(CtAdd* node) override;
-  void Visit(CtMul* node) override;
-  void Visit(CtPtAdd* node) override;
-  void Visit(CtPtMul* node) override;
-  void Visit(CtRotate* node) override;
-  void Visit(CtInput* node) override;
+  void Visit(CtAdd& node) override;
+  void Visit(CtMul& node) override;
+  void Visit(CtPtAdd& node) override;
+  void Visit(CtPtMul& node) override;
+  void Visit(CtRotate& node) override;
+  void Visit(CtInput& node) override;
 
   std::vector<std::vector<double>> result() const;
 

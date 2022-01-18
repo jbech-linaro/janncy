@@ -24,43 +24,43 @@ std::vector<std::vector<double>> CleartextEvaluator::Evaluate(
   return clear_eval.result();
 }
 
-void CleartextEvaluator::Visit(CtInput* node) {
-  node_map_[node] = inputs_.back();
+void CleartextEvaluator::Visit(CtInput& node) {
+  node_map_[&node] = inputs_.back();
   inputs_.pop_back();
 }
 
-void CleartextEvaluator::Visit(CtAdd* node) {
-  auto p0 = node_map_[ct_graph_.parents(node)[0]];
-  auto p1 = node_map_[ct_graph_.parents(node)[1]];
+void CleartextEvaluator::Visit(CtAdd& node) {
+  auto p0 = node_map_[ct_graph_.parents(&node)[0]];
+  auto p1 = node_map_[ct_graph_.parents(&node)[1]];
   std::transform(p0.begin(), p0.end(), p1.begin(),
-                 std::back_inserter(node_map_[node]), std::plus<double>());
+                 std::back_inserter(node_map_[&node]), std::plus<double>());
 }
 
-void CleartextEvaluator::Visit(CtMul* node) {
-  auto p0 = node_map_[ct_graph_.parents(node)[0]];
-  auto p1 = node_map_[ct_graph_.parents(node)[1]];
+void CleartextEvaluator::Visit(CtMul& node) {
+  auto p0 = node_map_[ct_graph_.parents(&node)[0]];
+  auto p1 = node_map_[ct_graph_.parents(&node)[1]];
   std::transform(p0.begin(), p0.end(), p1.begin(),
-                 std::back_inserter(node_map_[node]),
+                 std::back_inserter(node_map_[&node]),
                  std::multiplies<double>());
 }
 
-void CleartextEvaluator::Visit(CtRotate* node) {
-  auto p = ct_graph_.parents(node)[0];
-  node_map_[node] = node_map_[p];
-  std::rotate(node_map_[node].begin(), node_map_[node].begin() + node->amt(),
-              node_map_[node].end());
+void CleartextEvaluator::Visit(CtRotate& node) {
+  auto p = ct_graph_.parents(&node)[0];
+  node_map_[&node] = node_map_[p];
+  std::rotate(node_map_[&node].begin(), node_map_[&node].begin() + node.amt(),
+              node_map_[&node].end());
 }
 
-void CleartextEvaluator::Visit(CtPtAdd* node) {
-  auto p = node_map_[ct_graph_.parents(node)[0]];
-  std::transform(p.begin(), p.end(), node->value().begin(),
-                 std::back_inserter(node_map_[node]), std::plus<double>());
+void CleartextEvaluator::Visit(CtPtAdd& node) {
+  auto p = node_map_[ct_graph_.parents(&node)[0]];
+  std::transform(p.begin(), p.end(), node.value().begin(),
+                 std::back_inserter(node_map_[&node]), std::plus<double>());
 }
 
-void CleartextEvaluator::Visit(CtPtMul* node) {
-  auto p = node_map_[ct_graph_.parents(node)[0]];
-  std::transform(p.begin(), p.end(), node->value().begin(),
-                 std::back_inserter(node_map_[node]),
+void CleartextEvaluator::Visit(CtPtMul& node) {
+  auto p = node_map_[ct_graph_.parents(&node)[0]];
+  std::transform(p.begin(), p.end(), node.value().begin(),
+                 std::back_inserter(node_map_[&node]),
                  std::multiplies<double>());
 }
 

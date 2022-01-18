@@ -13,12 +13,12 @@ class CtInput;
 
 class CtGraphVisitor {
  public:
-  virtual void Visit(CtInput* node) = 0;
-  virtual void Visit(CtAdd* node) = 0;
-  virtual void Visit(CtMul* node) = 0;
-  virtual void Visit(CtPtAdd* node) = 0;
-  virtual void Visit(CtPtMul* node) = 0;
-  virtual void Visit(CtRotate* node) = 0;
+  virtual void Visit(CtInput& node) = 0;
+  virtual void Visit(CtAdd& node) = 0;
+  virtual void Visit(CtMul& node) = 0;
+  virtual void Visit(CtPtAdd& node) = 0;
+  virtual void Visit(CtPtMul& node) = 0;
+  virtual void Visit(CtRotate& node) = 0;
 };
 
 }  // namespace janncy

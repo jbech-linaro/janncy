@@ -7,6 +7,6 @@ namespace janncy {
 
 CtMul::CtMul() : CtOp("CtMul"){};
 
-void CtMul::Accept(CtGraphVisitor& visitor) { return visitor.Visit(this); }
+void CtMul::Accept(CtGraphVisitor& visitor) { return visitor.Visit(*this); }
 
 }  // namespace janncy

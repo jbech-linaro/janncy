@@ -7,6 +7,6 @@ namespace janncy {
 
 CtInput::CtInput() : CtOp("CtInput"){};
 
-void CtInput::Accept(CtGraphVisitor& visitor) { return visitor.Visit(this); }
+void CtInput::Accept(CtGraphVisitor& visitor) { return visitor.Visit(*this); }
 
 }  // namespace janncy
