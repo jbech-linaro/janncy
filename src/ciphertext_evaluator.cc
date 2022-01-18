@@ -32,39 +32,39 @@ CiphertextEvaluator::CiphertextEvaluator(
 
 void CiphertextEvaluator::Visit(CtInput* node) {
   auto in_ct = Encrypt(inputs_.back());
-  node_map_.insert(std::make_pair(node, in_ct));
+  node_map_.emplace(node, in_ct);
   inputs_.pop_back();
 }
 
 void CiphertextEvaluator::Visit(CtAdd* node) {
   auto ct0 = node_map_.at(ct_graph_.parents(node)[0]);
   auto ct1 = node_map_.at(ct_graph_.parents(node)[1]);
-  node_map_.insert(std::make_pair(node, ct0 + ct1));
+  node_map_.emplace(node, ct0 + ct1);
 }
 
 void CiphertextEvaluator::Visit(CtMul* node) {
   auto ct0 = node_map_.at(ct_graph_.parents(node)[0]);
   auto ct1 = node_map_.at(ct_graph_.parents(node)[1]);
-  node_map_.insert(std::make_pair(node, ct0 * ct1));
+  node_map_.emplace(node, ct0 * ct1);
 }
 
 void CiphertextEvaluator::Visit(CtRotate* node) {
   auto parent_ct = node_map_.at(ct_graph_.parents(node)[0]);
-  node_map_.insert(std::make_pair(node, parent_ct.Rotate(node->amt())));
+  node_map_.emplace(node, parent_ct.Rotate(node->amt()));
 }
 
 void CiphertextEvaluator::Visit(CtPtAdd* node) {
   auto parent_ct = node_map_.at(ct_graph_.parents(node)[0]);
   std::vector<std::complex<double>> pt_values(node->value().begin(),
                                               node->value().end());
-  node_map_.insert(std::make_pair(node, parent_ct.AddPtVec(pt_values)));
+  node_map_.emplace(node, parent_ct.AddPtVec(pt_values));
 }
 
 void CiphertextEvaluator::Visit(CtPtMul* node) {
   auto parent_ct = node_map_.at(ct_graph_.parents(node)[0]);
   std::vector<std::complex<double>> pt_values(node->value().begin(),
                                               node->value().end());
-  node_map_.insert(std::make_pair(node, parent_ct.AddPtVec(pt_values)));
+  node_map_.emplace(node, parent_ct.AddPtVec(pt_values));
 }
 
 // TODO(nsamar): This function probably should not be public?
