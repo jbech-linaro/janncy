@@ -1,47 +1,108 @@
+#include <algorithm>
+#include <complex>
+#include <vector>
+
 #include "gtest/gtest.h"
 #include "include/ciphertext.h"
 
 using namespace std::complex_literals;
 
+namespace {
+
 double epsilon = 10e-5;
 
+void TestCloseEnough(std::vector<std::complex<double>> v0,
+                     std::vector<std::complex<double>> v1) {
+  std::vector<std::complex<double>> diff;
+  std::transform(v0.begin(), v0.end(), v1.begin(), std::back_inserter(diff),
+                 std::minus<std::complex<double>>());
+
+  for (auto val : diff) {
+    EXPECT_LT(std::norm(val), epsilon);
+  }
+}
+
+}  // namespace
+
 TEST(Ciphertext, Add) {
-  auto ct0 = janncy::Encrypt(std::vector(8, std::complex<double>(1)));
-  auto ct1 = janncy::Encrypt(std::vector(8, std::complex<double>(1)));
+  auto in0 = std::vector<std::complex<double>>{0, 1, 2, 3, 4, 5, 6, 7};
+  auto in1 = in0;
+  auto ct0 = janncy::Encrypt(in0);
+  auto ct1 = janncy::Encrypt(in1);
   auto result = (ct0 + ct1).Decrypt();
-  EXPECT_LT(std::abs(result[0].real() - 2), epsilon);
+  std::vector<std::complex<double>> expected;
+  std::transform(in0.begin(), in0.end(), in1.begin(),
+                 std::back_inserter(expected),
+                 std::plus<std::complex<double>>());
+  TestCloseEnough(result, expected);
 }
 
 TEST(Ciphertext, Multiply) {
-  auto ct0 = janncy::Encrypt(std::vector(8, std::complex<double>(2)));
-  auto ct1 = janncy::Encrypt(std::vector(8, std::complex<double>(2)));
+  auto in0 = std::vector<std::complex<double>>{0, 1, 2, 3, 4, 5, 6, 7};
+  auto in1 = in0;
+  auto ct0 = janncy::Encrypt(in0);
+  auto ct1 = janncy::Encrypt(in1);
   auto result = (ct0 * ct1).Decrypt();
-  EXPECT_LT(std::abs(result[0].real() - 4), epsilon);
+  std::vector<std::complex<double>> expected;
+  std::transform(in0.begin(), in0.end(), in1.begin(),
+                 std::back_inserter(expected),
+                 std::multiplies<std::complex<double>>());
+  TestCloseEnough(result, expected);
 }
 
 TEST(Ciphertext, PlaintextMultiply) {
-  auto ct0 = janncy::Encrypt(std::vector(8, std::complex<double>(2)));
-  auto pt_vec = std::vector(8, std::complex<double>(3));
+  auto in0 = std::vector<std::complex<double>>{0, 1, 2, 3, 4, 5, 6, 7};
+  auto in1 = in0;
+  auto ct0 = janncy::Encrypt(in0);
+  auto pt_vec = in1;
   auto result = (ct0.MultPtVec(pt_vec)).Decrypt();
-  EXPECT_LT(std::abs(result[0].real() - 6), epsilon);
+  std::vector<std::complex<double>> expected;
+  std::transform(in0.begin(), in0.end(), in1.begin(),
+                 std::back_inserter(expected),
+                 std::multiplies<std::complex<double>>());
+  TestCloseEnough(result, expected);
 }
 
 TEST(Ciphertext, PlaintextAdd) {
-  auto ct0 = janncy::Encrypt(std::vector(8, std::complex<double>(5)));
-  auto pt_vec = std::vector(8, std::complex<double>(8));
+  auto in0 = std::vector<std::complex<double>>{0, 1, 2, 3, 4, 5, 6, 7};
+  auto in1 = in0;
+  auto ct0 = janncy::Encrypt(in0);
+  auto pt_vec = in1;
+  std::vector<std::complex<double>> expected;
+  std::transform(in0.begin(), in0.end(), in1.begin(),
+                 std::back_inserter(expected),
+                 std::plus<std::complex<double>>());
   auto result = (ct0.AddPtVec(pt_vec)).Decrypt();
-  EXPECT_LT(std::abs(result[0].real() - 13), epsilon);
+  TestCloseEnough(result, expected);
 }
 
 TEST(Ciphertext, Subtract) {
-  auto ct0 = janncy::Encrypt(std::vector(8, std::complex<double>(1)));
-  auto ct1 = janncy::Encrypt(std::vector(8, std::complex<double>(2)));
+  auto in0 = std::vector<std::complex<double>>{0, 1, 2, 3, 4, 5, 6, 7};
+  auto in1 = in0;
+  auto ct0 = janncy::Encrypt(in0);
+  auto ct1 = janncy::Encrypt(in1);
   auto result = (ct0 - ct1).Decrypt();
-  EXPECT_LT(std::abs(result[0].real() - (-1)), epsilon);
+  std::vector<std::complex<double>> expected;
+  std::transform(in0.begin(), in0.end(), in1.begin(),
+                 std::back_inserter(expected),
+                 std::minus<std::complex<double>>());
+  TestCloseEnough(result, expected);
+}
+
+TEST(Ciphertext, Rotate) {
+  auto in0 = std::vector<std::complex<double>>{0, 1, 2, 3, 4, 5, 6, 7};
+  auto ct = janncy::Encrypt(in0);
+  auto rotate_amount = 2;
+  auto result = ct.Rotate(rotate_amount).Decrypt();
+  auto expected = in0;
+  std::rotate(expected.begin(), expected.begin() + rotate_amount,
+              expected.end());
+  TestCloseEnough(result, expected);
 }
 
 TEST(Ciphertext, Bootstrap) {
-  auto ct = janncy::Encrypt(std::vector(8, std::complex<double>(1)));
+  auto in0 = std::vector<std::complex<double>>{0, 1, 2, 3, 4, 5, 6, 7};
+  auto ct = janncy::Encrypt(in0);
   auto result = ct.Bootstrap().Decrypt();
-  EXPECT_LT(std::abs(result[0].real() - 1), epsilon);
+  TestCloseEnough(result, in0);
 }
