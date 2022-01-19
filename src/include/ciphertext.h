@@ -8,6 +8,8 @@
 
 namespace janncy {
 
+using Message = std::vector<std::complex<double>>;
+
 class Ciphertext {
  public:
   explicit Ciphertext(heaan::Ciphertext ciphertext);
@@ -20,10 +22,10 @@ class Ciphertext {
 
   Ciphertext Bootstrap();
 
-  Ciphertext AddPtVec(std::vector<std::complex<double> > pt_vec);
-  Ciphertext MultPtVec(std::vector<std::complex<double> > pt_vec);
+  Ciphertext AddPtVec(Message pt_vec);
+  Ciphertext MultPtVec(Message pt_vec);
 
-  std::vector<std::complex<double> > Decrypt();
+  Message Decrypt();
 
   static heaan::Scheme* scheme();
 
@@ -39,7 +41,7 @@ class Ciphertext {
   static int num_slots_;
 };
 
-Ciphertext Encrypt(const std::vector<std::complex<double> >& values);
+Ciphertext Encrypt(const Message& values);
 Ciphertext operator*(const Ciphertext& lhs, const Ciphertext& rhs);
 Ciphertext operator+(const Ciphertext& lhs, const Ciphertext& rhs);
 Ciphertext operator-(const Ciphertext& lhs, const Ciphertext& rhs);

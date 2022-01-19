@@ -67,9 +67,9 @@ Ciphertext Ciphertext::Rotate(int amount) {
   return Ciphertext(ct_result);
 }
 
-std::vector<std::complex<double> > Ciphertext::Decrypt() {
+Message Ciphertext::Decrypt() {
   auto ptr_result = scheme_->decrypt(*secret_key_, ciphertext_);
-  auto result = std::vector<std::complex<double> >{};
+  auto result = Message{};
   for (int idx = 0; idx < num_slots_; idx++) {
     result.push_back(ptr_result[idx]);
   }
@@ -99,7 +99,7 @@ heaan::Scheme* Ciphertext::scheme() {
 
 int Ciphertext::num_slots() { return num_slots_; }
 
-Ciphertext Encrypt(const std::vector<std::complex<double> >& values) {
+Ciphertext Encrypt(const Message& values) {
   assert(values.size() == Ciphertext::num_slots());
   auto ct = heaan::Ciphertext();
   std::complex<double>* value_array =
@@ -114,14 +114,14 @@ Ciphertext Encrypt(const std::vector<std::complex<double> >& values) {
   return Ciphertext(ct);
 }
 
-Ciphertext Ciphertext::AddPtVec(std::vector<std::complex<double> > pt_vec) {
+Ciphertext Ciphertext::AddPtVec(Message pt_vec) {
   auto pt = Encrypt(pt_vec);
   heaan::Ciphertext ct_result;
   scheme_->add(ct_result, ciphertext_, pt.ciphertext_);
   return Ciphertext(ct_result);
 }
 
-Ciphertext Ciphertext::MultPtVec(std::vector<std::complex<double> > pt_vec) {
+Ciphertext Ciphertext::MultPtVec(Message pt_vec) {
   heaan::Ciphertext ct_result;
   std::complex<double>* const_vec =
       new std::complex<double>[Ciphertext::num_slots()];
