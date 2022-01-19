@@ -11,6 +11,7 @@
 
 #include "include/cipherfier.h"
 #include "include/flow.h"
+#include "include/graph.h"
 #include "include/panic.h"
 
 using namespace janncy;
@@ -283,10 +284,10 @@ int main(int argc, char **argv) {
   }
   google::protobuf::ShutdownProtobufLibrary();
 
-  flow->Draw("test");
+  janncy::Draw(*flow, "flow");
   std::cerr << "Nodes in flow: " << flow->nodes().size() << "\n";
   CtGraph ct_graph = Cipherfier::Cipherfy(*flow);
 
-  ct_graph.Draw("ct_graph");
+  janncy::Draw(ct_graph, "ct_graph");
   std::cerr << "Nodes in ct_graph: " << ct_graph.nodes().size() << "\n";
 }

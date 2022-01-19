@@ -1,24 +1,22 @@
 #include "include/flow_node.h"
 
+#include <sstream>
 #include <string>
 
 namespace janncy {
 
 std::string FlowNode::str() const {
-  return "";
-  /*
   std::stringstream result;
   result << "[" << this << "] ";
-  result << op_type_;
-  if (op_type_ != "Input") {
-      result << "(";
-      for (auto& value : output_shape_) {
-          result << value << ", ";
-      }
-      result << ")";
+  result << op_type();
+  if (op_type() != "Input") {
+    result << "(";
+    for (auto& value : shape()) {
+      result << value << ", ";
+    }
+    result << ")";
   }
   return result.str();
-  */
 }
 
 }  // namespace janncy

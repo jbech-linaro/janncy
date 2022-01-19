@@ -53,39 +53,6 @@ class Graph {
     return result.str();
   }
 
-  void Draw(const std::string& filename) const {
-    /*
-    std::unordered_map<const T*, Agnode_t*> node_map;
-    Agraph_t* g;
-    GVC_t* gvc;
-
-    gvc = gvContext();
-
-    g = agopen((char*)"g", Agdirected, nullptr);
-
-    for (auto& node : nodes_) {
-        node_map[node] =
-            agnode(g, const_cast<char*>((node->str()).c_str()), 1);
-        for (auto& child : children(node)) {
-            node_map[child] =
-                agnode(g, const_cast<char*>((child->str()).c_str()), 1);
-            agedge(g, node_map.at(node), node_map.at(child), 0, 1);
-        }
-    }
-    // agsafeset(n, (char*)"color", (char*)"red", (char*)"");
-    std::string filepath =
-        "-o/data/sanchez/users/nsamar/janncy/" + filename + ".pdf";
-    char* args[] = {(char*)"dot", (char*)"-Tpdf", (char*)filepath.c_str()};
-    gvParseArgs(gvc, sizeof(args) / sizeof(char*), args);
-
-    gvLayout(gvc, g, "dot");
-    gvRenderJobs(gvc, g);
-    gvFreeLayout(gvc, g);
-    agclose(g);
-    gvFreeContext(gvc);
-    */
-  }
-
   const std::vector<const T*>& parents(const T* node) const {
     return parent_map_.at(node);
   }
@@ -113,6 +80,35 @@ class Graph {
     return result;
   }
 };
+
+template <class T>
+void Draw(Graph<T>& graph, const std::string& filename) {
+  std::unordered_map<const T*, Agnode_t*> node_map;
+  Agraph_t* g;
+  GVC_t* gvc;
+
+  gvc = gvContext();
+
+  g = agopen((char*)"g", Agdirected, nullptr);
+
+  for (auto& node : graph.nodes()) {
+    node_map[node] = agnode(g, const_cast<char*>((node->str()).c_str()), 1);
+    for (auto& child : graph.children(node)) {
+      node_map[child] = agnode(g, const_cast<char*>((child->str()).c_str()), 1);
+      agedge(g, node_map.at(node), node_map.at(child), 0, 1);
+    }
+  }
+  std::string filepath =
+      "-o/data/sanchez/users/nsamar/janncy/" + filename + ".pdf";
+  char* args[] = {(char*)"dot", (char*)"-Tpdf", (char*)filepath.c_str()};
+  gvParseArgs(gvc, sizeof(args) / sizeof(char*), args);
+
+  gvLayout(gvc, g, "dot");
+  gvRenderJobs(gvc, g);
+  gvFreeLayout(gvc, g);
+  agclose(g);
+  gvFreeContext(gvc);
+}
 
 }  // namespace janncy
 
