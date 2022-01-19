@@ -1,7 +1,6 @@
 #ifndef JANNCY_CIPHERTEXT_EVALUATOR_H_
 #define JANNCY_CIPHERTEXT_EVALUATOR_H_
 
-#include <complex>
 #include <unordered_map>
 #include <vector>
 

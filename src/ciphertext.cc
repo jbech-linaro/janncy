@@ -94,8 +94,7 @@ int Ciphertext::num_slots() { return num_slots_; }
 Ciphertext Ciphertext::Encrypt(const Message& values) {
   assert(values.size() == Ciphertext::num_slots());
   auto ct = heaan::Ciphertext();
-  std::complex<double>* value_array =
-      new std::complex<double>[Ciphertext::num_slots()];
+  MessageElement* value_array = new MessageElement[Ciphertext::num_slots()];
   for (int idx = 0; idx < Ciphertext::num_slots(); idx++) {
     value_array[idx] = values[idx];
   }
@@ -115,8 +114,7 @@ Ciphertext Ciphertext::AddPtVec(Message pt_vec) {
 
 Ciphertext Ciphertext::MultPtVec(Message pt_vec) {
   heaan::Ciphertext ct_result;
-  std::complex<double>* const_vec =
-      new std::complex<double>[Ciphertext::num_slots()];
+  MessageElement* const_vec = new MessageElement[Ciphertext::num_slots()];
   for (int idx = 0; idx < Ciphertext::num_slots(); idx++) {
     const_vec[idx] = pt_vec[idx];
   }

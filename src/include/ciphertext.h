@@ -3,12 +3,9 @@
 
 #include <HEAAN/src/HEAAN.h>
 
-#include <complex>
-#include <vector>
+#include "include/message.h"
 
 namespace janncy {
-
-using Message = std::vector<std::complex<double>>;
 
 class Ciphertext {
  public:

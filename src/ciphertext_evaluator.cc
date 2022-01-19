@@ -1,7 +1,6 @@
 #include "include/ciphertext_evaluator.h"
 
 #include <algorithm>
-#include <complex>
 #include <unordered_map>
 #include <vector>
 
@@ -71,7 +70,7 @@ std::vector<Message> CiphertextEvaluator::result() const {
   std::copy_if(
       node_map_.begin(), node_map_.end(), std::back_inserter(childless),
       [&](auto& x) { return ct_graph_.children(x.first).size() == 0; });
-  auto result = std::vector<std::vector<std::complex<double>>>();
+  auto result = std::vector<Message>();
   std::transform(childless.begin(), childless.end(), std::back_inserter(result),
                  [&](auto& x) { return x.second.Decrypt(); });
   return result;
