@@ -9,7 +9,7 @@ import torch
 build_dir = Path("build/")
 src_dir = Path("src/")
 test_dir = Path("test/")
-gtest_dir = Path("/usr/gtest/include")
+gtest_dir = Path(".dependencies/googletest")
 clang_version = 10
 cpp_version = 17
 install_cmd = "sudo apt-get install -y"
@@ -17,6 +17,7 @@ clangpp_path = Path(f"/usr/bin/clang++-{clang_version}")
 clang_path = Path(f"/usr/bin/clang-{clang_version}")
 onnx_path = Path(".dependencies/onnx")
 heaanlib_path = Path(".dependencies/HEAAN/HEAAN/lib/libHEAAN.a")
+libgtest_path = Path(".dependencies/googletest/build/lib/libgtest.a")
 pip3_list_path = Path(".pip3_list")
 
 def cmd_allow_fail(cmd_str : str) -> str:
@@ -100,12 +101,14 @@ def install_torch() -> None:
     pip3_if_missing("numpy")
 
 def install_gtest() -> None:
-    if os.path.exists("/usr/lib/libgtest.a"):
-        return
-    install_if_missing("libgtest-dev")
-    cmd("cd /usr/src/gtest; sudo cmake CMakeLists.txt")
-    cmd("cd /usr/src/gtest; sudo make")
-    cmd("cd /usr/src/gtest; sudo cp *.a /usr/lib")
+    if not os.path.exists("{}/README.md".format(gtest_dir)):
+        cmd("mkdir -p .dependencies")
+        cmd("cd .dependencies && git clone https://github.com/google/googletest.git")
+
+    if not os.path.exists(libgtest_path):
+        print("Compiling {}".format(libgtest_path))
+        cmd("mkdir -p {}/build".format(gtest_dir))
+        cmd("cd {}/build && cmake -DCMAKE_C_COMPILER='gcc' -DCMAKE_CXX_COMPILER='g++' .. && make".format(gtest_dir))
 
 def install_ntl() -> None:
     if not os.path.exists(".dependencies/ntl/README"):
@@ -138,7 +141,7 @@ def install_dependencies() -> None:
     install_ntl()
     install_heaan()
     #install_torch()
-    #install_gtest()
+    install_gtest()
     #download_models()
 
 install_dependencies()
@@ -147,7 +150,7 @@ env = Environment(CXX = f'/usr/bin/clang++-{clang_version}', ENV = os.environ)
 env.VariantDir(build_dir, src_dir, duplicate=0)
 env.Append(CPPFLAGS = [ "-fsanitize=address", ])
 env.Append(CPPFLAGS = [ "-ggdb", "-fno-omit-frame-pointer", "-g", f"-std=c++{cpp_version}", "-Wall", "-DONNX_NAMESPACE=onnx", ])
-env.Append(CPPPATH = [ onnx_path, src_dir, gtest_dir, heaanlib_path.parent.parent.parent ])
+env.Append(CPPPATH = [ onnx_path, src_dir, libgtest_path, heaanlib_path.parent.parent.parent ])
 env.Append(LIBS = [ "HEAAN", "asan", "stdc++fs", "pthread", "ntl", "gmp", "m", "cgraph", "gvc", "protobuf", "gtest_main", "gtest", ])
 env.Append( LIBPATH = [ heaanlib_path.parent ])
 env.Tool('compilation_db')
