@@ -20,45 +20,37 @@ int Ciphertext::num_slots_ = 8;
 
 Ciphertext Ciphertext::Bootstrap() {
   heaan::Ciphertext result(ciphertext_);
-  scheme_->bootstrapAndEqual(result, /*logq=*/40, /*logQ=*/800,
-                             /*logT=*/4, /*logI=*/4);
+  Ciphertext::scheme_->bootstrapAndEqual(result, /*logq=*/40, /*logQ=*/800,
+                                         /*logT=*/4, /*logI=*/4);
   return Ciphertext(result);
 }
 
 Ciphertext::Ciphertext(heaan::Ciphertext ciphertext)
     : ciphertext_(ciphertext) {}
 
-Ciphertext operator*(const Ciphertext& lhs, const Ciphertext& rhs) {
-  Ciphertext result(lhs);
-  result *= rhs;
-  return result;
+Ciphertext Ciphertext::Multiply(const Ciphertext& rhs) const {
+  heaan::Ciphertext ct_result(ciphertext_);
+  // TODO(nsamar): The `const_cast` is necessary because HEAAN
+  // does not const-qualify its functions properly.
+  // When this is fixed, all `const_cast`s in this file should
+  // be removed.
+  Ciphertext::scheme_->multAndEqual(
+      ct_result, const_cast<heaan::Ciphertext&>(rhs.ciphertext_));
+  return Ciphertext(ct_result);
 }
 
-Ciphertext operator+(const Ciphertext& lhs, const Ciphertext& rhs) {
-  Ciphertext result(lhs);
-  result += rhs;
-  return result;
+Ciphertext Ciphertext::Add(const Ciphertext& rhs) const {
+  heaan::Ciphertext ct_result(ciphertext_);
+  Ciphertext::scheme_->addAndEqual(
+      ct_result, const_cast<heaan::Ciphertext&>(rhs.ciphertext_));
+  return Ciphertext(ct_result);
 }
 
-Ciphertext operator-(const Ciphertext& lhs, const Ciphertext& rhs) {
-  Ciphertext result(lhs);
-  result -= rhs;
-  return result;
-}
-
-Ciphertext& Ciphertext::operator*=(Ciphertext rhs) {
-  scheme_->multAndEqual(ciphertext_, rhs.ciphertext_);
-  return *this;
-}
-
-Ciphertext& Ciphertext::operator+=(Ciphertext rhs) {
-  scheme_->addAndEqual(ciphertext_, rhs.ciphertext_);
-  return *this;
-}
-
-Ciphertext& Ciphertext::operator-=(Ciphertext rhs) {
-  scheme_->subAndEqual(ciphertext_, rhs.ciphertext_);
-  return *this;
+Ciphertext Ciphertext::Subtract(const Ciphertext& rhs) const {
+  heaan::Ciphertext ct_result(ciphertext_);
+  Ciphertext::scheme_->subAndEqual(
+      ct_result, const_cast<heaan::Ciphertext&>(rhs.ciphertext_));
+  return Ciphertext(ct_result);
 }
 
 Ciphertext Ciphertext::Rotate(int amount) {
@@ -99,7 +91,7 @@ heaan::Scheme* Ciphertext::scheme() {
 
 int Ciphertext::num_slots() { return num_slots_; }
 
-Ciphertext Encrypt(const Message& values) {
+Ciphertext Ciphertext::Encrypt(const Message& values) {
   assert(values.size() == Ciphertext::num_slots());
   auto ct = heaan::Ciphertext();
   std::complex<double>* value_array =

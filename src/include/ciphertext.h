@@ -16,10 +16,6 @@ class Ciphertext {
 
   Ciphertext Rotate(int amount);
 
-  Ciphertext& operator*=(Ciphertext rhs);
-  Ciphertext& operator+=(Ciphertext rhs);
-  Ciphertext& operator-=(Ciphertext rhs);
-
   Ciphertext Bootstrap();
 
   Ciphertext AddPtVec(Message pt_vec);
@@ -27,24 +23,24 @@ class Ciphertext {
 
   Message Decrypt();
 
-  static heaan::Scheme* scheme();
-
   static int num_slots();
+
+  Ciphertext Multiply(const Ciphertext& rhs) const;
+  Ciphertext Add(const Ciphertext& rhs) const;
+  Ciphertext Subtract(const Ciphertext& rhs) const;
+
+  static Ciphertext Encrypt(const Message& values);
 
  private:
   static void InitScheme();
 
+  static heaan::Scheme* scheme();
   heaan::Ciphertext ciphertext_;
   static heaan::Scheme* scheme_;
   static heaan::Ring* ring_;
   static heaan::SecretKey* secret_key_;
   static int num_slots_;
 };
-
-Ciphertext Encrypt(const Message& values);
-Ciphertext operator*(const Ciphertext& lhs, const Ciphertext& rhs);
-Ciphertext operator+(const Ciphertext& lhs, const Ciphertext& rhs);
-Ciphertext operator-(const Ciphertext& lhs, const Ciphertext& rhs);
 
 }  // namespace janncy
 

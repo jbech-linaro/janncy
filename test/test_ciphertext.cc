@@ -26,9 +26,9 @@ void TestCloseEnough(janncy::Message v0, janncy::Message v1) {
 TEST(Ciphertext, Add) {
   auto in0 = janncy::Message{0, 1, 2, 3, 4, 5, 6, 7};
   auto in1 = in0;
-  auto ct0 = janncy::Encrypt(in0);
-  auto ct1 = janncy::Encrypt(in1);
-  auto result = (ct0 + ct1).Decrypt();
+  auto ct0 = janncy::Ciphertext::Encrypt(in0);
+  auto ct1 = janncy::Ciphertext::Encrypt(in1);
+  auto result = ct0.Add(ct1).Decrypt();
   janncy::Message expected;
   std::transform(in0.begin(), in0.end(), in1.begin(),
                  std::back_inserter(expected),
@@ -39,9 +39,9 @@ TEST(Ciphertext, Add) {
 TEST(Ciphertext, Multiply) {
   auto in0 = janncy::Message{0, 1, 2, 3, 4, 5, 6, 7};
   auto in1 = in0;
-  auto ct0 = janncy::Encrypt(in0);
-  auto ct1 = janncy::Encrypt(in1);
-  auto result = (ct0 * ct1).Decrypt();
+  auto ct0 = janncy::Ciphertext::Encrypt(in0);
+  auto ct1 = janncy::Ciphertext::Encrypt(in1);
+  auto result = ct0.Multiply(ct1).Decrypt();
   janncy::Message expected;
   std::transform(in0.begin(), in0.end(), in1.begin(),
                  std::back_inserter(expected),
@@ -52,7 +52,7 @@ TEST(Ciphertext, Multiply) {
 TEST(Ciphertext, PlaintextMultiply) {
   auto in0 = janncy::Message{0, 1, 2, 3, 4, 5, 6, 7};
   auto in1 = in0;
-  auto ct0 = janncy::Encrypt(in0);
+  auto ct0 = janncy::Ciphertext::Encrypt(in0);
   auto pt_vec = in1;
   auto result = (ct0.MultPtVec(pt_vec)).Decrypt();
   janncy::Message expected;
@@ -65,7 +65,7 @@ TEST(Ciphertext, PlaintextMultiply) {
 TEST(Ciphertext, PlaintextAdd) {
   auto in0 = janncy::Message{0, 1, 2, 3, 4, 5, 6, 7};
   auto in1 = in0;
-  auto ct0 = janncy::Encrypt(in0);
+  auto ct0 = janncy::Ciphertext::Encrypt(in0);
   auto pt_vec = in1;
   janncy::Message expected;
   std::transform(in0.begin(), in0.end(), in1.begin(),
@@ -78,9 +78,9 @@ TEST(Ciphertext, PlaintextAdd) {
 TEST(Ciphertext, Subtract) {
   auto in0 = janncy::Message{0, 1, 2, 3, 4, 5, 6, 7};
   auto in1 = in0;
-  auto ct0 = janncy::Encrypt(in0);
-  auto ct1 = janncy::Encrypt(in1);
-  auto result = (ct0 - ct1).Decrypt();
+  auto ct0 = janncy::Ciphertext::Encrypt(in0);
+  auto ct1 = janncy::Ciphertext::Encrypt(in1);
+  auto result = ct0.Subtract(ct1).Decrypt();
   janncy::Message expected;
   std::transform(in0.begin(), in0.end(), in1.begin(),
                  std::back_inserter(expected),
@@ -90,7 +90,7 @@ TEST(Ciphertext, Subtract) {
 
 TEST(Ciphertext, Rotate) {
   auto in0 = janncy::Message{0, 1, 2, 3, 4, 5, 6, 7};
-  auto ct = janncy::Encrypt(in0);
+  auto ct = janncy::Ciphertext::Encrypt(in0);
   auto rotate_amount = 2;
   auto result = ct.Rotate(rotate_amount).Decrypt();
   auto expected = in0;
@@ -101,7 +101,7 @@ TEST(Ciphertext, Rotate) {
 
 TEST(Ciphertext, Bootstrap) {
   auto in0 = janncy::Message{0, 1, 2, 3, 4, 5, 6, 7};
-  auto ct = janncy::Encrypt(in0);
+  auto ct = janncy::Ciphertext::Encrypt(in0);
   auto result = ct.Bootstrap().Decrypt();
   TestCloseEnough(result, in0);
 }
