@@ -18,6 +18,8 @@ class Ciphertext {
   Ciphertext& operator+=(Ciphertext rhs);
   Ciphertext& operator-=(Ciphertext rhs);
 
+  Ciphertext Bootstrap();
+
   Ciphertext AddPtVec(std::vector<std::complex<double> > pt_vec);
   Ciphertext MultPtVec(std::vector<std::complex<double> > pt_vec);
 

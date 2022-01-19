@@ -39,3 +39,9 @@ TEST(Ciphertext, Subtract) {
   auto result = (ct0 - ct1).Decrypt();
   EXPECT_LT(std::abs(result[0].real() - (-1)), epsilon);
 }
+
+TEST(Ciphertext, Bootstrap) {
+  auto ct = janncy::Encrypt(std::vector(8, std::complex<double>(1)));
+  auto result = ct.Bootstrap().Decrypt();
+  EXPECT_LT(std::abs(result[0].real() - 1), epsilon);
+}

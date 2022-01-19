@@ -17,7 +17,13 @@ heaan::Scheme* Ciphertext::scheme_ = nullptr;
 heaan::Ring* Ciphertext::ring_ = nullptr;
 heaan::SecretKey* Ciphertext::secret_key_ = nullptr;
 int Ciphertext::num_slots_ = 8;
-std::string kAllKeysAddedStamp = "/tmp/AllKeysAddedStamp";
+
+Ciphertext Ciphertext::Bootstrap() {
+  heaan::Ciphertext result(ciphertext_);
+  scheme_->bootstrapAndEqual(result, /*logq=*/40, /*logQ=*/800,
+                             /*logT=*/4, /*logI=*/4);
+  return Ciphertext(result);
+}
 
 Ciphertext::Ciphertext(heaan::Ciphertext ciphertext)
     : ciphertext_(ciphertext) {}
@@ -71,38 +77,16 @@ std::vector<std::complex<double> > Ciphertext::Decrypt() {
   return result;
 }
 
-namespace {
-
-bool KeysExist() {
-  std::ifstream stamp_file_in;
-  stamp_file_in.open(kAllKeysAddedStamp);
-  if (stamp_file_in.fail()) {
-    stamp_file_in.close();
-    std::ofstream stamp_file;
-    stamp_file.open(kAllKeysAddedStamp);
-    stamp_file << "dummy" << std::endl;
-    stamp_file.close();
-    return false;
-  }
-  stamp_file_in.close();
-  return true;
-}
-
-}  // namespace
-
 void Ciphertext::InitScheme() {
   assert(!scheme_);
   ring_ = new heaan::Ring();
   secret_key_ = new heaan::SecretKey(*ring_);
   scheme_ = new heaan::Scheme(*secret_key_, *ring_, /*isSerialized=*/true);
-  std::ifstream stamp_file_in;
-  stamp_file_in.open(kAllKeysAddedStamp);
-  if (!KeysExist()) {
-    std::cout << "Adding rotate keys..." << std::endl;
-    scheme_->addLeftRotKeys(*secret_key_);
-    std::cout << "Adding bootstrapping keys..." << std::endl;
-    scheme_->addBootKey(*secret_key_, 10, 35);
-  }
+  std::cout << "Adding rotate keys..." << std::endl;
+  scheme_->addLeftRotKeys(*secret_key_);
+  std::cout << "Adding bootstrapping keys..." << std::endl;
+  scheme_->addBootKey(*secret_key_, 3, 44);
+  srand(0);
   num_slots_ = 8;
 }
 
@@ -124,7 +108,8 @@ Ciphertext Encrypt(const std::vector<std::complex<double> >& values) {
     value_array[idx] = values[idx];
   }
   Ciphertext::scheme()->encrypt(ct, value_array, Ciphertext::num_slots(),
-                                /*logp=*/30, heaan::logQ);
+                                /*logp=*/30, /*logQ=*/800);
+  std::cout << "Slots: " << ct.n << std::endl;
   delete[] value_array;
   return Ciphertext(ct);
 }
