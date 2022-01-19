@@ -179,10 +179,9 @@ FlowNode *create_flatten(Flow &flow, onnx::NodeProto &onnx_node) {
   const FlowNode *par = get_parent_nodes(onnx_node)[0];
   return flow::CreateFlatten(flow, par);
 }
-/**
- * Specification of ONNX operations:
- * https://github.com/onnx/onnx/blob/master/docs/Operators.md
- */
+
+// Specification of ONNX operations:
+// https://github.com/onnx/onnx/blob/master/docs/Operators.md
 void create_node(Flow &flow, onnx::NodeProto &onnx_node) {
   FlowNode *new_node = nullptr;
 
@@ -235,11 +234,9 @@ int main(int argc, char **argv) {
   PANIC_IF(argc != 2,
            "Please provide filepath to *.onnx file as "
            "command-line argument!");
-  /**
-   * TODO(nsamar): For some reason, I get a logic_error for the
-   * model->graph() line if I do not print the value of has_graph(). This
-   * only occurs when running on resnet18.onnx.
-   */
+  // TODO(nsamar): For some reason, I get a logic_error for the
+  // model->graph() line if I do not print the value of has_graph(). This
+  // only occurs when running on resnet18.onnx.
   auto model = parse_model(argv[1]);
   std::cout << model->has_graph() << std::endl;
   if (!model->has_graph()) {
