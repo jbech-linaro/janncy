@@ -24,5 +24,6 @@ root of the repository, but that's not yet super reliable.
 
 [pre-commit]: https://pre-commit.com/
 [google-cpp]: https://google.github.io/styleguide/cppguide.html
+[clang-format]: https://clang.llvm.org/docs/ClangFormat.html
 [clang-format-vimrc]: https://github.com/n-samar/.config/blob/master/nvim/init.vim#L126-L128
 [vim-clang-format]: https://github.com/rhysd/vim-clang-format
