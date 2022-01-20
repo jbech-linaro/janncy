@@ -20,6 +20,9 @@ gtest_path = Path(".dependencies/googletest")
 gtest_headers = Path("{}/googletest/include".format(gtest_path))
 gtest_lib_path = Path("{}/build/lib".format(gtest_path))
 libgtest = Path("{}/libgtest.a".format(gtest_lib_path))
+ntl_path = Path(".dependencies/ntl")
+ntl_headers = Path("{}/include".format(ntl_path))
+ntl_lib_path = Path("{}/src/ntl.a".format(ntl_path))
 pip3_list_path = Path(".pip3_list")
 
 def cmd_allow_fail(cmd_str : str) -> str:
@@ -113,6 +116,12 @@ def install_gtest() -> None:
         cmd("mkdir -p {}/build".format(gtest_path))
         cmd("cd {}/build && cmake -DCMAKE_C_COMPILER='gcc' -DCMAKE_CXX_COMPILER='g++' .. && make".format(gtest_path))
 
+def install_ntl() -> None:
+    if not os.path.exists(ntl_path):
+        cmd("mkdir -p .dependencies && cd .dependencies && git clone git@github.com:libntl/ntl.git")
+    if not os.path.exists(ntl_lib_path):
+        cmd("cd .dependencies/ntl/src && ./configure && make -j8")
+
 def download_models() -> None:
     cmd("mkdir -p .pytorch")
     pytorch_path = Path(".pytorch")
@@ -136,6 +145,7 @@ def install_dependencies() -> None:
     install_graphviz()
     install_gtest()
     install_onnx()
+    install_ntl()
     install_heaan()
     install_torch()
     download_models()
@@ -153,6 +163,7 @@ env.Tool('compilation_db')
 env.CompilationDatabase()
 
 onnx_parser_cpps = [ "examples/onnx_parser.cc", ".dependencies/onnx/onnx/onnx.pb.cc", ".dependencies/onnx/onnx/defs/tensor_proto_util.cc", ".dependencies/onnx/onnx/defs/data_type_utils.cc", ".dependencies/onnx/onnx/defs/shape_inference.cc", ] + Glob("src/*.cc")
+env.Append(CPPPATH = [ ntl_headers ])
 env.Program(str(build_dir / "onnx_parser"), onnx_parser_cpps)
 
 env.Program(str(build_dir / "tests"), Glob("test/*.cc") + Glob("src/*.cc"))
