@@ -1,5 +1,6 @@
 #include "include/cipherfier.h"
 
+#include <cassert>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -14,7 +15,6 @@
 #include "include/fully_connected.h"
 #include "include/input.h"
 #include "include/max_pool.h"
-#include "include/ostream_utils.h"
 #include "include/panic.h"
 #include "include/relu.h"
 

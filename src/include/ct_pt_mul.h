@@ -11,11 +11,10 @@ class CtGraphVisitor;
 
 class CtPtMul : public CtOp {
  public:
-  CtPtMul();
+  void Accept(CtGraphVisitor& visitor) override;
+  std::string op_type() const override;
 
   std::vector<double> value() const;
-
-  void Accept(CtGraphVisitor& visitor) override;
 
  private:
   std::vector<double> value_;

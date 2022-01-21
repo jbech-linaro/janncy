@@ -14,12 +14,10 @@ class FlowNode {
   virtual std::string op_type() const = 0;
   virtual std::vector<int> shape() const = 0;
 
-  FlowNode() {}
-
   virtual ~FlowNode() {}
-
-  std::string str() const;
 };
+
+std::ostream& operator<<(std::ostream& stream, const FlowNode& node);
 
 }  // namespace janncy
 

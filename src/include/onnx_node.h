@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "onnx/defs/tensor_proto_util.h"
-#include "onnx/onnx_pb.h"
-#include "onnx/proto_utils.h"
+#include <onnx/defs/tensor_proto_util.h>
+#include <onnx/onnx_pb.h>
+#include <onnx/proto_utils.h>
 
 namespace janncy {
 

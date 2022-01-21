@@ -4,7 +4,10 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "include/ostream_utils.h"
+// Needs to include everything that overloads operator<<
+#include "ct_op.h"
+#include "graph.h"
+#include "utils.h"
 
 namespace janncy {
 

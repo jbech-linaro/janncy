@@ -1,11 +1,8 @@
 #ifndef JANNCY_GRAPH_H_
 #define JANNCY_GRAPH_H_
 
-#include <graphviz/cgraph.h>
-#include <graphviz/gvc.h>
-#include <graphviz/types.h>
-
 #include <algorithm>
+#include <cassert>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -41,30 +38,30 @@ class Graph {
     return raw_new_node;
   }
 
-  std::string str() const {
-    std::stringstream result;
-    for (auto& node : nodes_) {
-      result << node->str() << " -> ";
-      for (auto& child : node->get_children()) {
-        result << child->str() << ", ";
-      }
-      result << "\n";
-    }
-    return result.str();
-  }
-
-  const std::vector<const T*>& parents(const T* node) const {
-    return parent_map_.at(node);
+  std::vector<const T*> parents(const T* node) const {
+    auto& ref = parent_map_.at(node);
+    return std::vector<const T*>(ref.begin(), ref.end());
   }
   const std::vector<T*>& parents(const T* node) { return parent_map_.at(node); }
 
-  const std::vector<const T*>& children(const T* node) const {
-    return child_map_.at(node);
+  std::vector<const T*> children(const T* node) const {
+    auto& ref = child_map_.at(node);
+    return std::vector<const T*>(ref.begin(), ref.end());
   }
   const std::vector<T*>& children(const T* node) { return child_map_.at(node); }
 
-  std::vector<const T*> nodes() const { return GetRawNodePointers(); }
-  std::vector<T*> nodes() { return GetRawNodePointers(); }
+  std::vector<const T*> nodes() const {
+    std::vector<const T*> result(nodes_.size());
+    std::transform(nodes_.begin(), nodes_.end(), result.begin(),
+                   [](const auto& ptr) { return ptr.get(); });
+    return result;
+  }
+  std::vector<T*> nodes() {
+    std::vector<T*> result(nodes_.size());
+    std::transform(nodes_.begin(), nodes_.end(), result.begin(),
+                   [](const auto& ptr) { return ptr.get(); });
+    return result;
+  }
 
   bool Contains(const T* node) const { return child_map_.count(node) == 1; }
 
@@ -72,43 +69,15 @@ class Graph {
   std::vector<std::unique_ptr<T>> nodes_;
   std::unordered_map<const T*, std::vector<T*>> child_map_;
   std::unordered_map<const T*, std::vector<T*>> parent_map_;
-
-  std::vector<T*> GetRawNodePointers() const {
-    // TODO(nsamar): Use back inserter and an empty result{}
-    std::vector<T*> result(nodes_.size());
-    std::transform(nodes_.begin(), nodes_.end(), result.begin(),
-                   [](const auto& ptr) { return ptr.get(); });
-    return result;
-  }
 };
 
 template <class T>
-void Draw(Graph<T>& graph, const std::string& filename) {
-  std::unordered_map<const T*, Agnode_t*> node_map;
-  Agraph_t* g;
-  GVC_t* gvc;
-
-  gvc = gvContext();
-
-  g = agopen((char*)"g", Agdirected, nullptr);
-
-  for (auto& node : graph.nodes()) {
-    node_map[node] = agnode(g, const_cast<char*>((node->str()).c_str()), 1);
-    for (auto& child : graph.children(node)) {
-      node_map[child] = agnode(g, const_cast<char*>((child->str()).c_str()), 1);
-      agedge(g, node_map.at(node), node_map.at(child), 0, 1);
-    }
+std::ostream& operator<<(std::ostream& stream, const Graph<T>& graph) {
+  stream << "Graph{\n";
+  for (const T* node : graph.nodes()) {
+    stream << "  " << *node << " -> " << graph.children(node) << "\n";
   }
-  std::string filepath =
-      "-o/data/sanchez/users/nsamar/janncy/" + filename + ".pdf";
-  char* args[] = {(char*)"dot", (char*)"-Tpdf", (char*)filepath.c_str()};
-  gvParseArgs(gvc, sizeof(args) / sizeof(char*), args);
-
-  gvLayout(gvc, g, "dot");
-  gvRenderJobs(gvc, g);
-  gvFreeLayout(gvc, g);
-  agclose(g);
-  gvFreeContext(gvc);
+  return stream << "}";
 }
 
 }  // namespace janncy

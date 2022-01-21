@@ -5,11 +5,12 @@
 #include <string>
 #include <unordered_map>
 
-#include "onnx/defs/tensor_proto_util.h"
-#include "onnx/onnx_pb.h"
-#include "onnx/proto_utils.h"
+#include <onnx/defs/tensor_proto_util.h>
+#include <onnx/onnx_pb.h>
+#include <onnx/proto_utils.h>
 
 #include "include/cipherfier.h"
+#include "include/draw_graph.h"
 #include "include/flow.h"
 #include "include/graph.h"
 #include "include/onnx_graph.h"
@@ -215,8 +216,7 @@ void CreateNode(Flow &flow, onnx::NodeProto &onnx_node) {
 
 std::unique_ptr<onnx::ModelProto> ParseModel(const std::string &filepath) {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
-  bool file_exists = std::experimental::filesystem::exists(
-      std::experimental::filesystem::path(filepath));
+  bool file_exists = std::experimental::filesystem::exists(filepath);
   PANIC_IF(!file_exists, "ONNX file does not exist!", filepath);
 
   std::ifstream in(filepath, std::ios::ate | std::ios::binary);
@@ -277,18 +277,17 @@ int main(int argc, char **argv) {
            "command-line argument!");
   auto model = ParseModel(argv[1]);
   std::cout << model->has_graph() << std::endl;
-  if (!model->has_graph()) {
-    PANIC("Model does not have a graph!");
-  }
+  PANIC_IF(!model->has_graph(), "Model does not have a graph!");
+
   auto graph = model->graph();
 
   auto flow = OnnxGraph::MakeFlow(&graph);
 
   google::protobuf::ShutdownProtobufLibrary();
-  janncy::Draw(*flow, "flow");
+  janncy::DrawGraph(*flow, "flow");
   std::cerr << "Nodes in flow: " << flow->nodes().size() << "\n";
   CtGraph ct_graph = Cipherfier::Cipherfy(*flow);
 
-  janncy::Draw(ct_graph, "ct_graph");
+  janncy::DrawGraph(ct_graph, "ct_graph");
   std::cerr << "Nodes in ct_graph: " << ct_graph.nodes().size() << "\n";
 }

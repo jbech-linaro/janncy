@@ -1,22 +1,13 @@
 #include "include/flow_node.h"
 
-#include <sstream>
-#include <string>
+#include <ostream>
+
+#include "include/utils.h"
 
 namespace janncy {
 
-std::string FlowNode::str() const {
-  std::stringstream result;
-  result << "[" << this << "] ";
-  result << op_type();
-  if (op_type() != "Input") {
-    result << "(";
-    for (auto& value : shape()) {
-      result << value << ", ";
-    }
-    result << ")";
-  }
-  return result.str();
+std::ostream& operator<<(std::ostream& stream, const FlowNode& node) {
+  return stream << node.op_type() << "@" << &node << " " << node.shape();
 }
 
 }  // namespace janncy

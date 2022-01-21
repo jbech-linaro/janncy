@@ -5,8 +5,7 @@
 
 namespace janncy {
 
-CtInput::CtInput() : CtOp("CtInput"){};
-
 void CtInput::Accept(CtGraphVisitor& visitor) { return visitor.Visit(*this); }
+std::string CtInput::op_type() const { return "CtInput"; }
 
 }  // namespace janncy

@@ -6,9 +6,9 @@
 #include <unordered_map>
 #include <vector>
 
-#include "onnx/defs/tensor_proto_util.h"
-#include "onnx/onnx_pb.h"
-#include "onnx/proto_utils.h"
+#include <onnx/defs/tensor_proto_util.h>
+#include <onnx/onnx_pb.h>
+#include <onnx/proto_utils.h>
 
 #include "include/flow.h"
 #include "include/onnx_node.h"
@@ -41,4 +41,3 @@ class OnnxGraph {
 }  // namespace janncy
 
 #endif  // JANNCY_ONNX_GRAPH_H_
-

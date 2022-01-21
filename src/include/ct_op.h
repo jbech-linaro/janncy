@@ -1,27 +1,22 @@
 #ifndef JANNCY_CT_OP_H_
 #define JANNCY_CT_OP_H_
 
+#include <ostream>
 #include <string>
-#include <vector>
 
 namespace janncy {
-
-template <class T>
-class Graph;
 
 class CtGraphVisitor;
 
 class CtOp {
  public:
-  CtOp(std::string type_str);
   virtual ~CtOp(){};
 
   virtual void Accept(CtGraphVisitor& visitor) = 0;
-  std::string str() const;
-
- private:
-  std::string type_str_;
+  virtual std::string op_type() const = 0;
 };
+
+std::ostream& operator<<(std::ostream& stream, const CtOp& op);
 
 }  // namespace janncy
 

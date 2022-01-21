@@ -2,9 +2,9 @@
 
 #include <string>
 
-#include "onnx/defs/tensor_proto_util.h"
-#include "onnx/onnx_pb.h"
-#include "onnx/proto_utils.h"
+#include <onnx/defs/tensor_proto_util.h>
+#include <onnx/onnx_pb.h>
+#include <onnx/proto_utils.h>
 
 #include "include/panic.h"
 
@@ -108,4 +108,3 @@ std::string OnnxNode::op_type() const { return node_proto_->op_type(); }
 std::string OnnxNode::name() const { return node_proto_->name(); }
 
 }  // namespace janncy
-

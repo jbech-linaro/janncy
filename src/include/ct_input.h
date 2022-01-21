@@ -14,9 +14,8 @@ class Graph;
 
 class CtInput : public CtOp {
  public:
-  CtInput();
-
   void Accept(CtGraphVisitor& visitor) override;
+  std::string op_type() const override;
 };
 
 }  // namespace janncy
