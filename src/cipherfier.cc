@@ -46,7 +46,7 @@ const CtTensor& Cipherfier::get_parent_tensor(const FlowNode& node) const {
 }
 const CtTensor& Cipherfier::get_parent_tensor(const FlowNode& node,
                                               int parent_ind) const {
-  return tensor_map_.at(flow_.parents(&node)[parent_ind]);
+  return tensor_map_.at(flow_.parents(node)[parent_ind]);
 }
 
 const CtOp& SumCiphertexts(CtGraph& ct_graph,

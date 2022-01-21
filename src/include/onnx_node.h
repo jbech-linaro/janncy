@@ -20,7 +20,7 @@ namespace janncy {
 // these values to the attributes in OnnxNode.
 class OnnxNode {
  public:
-  OnnxNode(const onnx::NodeProto* node_proto, std::vector<Shape> input_shapes);
+  OnnxNode(const onnx::NodeProto& node_proto, std::vector<Shape> input_shapes);
   explicit OnnxNode(Shape shape);
 
   std::vector<std::string> input() const;

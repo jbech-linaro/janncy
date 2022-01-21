@@ -35,37 +35,37 @@ void CleartextEvaluator::Visit(const CtInput& node) {
 }
 
 void CleartextEvaluator::Visit(const CtAdd& node) {
-  auto p0 = node_map_[ct_graph_.parents(&node)[0]];
-  auto p1 = node_map_[ct_graph_.parents(&node)[1]];
+  auto p0 = node_map_[ct_graph_.parents(node)[0]];
+  auto p1 = node_map_[ct_graph_.parents(node)[1]];
   std::transform(p0.begin(), p0.end(), p1.begin(),
                  std::back_inserter(node_map_[&node]),
                  std::plus<MessageElement>());
 }
 
 void CleartextEvaluator::Visit(const CtMul& node) {
-  auto p0 = node_map_[ct_graph_.parents(&node)[0]];
-  auto p1 = node_map_[ct_graph_.parents(&node)[1]];
+  auto p0 = node_map_[ct_graph_.parents(node)[0]];
+  auto p1 = node_map_[ct_graph_.parents(node)[1]];
   std::transform(p0.begin(), p0.end(), p1.begin(),
                  std::back_inserter(node_map_[&node]),
                  std::multiplies<MessageElement>());
 }
 
 void CleartextEvaluator::Visit(const CtRotate& node) {
-  auto p = ct_graph_.parents(&node)[0];
+  auto p = ct_graph_.parents(node)[0];
   node_map_[&node] = node_map_[p];
   std::rotate(node_map_[&node].begin(), node_map_[&node].begin() + node.amt(),
               node_map_[&node].end());
 }
 
 void CleartextEvaluator::Visit(const CtPtAdd& node) {
-  auto p = node_map_[ct_graph_.parents(&node)[0]];
+  auto p = node_map_[ct_graph_.parents(node)[0]];
   std::transform(p.begin(), p.end(), node.value().begin(),
                  std::back_inserter(node_map_[&node]),
                  std::plus<MessageElement>());
 }
 
 void CleartextEvaluator::Visit(const CtPtMul& node) {
-  auto p = node_map_[ct_graph_.parents(&node)[0]];
+  auto p = node_map_[ct_graph_.parents(node)[0]];
   std::transform(p.begin(), p.end(), node.value().begin(),
                  std::back_inserter(node_map_[&node]),
                  std::multiplies<MessageElement>());
@@ -76,7 +76,7 @@ std::vector<Message> CleartextEvaluator::result() const {
   auto childless = std::vector<std::pair<const CtOp*, Message>>();
   std::copy_if(
       node_map_.begin(), node_map_.end(), std::back_inserter(childless),
-      [&](auto& x) { return ct_graph_.children(x.first).size() == 0; });
+      [&](auto& x) { return ct_graph_.children(*x.first).size() == 0; });
   auto result = std::vector<Message>();
   std::transform(childless.begin(), childless.end(), std::back_inserter(result),
                  [&](auto& x) { return x.second; });

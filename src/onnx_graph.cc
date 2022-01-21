@@ -217,7 +217,7 @@ void OnnxGraph::LoadNodes() {
     for (const auto& input_name : node_proto.input()) {
       input_shapes.push_back(shape_map_.at(input_name));
     }
-    nodes_.push_back(new OnnxNode(&node_proto, input_shapes));
+    nodes_.push_back(new OnnxNode(node_proto, input_shapes));
     std::cout << node_proto.name() << std::endl;
     onnxnode_map_[nodes_.back()->output()[0]] = nodes_.back();
     AddFlowNode(*nodes_.back());

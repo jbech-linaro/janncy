@@ -24,7 +24,7 @@ void DrawGraph(const Graph<T>& graph, const std::string& filename) {
     Agnode_t* g_node = agnode(g, ToString(node).data(), 1);
     agsafeset(g_node, (char*)"label", ToString(*node).data(), (char*)"");
 
-    for (const T* child : graph.children(node)) {
+    for (const T* child : graph.children(*node)) {
       Agnode_t* g_child = agnode(g, ToString(child).data(), 1);
       agedge(g, g_node, g_child, 0, 1);
     }

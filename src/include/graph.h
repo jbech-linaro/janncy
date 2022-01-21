@@ -32,11 +32,11 @@ class Graph {
     return *raw_new_node;
   }
 
-  const std::vector<const T*>& parents(const T* node) const {
-    return parent_map_.at(node);
+  const std::vector<const T*>& parents(const T& node) const {
+    return parent_map_.at(&node);
   }
-  std::vector<const T*> children(const T* node) const {
-    return child_map_.at(node);
+  const std::vector<const T*>& children(const T& node) const {
+    return child_map_.at(&node);
   }
   std::vector<const T*> nodes() const {
     std::vector<const T*> result(nodes_.size());
@@ -44,7 +44,7 @@ class Graph {
                    [](const auto& ptr) { return ptr.get(); });
     return result;
   }
-  bool Contains(const T* node) const { return child_map_.count(node) == 1; }
+  bool Contains(const T& node) const { return child_map_.count(node) == 1; }
 
  private:
   std::vector<std::unique_ptr<T>> nodes_;

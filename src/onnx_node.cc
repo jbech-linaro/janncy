@@ -22,10 +22,15 @@ const std::string ATTR_AXIS = "axis";
 
 }  // namespace
 
-OnnxNode::OnnxNode(const onnx::NodeProto* node_proto,
+OnnxNode::OnnxNode(const onnx::NodeProto& node_proto,
                    std::vector<Shape> input_shapes)
-    : node_proto_(node_proto), input_shapes_(std::move(input_shapes)) {}
+    : node_proto_(&node_proto), input_shapes_(std::move(input_shapes)) {}
 
+// TODO(nsamar): This constructor should not exist, it is just a hack
+// to be able to put onnx inputs into OnnxNode objects (hack needed
+// because onnx inputs are not onnx::NodeProto's). When the need for the
+// hack is removed, remove this constructor as well and make node_proto_
+// a const reference instead of a pointer.
 OnnxNode::OnnxNode(Shape shape)
     : node_proto_(nullptr), input_shapes_({}), shape_(std::move(shape)) {}
 
@@ -39,6 +44,9 @@ std::vector<std::string> OnnxNode::output() const {
   return result;
 }
 
+// TODO(nsamar): Is this, and other functions here,
+// really required to return nullptr or not? If not, change to return a
+// const reference
 const onnx::AttributeProto* OnnxNode::attribute(
     const std::string& attr_name) const {
   for (const auto& attr : node_proto_->attribute()) {
