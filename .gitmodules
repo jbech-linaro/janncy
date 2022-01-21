@@ -1,0 +1,12 @@
+[submodule "onnx"]
+	path = onnx
+	url = https://github.com/onnx/onnx.git
+[submodule "HEAAN"]
+	path = HEAAN
+	url = https://github.com/n-samar/HEAAN.git
+[submodule "googletest"]
+	path = googletest
+	url = https://github.com/google/googletest.git
+[submodule "ntl"]
+	path = ntl
+	url = https://github.com/libntl/ntl.git
