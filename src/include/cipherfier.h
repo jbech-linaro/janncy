@@ -34,23 +34,6 @@ class Cipherfier : public FlowVisitor {
 
   const CtTensor& get_parent_tensor(const FlowNode& node) const;
   const CtTensor& get_parent_tensor(const FlowNode& node, int parent_ind) const;
-
-  const CtOp* SumCiphertexts(const std::vector<const CtOp*>& cts);
-
-  // slot i of result is the sum of ct[i:i + sum_length]
-  // Should also be doable with strides
-  const CtOp* PrefixSums(const CtOp* ct, int sum_length);
-
-  // return a ct consisting of the first element from each of `cts`
-  // Assumes the remaining elements are all 0s
-  const CtOp* FlattenSlots(const std::vector<const CtOp*>& cts);
-  const CtOp* ApplyFilter(const CtTensor& input,
-                          const KernelAttributes& kernel);
-
-  // return {ct^1, ct^2, ..., ct^degree}
-  std::vector<const CtOp*> CtPowers(const CtOp* ct, int degree);
-  const CtOp* PolyEval(const CtOp* parent, int degree);
-  const CtOp* ReluPolynomial(CtGraph& ct_graph, const CtOp* parent);
 };
 
 }  // namespace janncy

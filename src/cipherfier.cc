@@ -1,5 +1,6 @@
 #include "include/cipherfier.h"
 
+#include <algorithm>
 #include <cassert>
 #include <string>
 #include <unordered_map>
@@ -48,7 +49,8 @@ const CtTensor& Cipherfier::get_parent_tensor(const FlowNode& node,
   return tensor_map_.at(flow_.parents(&node)[parent_ind]);
 }
 
-const CtOp* Cipherfier::SumCiphertexts(const std::vector<const CtOp*>& cts) {
+const CtOp* SumCiphertexts(CtGraph& ct_graph,
+                           const std::vector<const CtOp*>& cts) {
   assert(!cts.empty());
   if (cts.size() == 1) {
     return cts[0];
@@ -57,32 +59,38 @@ const CtOp* Cipherfier::SumCiphertexts(const std::vector<const CtOp*>& cts) {
     std::vector<const CtOp*> first_half(cts.begin(), cts_mid);
     std::vector<const CtOp*> second_half(cts_mid, cts.end());
 
-    return ct_graph::CreateAdd(ct_graph_, SumCiphertexts(first_half),
-                               SumCiphertexts(second_half));
+    return ct_graph::CreateAdd(ct_graph, SumCiphertexts(ct_graph, first_half),
+                               SumCiphertexts(ct_graph, second_half));
   }
 }
-const CtOp* Cipherfier::PrefixSums(const CtOp* ct, int sum_length) {
+
+// slot i of result is the sum of ct[i:i + sum_length]
+// Should also be doable with strides
+const CtOp* PrefixSums(CtGraph& ct_graph, const CtOp* ct, int sum_length) {
   int current_sum_length = 1;
   while (current_sum_length < sum_length) {
     int rotate_by =
         std::min(current_sum_length, sum_length - current_sum_length);
     current_sum_length += rotate_by;
-    ct = ct_graph::CreateAdd(ct_graph_, ct,
-                             ct_graph::CreateRotate(ct_graph_, ct));
+    ct =
+        ct_graph::CreateAdd(ct_graph, ct, ct_graph::CreateRotate(ct_graph, ct));
   }
   assert(current_sum_length == sum_length);
   return ct;
 }
-const CtOp* Cipherfier::FlattenSlots(const std::vector<const CtOp*>& cts) {
+// return a ct consisting of the first element from each of `cts`
+// Assumes the remaining elements are all 0s
+const CtOp* FlattenSlots(CtGraph& ct_graph,
+                         const std::vector<const CtOp*>& cts) {
   std::vector<const CtOp*> slots;
   for (const CtOp* ct : cts) {
-    slots.push_back(ct_graph::CreateRotate(ct_graph_, ct));
+    slots.push_back(ct_graph::CreateRotate(ct_graph, ct));
   }
-  return SumCiphertexts(slots);
+  return SumCiphertexts(ct_graph, slots);
 }
 
-const CtOp* Cipherfier::ApplyFilter(const CtTensor& input,
-                                    const KernelAttributes& kernel) {
+const CtOp* ApplyFilter(CtGraph& ct_graph, const CtTensor& input,
+                        const KernelAttributes& kernel) {
   int kernel_size = 1;
   for (int d : kernel.kernel_shape()) {
     kernel_size *= d;
@@ -90,40 +98,42 @@ const CtOp* Cipherfier::ApplyFilter(const CtTensor& input,
   std::vector<const CtOp*> partial_filters;
   for (const CtOp* channel : input.ciphertexts()) {
     for (int i = 0; i < kernel_size; ++i) {
-      const CtOp* rotated = ct_graph::CreateRotate(ct_graph_, channel);
-      const CtOp* multiplied = ct_graph::CreatePtMul(ct_graph_, rotated);
+      const CtOp* rotated = ct_graph::CreateRotate(ct_graph, channel);
+      const CtOp* multiplied = ct_graph::CreatePtMul(ct_graph, rotated);
       partial_filters.push_back(multiplied);
     }
   }
-  return SumCiphertexts(partial_filters);
+  return SumCiphertexts(ct_graph, partial_filters);
 }
 
-std::vector<const CtOp*> Cipherfier::CtPowers(const CtOp* ct, int degree) {
+// return {ct^1, ct^2, ..., ct^degree}
+std::vector<const CtOp*> CtPowers(CtGraph& ct_graph, const CtOp* ct,
+                                  int degree) {
   if (degree == 1) {
     return {ct};
   }
   int low_degrees = (degree + 1) / 2;  // ceil(degree / 2)
-  std::vector<const CtOp*> powers = CtPowers(ct, low_degrees);
+  std::vector<const CtOp*> powers = CtPowers(ct_graph, ct, low_degrees);
   const CtOp* mid_power = powers.back();
   for (int i = low_degrees; i < degree; ++i) {
     powers.push_back(
-        ct_graph::CreateMul(ct_graph_, powers[i - low_degrees], mid_power));
+        ct_graph::CreateMul(ct_graph, powers[i - low_degrees], mid_power));
   }
   return powers;
 }
-const CtOp* Cipherfier::PolyEval(const CtOp* parent, int degree) {
+const CtOp* PolyEval(CtGraph& ct_graph, const CtOp* parent, int degree) {
   std::vector<const CtOp*> multiplied_powers;
-  for (const CtOp* p : CtPowers(parent, degree)) {
-    multiplied_powers.push_back(ct_graph::CreatePtMul(ct_graph_, p));
+  for (const CtOp* p : CtPowers(ct_graph, parent, degree)) {
+    multiplied_powers.push_back(ct_graph::CreatePtMul(ct_graph, p));
   }
-  const CtOp* summed_powers = SumCiphertexts(multiplied_powers);
-  return ct_graph::CreatePtAdd(ct_graph_,
+  const CtOp* summed_powers = SumCiphertexts(ct_graph, multiplied_powers);
+  return ct_graph::CreatePtAdd(ct_graph,
                                summed_powers);  // add in constant factor
 }
-const CtOp* Cipherfier::ReluPolynomial(CtGraph& ct_graph, const CtOp* parent) {
-  const CtOp* first_poly = PolyEval(parent, 16);
-  const CtOp* second_poly = PolyEval(first_poly, 7);
-  const CtOp* third_poly = PolyEval(second_poly, 7);
+const CtOp* ReluPolynomial(CtGraph& ct_graph, const CtOp* parent) {
+  const CtOp* first_poly = PolyEval(ct_graph, parent, 16);
+  const CtOp* second_poly = PolyEval(ct_graph, first_poly, 7);
+  const CtOp* third_poly = PolyEval(ct_graph, second_poly, 7);
   return third_poly;
 }
 
@@ -132,7 +142,8 @@ void Cipherfier::Visit(const ConvLayer& node) {
   int output_channel_cnt = node.shape()[0];
   std::vector<const CtOp*> output_channels;
   for (int i = 0; i < output_channel_cnt; ++i) {
-    output_channels.push_back(ApplyFilter(parent_tensor, node.kernel()));
+    output_channels.push_back(
+        ApplyFilter(ct_graph_, parent_tensor, node.kernel()));
   }
   tensor_map_.emplace(&node, CtTensor(std::move(output_channels)));
 }
@@ -178,26 +189,33 @@ void Cipherfier::Visit(const FullyConnected& node) {
   std::vector<const CtOp*> slots;
   for (int i = 0; i < node.output_size(); i++) {
     const CtOp* weighted_row = ct_graph::CreatePtMul(ct_graph_, input_ct);
-    const CtOp* summed = PrefixSums(weighted_row, node.input_size());
+    const CtOp* summed = PrefixSums(ct_graph_, weighted_row, node.input_size());
     const CtOp* masked = ct_graph::CreatePtMul(ct_graph_, summed);
     slots.push_back(masked);
   }
-  tensor_map_.emplace(&node, CtTensor({FlattenSlots(slots)}));
+  tensor_map_.emplace(&node, CtTensor({FlattenSlots(ct_graph_, slots)}));
 }
 
 void Cipherfier::Visit(const Flatten& node) {
   // alex: Not super correct, but forces things into a single CT as expected
   // by FullyConnected
-  const CtOp* result = FlattenSlots(get_parent_tensor(node).ciphertexts());
+  const CtOp* result =
+      FlattenSlots(ct_graph_, get_parent_tensor(node).ciphertexts());
   tensor_map_.emplace(&node, CtTensor({result}));
 }
 
 void Cipherfier::Visit(const BatchNormalization& node) {
+  const std::vector<const CtOp*>& par_cts =
+      get_parent_tensor(node).ciphertexts();
+
   std::vector<const CtOp*> result;
-  for (const CtOp* ct : get_parent_tensor(node).ciphertexts()) {
-    result.push_back(
-        ct_graph::CreatePtMul(ct_graph_, ct_graph::CreatePtAdd(ct_graph_, ct)));
-  }
+  result.reserve(par_cts.size());
+  std::transform(par_cts.begin(), par_cts.end(), std::back_inserter(result),
+                 [this](const CtOp* ct) {
+                   return ct_graph::CreatePtMul(
+                       ct_graph_, ct_graph::CreatePtAdd(ct_graph_, ct));
+                 });
+
   tensor_map_.emplace(&node, CtTensor(result));
 }
 
