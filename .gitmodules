@@ -1,12 +1,16 @@
 [submodule "onnx"]
 	path = onnx
 	url = https://github.com/onnx/onnx.git
+	ignore = dirty
 [submodule "HEAAN"]
 	path = HEAAN
 	url = https://github.com/n-samar/HEAAN.git
+	ignore = dirty
 [submodule "googletest"]
 	path = googletest
 	url = https://github.com/google/googletest.git
+	ignore = dirty
 [submodule "ntl"]
 	path = ntl
 	url = https://github.com/libntl/ntl.git
+	ignore = dirty
