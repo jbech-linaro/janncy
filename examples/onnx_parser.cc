@@ -45,13 +45,15 @@ int main(int argc, char** argv) {
 
   auto graph = model->graph();
 
-  auto flow = OnnxGraph::MakeFlow(&graph);
+  auto flow = OnnxGraph::MakeFlow(graph);
 
   google::protobuf::ShutdownProtobufLibrary();
   janncy::DrawGraph(*flow, "flow");
   std::cerr << "Nodes in flow: " << flow->nodes().size() << "\n";
+  /*
   CtGraph ct_graph = Cipherfier::Cipherfy(*flow);
 
   janncy::DrawGraph(ct_graph, "ct_graph");
   std::cerr << "Nodes in ct_graph: " << ct_graph.nodes().size() << "\n";
+  */
 }

@@ -20,21 +20,21 @@ class FlowNode;
 
 class OnnxGraph {
  public:
-  static std::unique_ptr<Flow> MakeFlow(onnx::GraphProto* graph_proto);
+  static std::unique_ptr<Flow> MakeFlow(const onnx::GraphProto& graph_proto);
 
  private:
-  explicit OnnxGraph(onnx::GraphProto* graph);
-  std::vector<OnnxNode*> Parents(const OnnxNode* node);
-  std::vector<const FlowNode*> FlownodeParents(const OnnxNode* node);
+  explicit OnnxGraph(const onnx::GraphProto& graph);
+  std::vector<const OnnxNode*> Parents(const OnnxNode& node);
+  std::vector<const FlowNode*> FlownodeParents(const OnnxNode& node);
   void LoadInitializers();
   void LoadNodes();
   void LoadInputs();
-  void AddFlowNode(const OnnxNode* onnx_node);
+  void AddFlowNode(const OnnxNode& onnx_node);
 
-  onnx::GraphProto* graph_;
+  const onnx::GraphProto& graph_;
   std::unique_ptr<Flow> flow_;
   std::vector<OnnxNode*> nodes_;
-  std::unordered_map<std::string, OnnxNode*> onnxnode_map_;
+  std::unordered_map<std::string, const OnnxNode*> onnxnode_map_;
   std::unordered_map<const OnnxNode*, const FlowNode*> flownode_map_;
   std::unordered_map<std::string, Shape> shape_map_;
 };

@@ -15,7 +15,7 @@ template <class T>
 class Graph {
  public:
   // Transfers ownership of `new_node` to the Graph object
-  const T* AddNode(std::unique_ptr<T> new_node,
+  const T& AddNode(std::unique_ptr<T> new_node,
                    const std::vector<const T*>& parents) {
     const T* raw_new_node = new_node.get();
     nodes_.emplace_back(std::move(new_node));
@@ -29,7 +29,7 @@ class Graph {
       parent_map_[raw_new_node].push_back(parent);
     }
 
-    return raw_new_node;
+    return *raw_new_node;
   }
 
   const std::vector<const T*>& parents(const T* node) const {

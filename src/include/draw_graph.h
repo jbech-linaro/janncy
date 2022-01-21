@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <experimental/filesystem>
+#include <iostream>
 #include <string>
 
 #include <graphviz/cgraph.h>
@@ -28,8 +29,7 @@ void DrawGraph(const Graph<T>& graph, const std::string& filename) {
       agedge(g, g_node, g_child, 0, 1);
     }
   }
-  std::string output_dir =
-      "/data/sanchez/users/" + std::string(getenv("USER")) + "/janncy_graphs";
+  std::string output_dir = "../janncy_graphs";
   std::experimental::filesystem::create_directories(output_dir);
   std::string filepath_arg = "-o" + output_dir + "/" + filename + ".pdf";
 

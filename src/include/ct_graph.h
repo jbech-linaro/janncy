@@ -12,14 +12,14 @@ using CtGraph = Graph<CtOp>;
 
 namespace ct_graph {
 
-const CtOp* CreateInput(CtGraph& ct_graph);
-const CtOp* CreateAdd(CtGraph& ct_graph, const CtOp* parent_1,
-                      const CtOp* parent_2);
-const CtOp* CreateMul(CtGraph& ct_graph, const CtOp* parent_1,
-                      const CtOp* parent_2);
-const CtOp* CreatePtAdd(CtGraph& ct_graph, const CtOp* parent);
-const CtOp* CreatePtMul(CtGraph& ct_graph, const CtOp* parent);
-const CtOp* CreateRotate(CtGraph& ct_graph, const CtOp* parent);
+const CtOp& CreateInput(CtGraph& ct_graph);
+const CtOp& CreateAdd(CtGraph& ct_graph, const CtOp& parent_1,
+                      const CtOp& parent_2);
+const CtOp& CreateMul(CtGraph& ct_graph, const CtOp& parent_1,
+                      const CtOp& parent_2);
+const CtOp& CreatePtAdd(CtGraph& ct_graph, const CtOp& parent);
+const CtOp& CreatePtMul(CtGraph& ct_graph, const CtOp& parent);
+const CtOp& CreateRotate(CtGraph& ct_graph, const CtOp& parent);
 
 }  // namespace ct_graph
 
