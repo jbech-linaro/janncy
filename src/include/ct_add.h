@@ -11,11 +11,8 @@ class CtGraphVisitor;
 
 class CtAdd : public CtOp {
  public:
-  CtAdd();
-
-  void Accept(CtGraphVisitor& visitor) override;
-
- private:
+  void Accept(CtGraphVisitor& visitor) const override;
+  std::string op_type() const override;
 };
 
 }  // namespace janncy

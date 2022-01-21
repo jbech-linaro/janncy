@@ -5,10 +5,10 @@
 
 namespace janncy {
 
-CtPtAdd::CtPtAdd() : CtOp("CtPtAdd"){};
+void CtPtAdd::Accept(CtGraphVisitor& visitor) const {
+  return visitor.Visit(*this);
+}
+std::string CtPtAdd::op_type() const { return "CtPtAdd"; }
 
 std::vector<double> CtPtAdd::value() const { return value_; }
-
-void CtPtAdd::Accept(CtGraphVisitor& visitor) { return visitor.Visit(*this); }
-
 }  // namespace janncy

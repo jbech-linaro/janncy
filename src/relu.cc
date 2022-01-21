@@ -9,7 +9,7 @@ namespace janncy {
 
 ReLU::ReLU(std::vector<int> shape) : shape_(std::move(shape)) {}
 
-void ReLU::Accept(FlowVisitor& visitor) { visitor.Visit(*this); }
+void ReLU::Accept(FlowVisitor& visitor) const { visitor.Visit(*this); }
 
 std::string ReLU::op_type() const { return "Relu"; }
 

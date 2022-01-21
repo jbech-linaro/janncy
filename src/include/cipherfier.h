@@ -13,24 +13,24 @@ namespace janncy {
 
 class Cipherfier : public FlowVisitor {
  public:
-  static CtGraph Cipherfy(Flow& flow);
+  static CtGraph Cipherfy(const Flow& flow);
 
-  void Visit(ConvLayer& node) override;
-  void Visit(FullyConnected& node) override;
-  void Visit(AveragePool& node) override;
-  void Visit(BatchNormalization& node) override;
-  void Visit(Add& node) override;
-  void Visit(Input& node) override;
-  void Visit(ReLU& node) override;
-  void Visit(MaxPool& node) override;
-  void Visit(Flatten& node) override;
+  void Visit(const ConvLayer& node) override;
+  void Visit(const FullyConnected& node) override;
+  void Visit(const AveragePool& node) override;
+  void Visit(const BatchNormalization& node) override;
+  void Visit(const Add& node) override;
+  void Visit(const Input& node) override;
+  void Visit(const ReLU& node) override;
+  void Visit(const MaxPool& node) override;
+  void Visit(const Flatten& node) override;
 
  private:
   CtGraph ct_graph_;
-  Flow& flow_;
+  const Flow& flow_;
   std::unordered_map<const FlowNode*, CtTensor> tensor_map_;
 
-  Cipherfier(Flow& flow);
+  Cipherfier(const Flow& flow);
 
   const CtTensor& get_parent_tensor(const FlowNode& node) const;
   const CtTensor& get_parent_tensor(const FlowNode& node, int parent_ind) const;

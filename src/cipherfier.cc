@@ -1,5 +1,6 @@
 #include "include/cipherfier.h"
 
+#include <cassert>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -14,7 +15,6 @@
 #include "include/fully_connected.h"
 #include "include/input.h"
 #include "include/max_pool.h"
-#include "include/ostream_utils.h"
 #include "include/panic.h"
 #include "include/relu.h"
 
@@ -22,9 +22,9 @@ namespace janncy {
 
 static const std::string kAllKeysAddedStamp = "serkey/AllKeysAddedStamp";
 
-CtGraph Cipherfier::Cipherfy(Flow& flow) {
+CtGraph Cipherfier::Cipherfy(const Flow& flow) {
   Cipherfier cipherfier(flow);
-  for (FlowNode* node : flow.nodes()) {
+  for (const FlowNode* node : flow.nodes()) {
     int old_graph_size = cipherfier.ct_graph_.nodes().size();
     std::cout << "Visiting " << node->op_type() << "(" << node << ") "
               << node->shape() << "; ";
@@ -38,7 +38,7 @@ CtGraph Cipherfier::Cipherfy(Flow& flow) {
   return std::move(cipherfier.ct_graph_);
 }
 
-Cipherfier::Cipherfier(Flow& flow) : flow_(flow) {}
+Cipherfier::Cipherfier(const Flow& flow) : flow_(flow) {}
 
 const CtTensor& Cipherfier::get_parent_tensor(const FlowNode& node) const {
   return get_parent_tensor(node, 0);
@@ -90,8 +90,8 @@ const CtOp* Cipherfier::ApplyFilter(const CtTensor& input,
   std::vector<const CtOp*> partial_filters;
   for (const CtOp* channel : input.ciphertexts()) {
     for (int i = 0; i < kernel_size; ++i) {
-      CtOp* rotated = ct_graph::CreateRotate(ct_graph_, channel);
-      CtOp* multiplied = ct_graph::CreatePtMul(ct_graph_, rotated);
+      const CtOp* rotated = ct_graph::CreateRotate(ct_graph_, channel);
+      const CtOp* multiplied = ct_graph::CreatePtMul(ct_graph_, rotated);
       partial_filters.push_back(multiplied);
     }
   }
@@ -127,7 +127,7 @@ const CtOp* Cipherfier::ReluPolynomial(CtGraph& ct_graph, const CtOp* parent) {
   return third_poly;
 }
 
-void Cipherfier::Visit(ConvLayer& node) {
+void Cipherfier::Visit(const ConvLayer& node) {
   const CtTensor& parent_tensor = get_parent_tensor(node);
   int output_channel_cnt = node.shape()[0];
   std::vector<const CtOp*> output_channels;
@@ -137,7 +137,7 @@ void Cipherfier::Visit(ConvLayer& node) {
   tensor_map_.emplace(&node, CtTensor(std::move(output_channels)));
 }
 
-void Cipherfier::Visit(AveragePool& node) {
+void Cipherfier::Visit(const AveragePool& node) {
   // TODO(alex): verify correctness and make it work for non-global Average pool
   // TODO(alex): make it work for non 2D stuff (or explicitly decide not to
   // support
@@ -164,13 +164,13 @@ void Cipherfier::Visit(AveragePool& node) {
   */
 }
 
-void Cipherfier::Visit(MaxPool& node) {
+void Cipherfier::Visit(const MaxPool& node) {
   // TODO(nsamar): this node is currently just bypassed
   CtTensor tensor = get_parent_tensor(node);  // copies parent tensor
   tensor_map_.emplace(&node, tensor);
 }
 
-void Cipherfier::Visit(FullyConnected& node) {
+void Cipherfier::Visit(const FullyConnected& node) {
   const CtTensor& parent_tensor = get_parent_tensor(node);
   PANIC_IF(parent_tensor.ciphertexts().size() != 1);
   const CtOp* input_ct = parent_tensor.ciphertexts()[0];
@@ -185,14 +185,14 @@ void Cipherfier::Visit(FullyConnected& node) {
   tensor_map_.emplace(&node, CtTensor({FlattenSlots(slots)}));
 }
 
-void Cipherfier::Visit(Flatten& node) {
+void Cipherfier::Visit(const Flatten& node) {
   // alex: Not super correct, but forces things into a single CT as expected
   // by FullyConnected
   const CtOp* result = FlattenSlots(get_parent_tensor(node).ciphertexts());
   tensor_map_.emplace(&node, CtTensor({result}));
 }
 
-void Cipherfier::Visit(BatchNormalization& node) {
+void Cipherfier::Visit(const BatchNormalization& node) {
   std::vector<const CtOp*> result;
   for (const CtOp* ct : get_parent_tensor(node).ciphertexts()) {
     result.push_back(
@@ -201,7 +201,7 @@ void Cipherfier::Visit(BatchNormalization& node) {
   tensor_map_.emplace(&node, CtTensor(result));
 }
 
-void Cipherfier::Visit(Add& node) {
+void Cipherfier::Visit(const Add& node) {
   const std::vector<const CtOp*>& p0_cts =
       get_parent_tensor(node, 0).ciphertexts();
   const std::vector<const CtOp*>& p1_cts =
@@ -214,7 +214,7 @@ void Cipherfier::Visit(Add& node) {
   tensor_map_.emplace(&node, CtTensor(std::move(sum_cts)));
 }
 
-void Cipherfier::Visit(Input& node) {
+void Cipherfier::Visit(const Input& node) {
   int channel_cnt = node.shape()[0];
   std::vector<const CtOp*> input_cts;
   for (int i = 0; i < channel_cnt; ++i) {
@@ -223,7 +223,7 @@ void Cipherfier::Visit(Input& node) {
   tensor_map_.emplace(&node, CtTensor(std::move(input_cts)));
 }
 
-void Cipherfier::Visit(ReLU& node) {
+void Cipherfier::Visit(const ReLU& node) {
   const CtTensor& parent_tensor = get_parent_tensor(node);
   std::vector<const CtOp*> output_cts;
   for (const CtOp* ct : parent_tensor.ciphertexts()) {

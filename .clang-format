@@ -58,7 +58,7 @@ ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
 Cpp11BracedListStyle: true
 DeriveLineEnding: true
-DerivePointerAlignment: true
+DerivePointerAlignment: false
 DisableFormat:   false
 ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: true
@@ -71,14 +71,14 @@ IncludeCategories:
   - Regex:           '^<ext/.*\.h>'
     Priority:        2
     SortPriority:    0
+  - Regex:           '^(<|")(onnx|graphviz)/.*\.h(>|")'
+    Priority:        3
+    SortPriority:    0
   - Regex:           '^<.*\.h>'
     Priority:        1
     SortPriority:    0
   - Regex:           '^<.*'
     Priority:        2
-    SortPriority:    0
-  - Regex:           '^"onnx/.*\.h"'
-    Priority:        3
     SortPriority:    0
   - Regex:           '.*'
     Priority:        4

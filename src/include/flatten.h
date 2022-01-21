@@ -14,7 +14,7 @@ class Flatten : public FlowNode {
  public:
   Flatten(const std::vector<int>& input_shape);
 
-  void Accept(FlowVisitor& visitor) override;
+  void Accept(FlowVisitor& visitor) const override;
   std::string op_type() const override;
   std::vector<int> shape() const override;
 

@@ -9,14 +9,11 @@
 namespace janncy {
 
 class CtGraphVisitor;
-template <class T>
-class Graph;
 
 class CtInput : public CtOp {
  public:
-  CtInput();
-
-  void Accept(CtGraphVisitor& visitor) override;
+  void Accept(CtGraphVisitor& visitor) const override;
+  std::string op_type() const override;
 };
 
 }  // namespace janncy

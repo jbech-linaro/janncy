@@ -1,11 +1,14 @@
 #include "include/ct_add.h"
 
+#include <string>
+
 #include "include/ct_graph_visitor.h"
 
 namespace janncy {
 
-CtAdd::CtAdd() : CtOp("CtAdd"){};
-
-void CtAdd::Accept(CtGraphVisitor& visitor) { return visitor.Visit(*this); }
+void CtAdd::Accept(CtGraphVisitor& visitor) const {
+  return visitor.Visit(*this);
+}
+std::string CtAdd::op_type() const { return "CtAdd"; }
 
 }  // namespace janncy

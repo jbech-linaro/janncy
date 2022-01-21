@@ -11,7 +11,7 @@ namespace janncy {
 
 Input::Input(std::vector<int> shape) : shape_(std::move(shape)) {}
 
-void Input::Accept(FlowVisitor& visitor) { visitor.Visit(*this); }
+void Input::Accept(FlowVisitor& visitor) const { visitor.Visit(*this); }
 std::string Input::op_type() const { return "Input"; }
 std::vector<int> Input::shape() const { return shape_; }
 

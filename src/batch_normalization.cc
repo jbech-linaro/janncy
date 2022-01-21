@@ -11,7 +11,9 @@ namespace janncy {
 BatchNormalization::BatchNormalization(std::vector<int> shape)
     : shape_(std::move(shape)) {}
 
-void BatchNormalization::Accept(FlowVisitor &visitor) { visitor.Visit(*this); }
+void BatchNormalization::Accept(FlowVisitor& visitor) const {
+  visitor.Visit(*this);
+}
 std::string BatchNormalization::op_type() const { return "BatchNormalization"; }
 std::vector<int> BatchNormalization::shape() const { return shape_; }
 

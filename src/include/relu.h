@@ -14,7 +14,7 @@ class ReLU : public FlowNode {
  public:
   ReLU(std::vector<int> shape);
 
-  void Accept(FlowVisitor& visitor) override;
+  void Accept(FlowVisitor& visitor) const override;
   std::string op_type() const override;
   std::vector<int> shape() const override;
 

@@ -1,17 +1,11 @@
 #include "include/ct_op.h"
 
-#include <sstream>
-#include <string>
+#include <ostream>
 
 namespace janncy {
 
-CtOp::CtOp(std::string type_str) : type_str_(type_str) {}
-
-std::string CtOp::str() const {
-  std::stringstream result;
-  result << "[" << this << "] ";
-  result << type_str_;
-  return result.str();
+std::ostream& operator<<(std::ostream& stream, const CtOp& op) {
+  return stream << op.op_type() << "@" << &op << "";
 }
 
 }  // namespace janncy

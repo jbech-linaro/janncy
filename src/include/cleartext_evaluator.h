@@ -12,24 +12,23 @@ namespace janncy {
 
 class CleartextEvaluator : public CtGraphVisitor {
  public:
-  static std::vector<Message> Evaluate(CtGraph& ct_graph,
+  static std::vector<Message> Evaluate(const CtGraph& ct_graph,
                                        std::vector<Message> inputs);
 
-  void Visit(CtAdd& node) override;
-  void Visit(CtMul& node) override;
-  void Visit(CtPtAdd& node) override;
-  void Visit(CtPtMul& node) override;
-  void Visit(CtRotate& node) override;
-  void Visit(CtInput& node) override;
+  void Visit(const CtAdd& node) override;
+  void Visit(const CtMul& node) override;
+  void Visit(const CtPtAdd& node) override;
+  void Visit(const CtPtMul& node) override;
+  void Visit(const CtRotate& node) override;
+  void Visit(const CtInput& node) override;
 
   std::vector<Message> result() const;
 
  private:
-  CleartextEvaluator(CtGraph& ct_graph, std::vector<Message> inputs)
-      : ct_graph_(ct_graph), inputs_(inputs){};
-  CtGraph& ct_graph_;
+  CleartextEvaluator(const CtGraph& ct_graph, std::vector<Message> inputs);
+  const CtGraph& ct_graph_;
   std::vector<Message> inputs_;
-  std::unordered_map<CtOp*, Message> node_map_;
+  std::unordered_map<const CtOp*, Message> node_map_;
 };
 
 }  // namespace janncy
