@@ -12,7 +12,8 @@ namespace janncy {
 using Flow = Graph<FlowNode>;
 
 namespace flow {
-const FlowNode* CreateAdd(Flow& flow, std::vector<const FlowNode*> parents);
+const FlowNode* CreateAdd(Flow& flow, const FlowNode* parent0,
+                          const FlowNode* parent1);
 
 const FlowNode* CreateConvLayer(Flow& flow, const FlowNode* parent,
                                 KernelAttributes kernel,

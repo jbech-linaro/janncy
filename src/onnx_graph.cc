@@ -99,9 +99,8 @@ const FlowNode* CreateRelu(Flow& flow, const OnnxNode& onnx_node,
 }
 
 const FlowNode* CreateAdd(Flow& flow, const OnnxNode& onnx_node,
-                          std::vector<const FlowNode*> parents) {
-  PANIC_IF(parents.size() != 2);
-  return flow::CreateAdd(flow, parents);
+                          const FlowNode* parent0, const FlowNode* parent1) {
+  return flow::CreateAdd(flow, parent0, parent1);
 }
 
 const FlowNode* CreateConv(Flow& flow, const OnnxNode& onnx_node,
@@ -178,7 +177,7 @@ const FlowNode* CreateFlatten(Flow& flow, const OnnxNode& onnx_node,
 const FlowNode* CreateFlowNode(Flow& flow, const OnnxNode& onnx_node,
                                std::vector<const FlowNode*> parents) {
   if (onnx_node.op_type() == "Add") {
-    return CreateAdd(flow, onnx_node, parents);
+    return CreateAdd(flow, onnx_node, parents[0], parents[1]);
   } else if (onnx_node.op_type() == "AveragePool") {
     return CreateAveragePool(flow, onnx_node, parents);
   } else if (onnx_node.op_type() == "Conv") {

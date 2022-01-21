@@ -14,17 +14,11 @@ namespace janncy {
 
 namespace flow {
 
-const FlowNode* CreateAdd(Flow& flow, std::vector<const FlowNode*> parents) {
-  if (parents.empty()) {
-    PANIC("Empty add");
-  }
-  std::vector<int> shape = parents[0]->shape();
-  for (const FlowNode* par : parents) {
-    if (par->shape() != shape) {
-      PANIC("All add inputs must have the same shape!", shape, par->shape());
-    }
-  }
-  return flow.AddNode(std::make_unique<Add>(shape), parents);
+const FlowNode* CreateAdd(Flow& flow, const FlowNode* parent0,
+                          const FlowNode* parent1) {
+  PANIC_IF(parent0->shape() != parent1->shape());
+  std::vector<int> shape = parent0->shape();
+  return flow.AddNode(std::make_unique<Add>(shape), {parent0, parent1});
 }
 
 const FlowNode* CreateConvLayer(Flow& flow, const FlowNode* parent,
@@ -64,10 +58,8 @@ const FlowNode* CreateFlatten(Flow& flow, const FlowNode* parent) {
 const FlowNode* CreateFullyConnected(Flow& flow, const FlowNode* parent,
                                      int output_dim) {
   std::vector<int> input_shape = parent->shape();
-  if (input_shape.size() != 1) {
-    PANIC("Fully-connected layer expects 1D input", input_shape);
-  }
-
+  PANIC_IF(input_shape.size() != 1, "Fully-connected layer expects 1D input",
+           input_shape);
   int input_dim = input_shape[0];
   return flow.AddNode(std::make_unique<FullyConnected>(input_dim, output_dim),
                       {parent});
