@@ -6,6 +6,7 @@
 
 #include "include/flow_node.h"
 #include "include/kernel_attributes.h"
+#include "include/shape.h"
 
 namespace janncy {
 
@@ -13,15 +14,15 @@ class FlowVisitor;
 
 class MaxPool : public FlowNode {
  public:
-  MaxPool(std::vector<int> input_shape, KernelAttributes kernel);
+  MaxPool(Shape input_shape, KernelAttributes kernel);
 
   void Accept(FlowVisitor& visitor) const override;
   std::string op_type() const override;
-  std::vector<int> shape() const override;
+  Shape shape() const override;
 
  private:
   KernelAttributes kernel_;
-  std::vector<int> output_shape_;
+  Shape output_shape_;
 };
 
 }  // namespace janncy

@@ -7,6 +7,7 @@
 // Needs to include everything that overloads operator<<
 #include "ct_op.h"
 #include "graph.h"
+#include "shape.h"
 #include "utils.h"
 
 namespace janncy {

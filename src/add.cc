@@ -8,10 +8,10 @@
 
 namespace janncy {
 
-Add::Add(std::vector<int> shape) : shape_(std::move(shape)) {}
+Add::Add(Shape shape) : shape_(std::move(shape)) {}
 
 void Add::Accept(FlowVisitor& visitor) const { visitor.Visit(*this); }
-std::vector<int> Add::shape() const { return shape_; }
 std::string Add::op_type() const { return "Add"; }
+Shape Add::shape() const { return shape_; }
 
 }  // namespace janncy

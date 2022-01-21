@@ -6,7 +6,9 @@
 #include <onnx/onnx_pb.h>
 #include <onnx/proto_utils.h>
 
+#include "include/kernel_attributes.h"
 #include "include/panic.h"
+#include "include/shape.h"
 
 namespace janncy {
 
@@ -21,15 +23,13 @@ const std::string ATTR_AXIS = "axis";
 }  // namespace
 
 OnnxNode::OnnxNode(const onnx::NodeProto* node_proto,
-                   std::vector<std::vector<int>> input_shapes)
-    : node_proto_(node_proto), input_shapes_(input_shapes) {}
+                   std::vector<Shape> input_shapes)
+    : node_proto_(node_proto), input_shapes_(std::move(input_shapes)) {}
 
-OnnxNode::OnnxNode(std::vector<int> shape)
-    : node_proto_(nullptr), input_shapes_({}), shape_(shape) {}
+OnnxNode::OnnxNode(Shape shape)
+    : node_proto_(nullptr), input_shapes_({}), shape_(std::move(shape)) {}
 
-std::vector<std::vector<int>> OnnxNode::input_shapes() const {
-  return input_shapes_;
-}
+std::vector<Shape> OnnxNode::input_shapes() const { return input_shapes_; }
 
 std::vector<std::string> OnnxNode::output() const {
   std::vector<std::string> result;
@@ -49,7 +49,7 @@ const onnx::AttributeProto* OnnxNode::attribute(
   return nullptr;
 }
 
-std::vector<int> OnnxNode::shape() const { return shape_; }
+Shape OnnxNode::shape() const { return shape_; }
 
 const onnx::AttributeProto* OnnxNode::typed_attribute(
     const std::string& attr_name,
@@ -101,6 +101,12 @@ std::vector<int> OnnxNode::strides() const {
 }
 std::vector<int> OnnxNode::padding() const {
   return optional_ints_attribute(ATTR_PADDING);
+}
+Shape OnnxNode::kernel_shape() const {
+  return Shape(optional_ints_attribute(ATTR_KERNEL_SHAPE));
+}
+KernelAttributes OnnxNode::kernel_for_pooling() const {
+  return KernelAttributes(kernel_shape(), strides(), padding());
 }
 
 std::string OnnxNode::op_type() const { return node_proto_->op_type(); }

@@ -11,14 +11,14 @@ class FlowVisitor;
 
 class Input : public FlowNode {
  public:
-  Input(std::vector<int> shape);
+  Input(Shape shape) : shape_(std::move(shape)){};
 
   void Accept(FlowVisitor& visitor) const override;
-  std::string op_type() const override;
-  std::vector<int> shape() const override;
+  std::string op_type() const override { return "InputLayer"; };
+  Shape shape() const override { return shape_; }
 
  private:
-  std::vector<int> shape_;
+  Shape shape_;
 };
 
 }  // namespace janncy

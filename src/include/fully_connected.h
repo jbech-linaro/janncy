@@ -2,6 +2,7 @@
 #define JANNCY_FULLY_CONNECTED_H_
 
 #include "include/flow_node.h"
+#include "include/shape.h"
 
 namespace janncy {
 
@@ -13,7 +14,7 @@ class FullyConnected : public FlowNode {
 
   void Accept(FlowVisitor& visitor) const override;
   std::string op_type() const override;
-  std::vector<int> shape() const override;
+  Shape shape() const override;
 
   int input_size() const;
   int output_size() const;

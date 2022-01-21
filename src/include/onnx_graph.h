@@ -12,6 +12,7 @@
 
 #include "include/flow.h"
 #include "include/onnx_node.h"
+#include "include/shape.h"
 
 namespace janncy {
 
@@ -35,7 +36,7 @@ class OnnxGraph {
   std::vector<OnnxNode*> nodes_;
   std::unordered_map<std::string, OnnxNode*> onnxnode_map_;
   std::unordered_map<const OnnxNode*, const FlowNode*> flownode_map_;
-  std::unordered_map<std::string, std::vector<int>> shape_map_;
+  std::unordered_map<std::string, Shape> shape_map_;
 };
 
 }  // namespace janncy

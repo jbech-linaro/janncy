@@ -9,13 +9,13 @@
 
 namespace janncy {
 
-AveragePool::AveragePool(std::vector<int> input_shape, KernelAttributes kernel)
+AveragePool::AveragePool(Shape input_shape, KernelAttributes kernel)
     : kernel_(std::move(kernel)),
       output_shape_(kernel_.output_shape(input_shape)) {}
 
 void AveragePool::Accept(FlowVisitor& visitor) const { visitor.Visit(*this); }
 std::string AveragePool::op_type() const { return "AveragePool"; }
-std::vector<int> AveragePool::shape() const { return output_shape_; }
+Shape AveragePool::shape() const { return output_shape_; }
 
 const KernelAttributes& AveragePool::kernel() const { return kernel_; }
 

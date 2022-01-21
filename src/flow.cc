@@ -9,6 +9,7 @@
 #include "include/max_pool.h"
 #include "include/panic.h"
 #include "include/relu.h"
+#include "include/shape.h"
 
 namespace janncy {
 
@@ -17,7 +18,7 @@ namespace flow {
 const FlowNode* CreateAdd(Flow& flow, const FlowNode* parent0,
                           const FlowNode* parent1) {
   PANIC_IF(parent0->shape() != parent1->shape());
-  std::vector<int> shape = parent0->shape();
+  Shape shape = parent0->shape();
   return flow.AddNode(std::make_unique<Add>(shape), {parent0, parent1});
 }
 
@@ -40,13 +41,13 @@ const FlowNode* CreateMaxPool(Flow& flow, const FlowNode* parent,
                       {parent});
 }
 const FlowNode* CreateGlobalAveragePool(Flow& flow, const FlowNode* parent) {
-  const auto& input_shape = parent->shape();
-  std::vector<int> kernel_shape(input_shape.begin() + 1, input_shape.end());
-  KernelAttributes kernel(kernel_shape, kernel_shape, {});
+  Shape kernel_shape = parent->shape().SpatialShape();
+  std::vector<int> strides(kernel_shape.begin(), kernel_shape.end());
+  KernelAttributes kernel(kernel_shape, strides, {});
   return CreateAveragePool(flow, parent, kernel);
 }
 
-const FlowNode* CreateInput(Flow& flow, std::vector<int> shape) {
+const FlowNode* CreateInput(Flow& flow, Shape shape) {
   return flow.AddNode(std::make_unique<Input>(std::move(shape)), {});
 }
 const FlowNode* CreateRelu(Flow& flow, const FlowNode* parent) {
@@ -57,9 +58,10 @@ const FlowNode* CreateFlatten(Flow& flow, const FlowNode* parent) {
 }
 const FlowNode* CreateFullyConnected(Flow& flow, const FlowNode* parent,
                                      int output_dim) {
-  std::vector<int> input_shape = parent->shape();
-  PANIC_IF(input_shape.size() != 1, "Fully-connected layer expects 1D input",
-           input_shape);
+  Shape input_shape = parent->shape();
+  PANIC_IF(input_shape.dimension_cnt() != 1,
+           "Fully-connected layer expects 1D input", input_shape);
+
   int input_dim = input_shape[0];
   return flow.AddNode(std::make_unique<FullyConnected>(input_dim, output_dim),
                       {parent});

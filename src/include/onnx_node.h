@@ -8,6 +8,9 @@
 #include <onnx/onnx_pb.h>
 #include <onnx/proto_utils.h>
 
+#include "kernel_attributes.h"
+#include "shape.h"
+
 namespace janncy {
 
 // TODO(nsamar): OnnxNode should not keep a NodeProto pointer,
@@ -17,25 +20,26 @@ namespace janncy {
 // these values to the attributes in OnnxNode.
 class OnnxNode {
  public:
-  OnnxNode(const onnx::NodeProto* node_proto,
-           std::vector<std::vector<int>> input_shapes);
-  explicit OnnxNode(std::vector<int> shape);
+  OnnxNode(const onnx::NodeProto* node_proto, std::vector<Shape> input_shapes);
+  explicit OnnxNode(Shape shape);
 
   std::vector<std::string> input() const;
   std::string op_type() const;
-  std::vector<std::vector<int>> input_shapes() const;
+  std::vector<Shape> input_shapes() const;
   std::vector<int> ints_attribute(const std::string& attr_name) const;
   std::vector<int> optional_ints_attribute(const std::string& attr_name) const;
   int int_attribute(const std::string& attr_name) const;
   const onnx::AttributeProto* attribute(const std::string& attr_name) const;
   std::vector<int> strides() const;
   std::vector<int> padding() const;
+  Shape kernel_shape() const;
+  KernelAttributes kernel_for_pooling() const;
 
   const onnx::AttributeProto* typed_attribute(
       const std::string& attr_name,
       const onnx::AttributeProto::AttributeType& attr_type) const;
 
-  std::vector<int> shape() const;
+  Shape shape() const;
 
   std::vector<std::string> output() const;
 
@@ -44,8 +48,8 @@ class OnnxNode {
 
  private:
   const onnx::NodeProto* node_proto_;
-  std::vector<std::vector<int>> input_shapes_;
-  std::vector<int> shape_;
+  std::vector<Shape> input_shapes_;
+  Shape shape_;
 };
 
 }  // namespace janncy

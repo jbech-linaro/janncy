@@ -12,9 +12,9 @@
 #include "include/cipherfier.h"
 #include "include/draw_graph.h"
 #include "include/flow.h"
-#include "include/graph.h"
 #include "include/onnx_graph.h"
 #include "include/panic.h"
+#include "include/shape.h"
 
 using namespace janncy;
 

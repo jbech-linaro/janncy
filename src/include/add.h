@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "include/flow_node.h"
+#include "include/shape.h"
 
 namespace janncy {
 
@@ -12,14 +13,14 @@ class FlowVisitor;
 
 class Add : public FlowNode {
  public:
-  Add(std::vector<int> shape);
+  Add(Shape shape);
 
   void Accept(FlowVisitor& visitor) const override;
-  std::vector<int> shape() const override;
   std::string op_type() const override;
+  Shape shape() const override;
 
  private:
-  std::vector<int> shape_;
+  Shape shape_;
 };
 
 }  // namespace janncy

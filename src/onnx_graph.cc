@@ -49,7 +49,7 @@ std::vector<const FlowNode*> OnnxGraph::FlownodeParents(const OnnxNode* node) {
 
 void OnnxGraph::LoadInitializers() {
   for (auto& ini : graph_->initializer()) {
-    std::vector<int> shape(ini.dims().begin(), ini.dims().end());
+    Shape shape(ini.dims().begin(), ini.dims().end());
     shape_map_[ini.name()] = shape;
     std::cerr << "Found initializer " << ini.name() << " with shape " << shape
               << "\n";
@@ -65,16 +65,17 @@ void OnnxGraph::LoadInputs() {
     PANIC_IF(!tensor_type.has_shape(), "Input tensor with unknown shape!");
 
     const auto& tensor_shape = tensor_type.shape();
-    std::vector<int> shape;
-    for (const auto& dim : tensor_shape.dim()) {
+
+    // Drops first dimension (batch size)
+    Shape shape(tensor_shape.dim_size() - 1);
+    for (int i = 0; i + 1 < tensor_shape.dim_size(); ++i) {
+      const auto& dim = tensor_shape.dim(i + 1);
       PANIC_IF(!dim.has_dim_value(),
-               "Only numeric tensor dimensions "
-               "are supported (no parameters)");
-      shape.push_back(dim.dim_value());
+               "Only numeric tensor dimensions are supported (no parameters)");
+      shape[i] = dim.dim_value();
     }
-    // Drop batch size dimension
-    shape.erase(shape.begin());
-    shape_map_[node_proto.name()] = shape;
+
+    shape_map_.emplace(node_proto.name(), shape);
     std::cerr << "Found input " << node_proto.name() << " with shape " << shape
               << "\n";
     nodes_.push_back(new OnnxNode(shape));
@@ -106,17 +107,22 @@ const FlowNode* CreateAdd(Flow& flow, const OnnxNode& onnx_node,
 const FlowNode* CreateConv(Flow& flow, const OnnxNode& onnx_node,
                            std::vector<const FlowNode*> parents) {
   PANIC_IF(parents.size() != 1);
-  std::vector<std::vector<int>> input_shapes = onnx_node.input_shapes();
+  std::vector<Shape> input_shapes = onnx_node.input_shapes();
 
   // Infer from weights input shape
   PANIC_IF(input_shapes.size() < 2);
-  std::vector<int> raw_kernel_shape = input_shapes[1];
-  int output_channel_cnt = raw_kernel_shape[0];
-  PANIC_IF(raw_kernel_shape[1] != input_shapes[0][0]);
+  if (input_shapes.size() > 2) {
+    std::cerr << "WARNING: ignoring biases of ConvLayer " << onnx_node.name()
+              << "\n";
+  }
+  const Shape& weights_shape = input_shapes[1];
+  int output_channel_cnt = weights_shape[0];
+  PANIC_IF(weights_shape[1] != input_shapes[0][0],
+           "ConvLayer mismatching number of channels", weights_shape,
+           input_shapes[0]);
 
-  std::vector<int> spatial_kernel_shape(raw_kernel_shape.begin() + 2,
-                                        raw_kernel_shape.end());
-  KernelAttributes kernel(spatial_kernel_shape, onnx_node.strides(),
+  Shape kernel_shape = weights_shape.SubShape(2);
+  KernelAttributes kernel(kernel_shape, onnx_node.strides(),
                           onnx_node.padding());
 
   return flow::CreateConvLayer(flow, parents[0], kernel, output_channel_cnt);
@@ -125,17 +131,13 @@ const FlowNode* CreateConv(Flow& flow, const OnnxNode& onnx_node,
 const FlowNode* CreateMaxPool(Flow& flow, const OnnxNode& onnx_node,
                               std::vector<const FlowNode*> parents) {
   PANIC_IF(parents.size() != 1);
-  KernelAttributes kernel(onnx_node.ints_attribute(ATTR_KERNEL_SHAPE),
-                          onnx_node.strides(), onnx_node.padding());
-  return flow::CreateMaxPool(flow, parents[0], kernel);
+  return flow::CreateMaxPool(flow, parents[0], onnx_node.kernel_for_pooling());
 }
 
 const FlowNode* CreateAveragePool(Flow& flow, const OnnxNode& onnx_node,
                                   std::vector<const FlowNode*> parents) {
   PANIC_IF(parents.size() != 1);
-  KernelAttributes kernel(onnx_node.ints_attribute(ATTR_KERNEL_SHAPE),
-                          onnx_node.strides(), onnx_node.padding());
-  return flow::CreateAveragePool(flow, parents[0], kernel);
+  return flow::CreateMaxPool(flow, parents[0], onnx_node.kernel_for_pooling());
 }
 
 const FlowNode* CreateGlobalAveragePool(Flow& flow, const OnnxNode& onnx_node,
@@ -146,15 +148,15 @@ const FlowNode* CreateGlobalAveragePool(Flow& flow, const OnnxNode& onnx_node,
 const FlowNode* CreateFullyConnected(Flow& flow, const OnnxNode& onnx_node,
                                      std::vector<const FlowNode*> parents) {
   PANIC_IF(parents.size() != 1);
-  std::vector<std::vector<int>> input_shapes = onnx_node.input_shapes();
+  std::vector<Shape> input_shapes = onnx_node.input_shapes();
 
   PANIC_IF(input_shapes.size() < 2 || input_shapes.size() > 3);
   if (input_shapes.size() == 3) {
     std::cerr << "WARNING: ignorring bias of fully connected layer "
               << onnx_node.name() << "\n";
   }
-  PANIC_IF(input_shapes[0].size() != 1);
-  PANIC_IF(input_shapes[1].size() != 2);
+  PANIC_IF(input_shapes[0].dimension_cnt() != 1);
+  PANIC_IF(input_shapes[1].dimension_cnt() != 2);
   PANIC_IF(input_shapes[0][0] != input_shapes[1][1]);
   PANIC_IF(input_shapes.size() >= 3 &&
            input_shapes[2][0] != input_shapes[1][0]);
@@ -214,7 +216,7 @@ void OnnxGraph::AddFlowNode(const OnnxNode* onnx_node) {
 
 void OnnxGraph::LoadNodes() {
   for (auto& node_proto : graph_->node()) {
-    std::vector<std::vector<int>> input_shapes;
+    std::vector<Shape> input_shapes;
     for (const auto& input_name : node_proto.input()) {
       input_shapes.push_back(shape_map_.at(input_name));
     }

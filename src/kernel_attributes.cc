@@ -5,18 +5,20 @@
 #include <vector>
 
 #include "include/panic.h"
+#include "include/shape.h"
 
-KernelAttributes::KernelAttributes(std::vector<int> kernel_shape,
-                                   std::vector<int> strides,
+namespace janncy {
+
+KernelAttributes::KernelAttributes(Shape kernel_shape, std::vector<int> strides,
                                    std::vector<int> pads)
     : kernel_shape_(std::move(kernel_shape)), strides_(std::move(strides)) {
-  int dims = kernel_shape_.size();
+  int dims = kernel_shape_.dimension_cnt();
 
   if (strides_.empty()) {
     strides_ = std::vector<int>(dims, 1);
   }
-  PANIC_IF(strides_.size() != kernel_shape_.size(), "Incompatible strides",
-           strides_, kernel_shape_);
+  PANIC_IF(strides_.size() != kernel_shape_.dimension_cnt(),
+           "Incompatible strides", strides_, kernel_shape_);
 
   if (pads.empty()) {
     begin_pads_ = std::vector<int>(dims, 0);
@@ -33,31 +35,29 @@ KernelAttributes::KernelAttributes(std::vector<int> kernel_shape,
   }
 }
 
-const std::vector<int>& KernelAttributes::kernel_shape() const {
-  return kernel_shape_;
-}
+const Shape& KernelAttributes::kernel_shape() const { return kernel_shape_; }
 const std::vector<int>& KernelAttributes::strides() const { return strides_; }
 const std::vector<int>& KernelAttributes::begin_pads() const {
   return begin_pads_;
 }
 const std::vector<int>& KernelAttributes::end_pads() const { return end_pads_; }
 
-std::vector<int> KernelAttributes::output_shape(
-    const std::vector<int>& input_shape, int output_channels) const {
-  PANIC_IF(input_shape.size() != kernel_shape_.size() + 1,
+Shape KernelAttributes::output_shape(const Shape& input_shape,
+                                     int output_channels) const {
+  PANIC_IF(input_shape.dimension_cnt() != kernel_shape_.dimension_cnt() + 1,
            "Incompatible input and kernel shapes", input_shape, kernel_shape_);
 
-  std::vector<int> shape(input_shape.size());
-  shape[0] = output_channels;
-  for (int i = 0; i < kernel_shape_.size(); i++) {
+  Shape spatial_shape(kernel_shape_.dimension_cnt());
+  for (int i = 0; i < kernel_shape_.dimension_cnt(); i++) {
     // From https://pytorch.org/docs/1.10.1/generated/torch.nn.Conv2d.html
     int padded_size = input_shape[i + 1] + begin_pads_[i] + end_pads_[i];
     PANIC_IF(padded_size < kernel_shape_[i]);
-    shape[i + 1] = 1 + (padded_size - kernel_shape_[i]) / strides_[i];
+    spatial_shape[i] = 1 + (padded_size - kernel_shape_[i]) / strides_[i];
   }
-  return shape;
+  return ShapeWithChannels(output_channels, spatial_shape);
 }
-std::vector<int> KernelAttributes::output_shape(
-    const std::vector<int>& input_shape) const {
-  return output_shape(input_shape, input_shape[0]);
+Shape KernelAttributes::output_shape(const Shape& input_shape) const {
+  return output_shape(input_shape, input_shape.channels());
 }
+
+}  // namespace janncy

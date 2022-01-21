@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "include/shape.h"
+
 namespace janncy {
 
 class FlowVisitor;
@@ -12,7 +14,7 @@ class FlowNode {
  public:
   virtual void Accept(FlowVisitor& visitor) const = 0;
   virtual std::string op_type() const = 0;
-  virtual std::vector<int> shape() const = 0;
+  virtual Shape shape() const = 0;
 
   virtual ~FlowNode() {}
 };

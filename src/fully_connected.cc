@@ -14,7 +14,7 @@ void FullyConnected::Accept(FlowVisitor& visitor) const {
   visitor.Visit(*this);
 }
 std::string FullyConnected::op_type() const { return "FullyConnected"; }
-std::vector<int> FullyConnected::shape() const { return {output_size()}; }
+Shape FullyConnected::shape() const { return {output_size()}; }
 
 int FullyConnected::input_size() const { return input_size_; }
 int FullyConnected::output_size() const { return output_size_; }

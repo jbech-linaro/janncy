@@ -6,6 +6,7 @@
 
 #include "include/flow_node.h"
 #include "include/kernel_attributes.h"
+#include "include/shape.h"
 
 namespace janncy {
 
@@ -13,17 +14,17 @@ class FlowVisitor;
 
 class AveragePool : public FlowNode {
  public:
-  AveragePool(std::vector<int> input_shape, KernelAttributes kernel);
+  AveragePool(Shape input_shape, KernelAttributes kernel);
 
   void Accept(FlowVisitor& visitor) const override;
   std::string op_type() const override;
-  std::vector<int> shape() const override;
+  Shape shape() const override;
 
   const KernelAttributes& kernel() const;
 
  private:
   KernelAttributes kernel_;
-  std::vector<int> output_shape_;
+  Shape output_shape_;
 };
 
 }  // namespace janncy

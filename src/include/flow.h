@@ -24,7 +24,7 @@ const FlowNode* CreateMaxPool(Flow& flow, const FlowNode* parent,
                               KernelAttributes kernel);
 const FlowNode* CreateGlobalAveragePool(Flow& flow, const FlowNode* parent);
 
-const FlowNode* CreateInput(Flow& flow, std::vector<int> shape);
+const FlowNode* CreateInput(Flow& flow, Shape shape);
 const FlowNode* CreateRelu(Flow& flow, const FlowNode* parent);
 const FlowNode* CreateFlatten(Flow& flow, const FlowNode* parent);
 const FlowNode* CreateFullyConnected(Flow& flow, const FlowNode* parent,
