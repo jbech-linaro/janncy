@@ -7,37 +7,14 @@ import subprocess
 import sys
 import torch
 
+
 ###############################################################################
 # Configuration
 ###############################################################################
-
-
-install_cmd = "sudo apt-get install -y"
+# Don't forget to update installed.sh as well
 clang_version = 10
 cpp_version = 17
 
-# apt-get packages
-packages = [
-        f"clang-tools-{clang_version}",
-        f"cmake llvm-{clang_version}",
-        "graphviz",
-        "libgraphviz-dev",
-        "libjpeg-dev",
-        "libprotobuf-dev",
-        "protobuf-compiler",
-        "python3-pip",
-        "zlib1g-dev"
-        ]
-
-# Python pip packages
-pip_packages = [
-        "image",
-        "numpy"
-        # "pep8",
-        "scons",
-        "torch",
-        # "virtualenv",
-        ]
 ###############################################################################
 # Paths
 ###############################################################################
@@ -48,7 +25,6 @@ src_dir = Path("src/")
 test_dir = Path("test/")
 
 clangpp_path = Path(f"/usr/bin/clang++-{clang_version}")
-clang_path = Path(f"/usr/bin/clang-{clang_version}")
 
 gtest_path = Path("googletest")
 gtest_headers = Path("{}/googletest/include".format(gtest_path))
@@ -125,22 +101,11 @@ def download_models() -> None:
                               pytorch_path / f"{model_name}.onnx")
 
 
-def install_dependencies() -> None:
-    install_str = "{} {}".format(install_cmd, " ".join(packages))
-    logging.info("This will need sudo rights, since we're about to install\
-                 distro packages")
-    # cmd(install_str)
-    #  TODO
-    # cmd("pip install image torch numpy")
-    # download_models()
-
-
 def compile_dependencies() -> None:
     compile_gtest()
     compile_onnx()
     compile_ntl()
     compile_heaan()
-
 
 ###############################################################################
 # Main
@@ -149,9 +114,6 @@ logging.basicConfig(format='%(levelname)s[%(lineno)s]: %(message)s',
                     level=logging.DEBUG)
 
 if COMMAND_LINE_TARGETS:
-    if 'setup' in COMMAND_LINE_TARGETS:
-        install_dependencies()
-
     if 'deps' in COMMAND_LINE_TARGETS:
         compile_dependencies()
 
@@ -159,7 +121,7 @@ if COMMAND_LINE_TARGETS:
         print(cmd("git submodule update --init --recursive"))
     sys.exit()
 
-env = Environment(CXX=f'/usr/bin/clang++-{clang_version}', ENV=os.environ)
+env = Environment(CXX=clangpp_path, ENV=os.environ)
 env.VariantDir(build_dir, src_dir, duplicate=0)
 
 # Compiler flags
