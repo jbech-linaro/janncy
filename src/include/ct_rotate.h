@@ -9,7 +9,7 @@ class CtGraphVisitor;
 
 class CtRotate : public CtOp {
  public:
-  void Accept(CtGraphVisitor& visitor) override;
+  void Accept(CtGraphVisitor& visitor) const override;
   std::string op_type() const override;
 
   int amt() const;

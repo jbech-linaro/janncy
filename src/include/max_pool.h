@@ -15,7 +15,7 @@ class MaxPool : public FlowNode {
  public:
   MaxPool(std::vector<int> input_shape, KernelAttributes kernel);
 
-  void Accept(FlowVisitor& visitor) override;
+  void Accept(FlowVisitor& visitor) const override;
   std::string op_type() const override;
   std::vector<int> shape() const override;
 

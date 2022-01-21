@@ -5,7 +5,9 @@
 
 namespace janncy {
 
-void CtMul::Accept(CtGraphVisitor& visitor) { return visitor.Visit(*this); }
+void CtMul::Accept(CtGraphVisitor& visitor) const {
+  return visitor.Visit(*this);
+}
 std::string CtMul::op_type() const { return "CtMul"; }
 
 }  // namespace janncy

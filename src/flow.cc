@@ -14,7 +14,7 @@ namespace janncy {
 
 namespace flow {
 
-FlowNode* CreateAdd(Flow& flow, std::vector<const FlowNode*> parents) {
+const FlowNode* CreateAdd(Flow& flow, std::vector<const FlowNode*> parents) {
   if (parents.empty()) {
     PANIC("Empty add");
   }
@@ -27,42 +27,42 @@ FlowNode* CreateAdd(Flow& flow, std::vector<const FlowNode*> parents) {
   return flow.AddNode(std::make_unique<Add>(shape), parents);
 }
 
-FlowNode* CreateConvLayer(Flow& flow, const FlowNode* parent,
-                          KernelAttributes kernel, int output_channel_cnt) {
+const FlowNode* CreateConvLayer(Flow& flow, const FlowNode* parent,
+                                KernelAttributes kernel,
+                                int output_channel_cnt) {
   return flow.AddNode(
       std::make_unique<ConvLayer>(parent->shape(), kernel, output_channel_cnt),
       {parent});
 }
 
-FlowNode* CreateAveragePool(Flow& flow, const FlowNode* parent,
-                            KernelAttributes kernel) {
+const FlowNode* CreateAveragePool(Flow& flow, const FlowNode* parent,
+                                  KernelAttributes kernel) {
   return flow.AddNode(std::make_unique<AveragePool>(parent->shape(), kernel),
                       {parent});
 }
-FlowNode* CreateMaxPool(Flow& flow, const FlowNode* parent,
-                        KernelAttributes kernel) {
+const FlowNode* CreateMaxPool(Flow& flow, const FlowNode* parent,
+                              KernelAttributes kernel) {
   return flow.AddNode(std::make_unique<MaxPool>(parent->shape(), kernel),
                       {parent});
 }
-FlowNode* CreateGlobalAveragePool(Flow& flow, const FlowNode* parent) {
-  auto input_shape = parent->shape();
-  auto kernel_shape =
-      std::vector<int>(input_shape.begin() + 1, input_shape.end());
+const FlowNode* CreateGlobalAveragePool(Flow& flow, const FlowNode* parent) {
+  const auto& input_shape = parent->shape();
+  std::vector<int> kernel_shape(input_shape.begin() + 1, input_shape.end());
   KernelAttributes kernel(kernel_shape, kernel_shape, {});
   return CreateAveragePool(flow, parent, kernel);
 }
 
-FlowNode* CreateInput(Flow& flow, std::vector<int> shape) {
+const FlowNode* CreateInput(Flow& flow, std::vector<int> shape) {
   return flow.AddNode(std::make_unique<Input>(std::move(shape)), {});
 }
-FlowNode* CreateRelu(Flow& flow, const FlowNode* parent) {
+const FlowNode* CreateRelu(Flow& flow, const FlowNode* parent) {
   return flow.AddNode(std::make_unique<ReLU>(parent->shape()), {parent});
 }
-FlowNode* CreateFlatten(Flow& flow, const FlowNode* parent) {
+const FlowNode* CreateFlatten(Flow& flow, const FlowNode* parent) {
   return flow.AddNode(std::make_unique<Flatten>(parent->shape()), {parent});
 }
-FlowNode* CreateFullyConnected(Flow& flow, const FlowNode* parent,
-                               int output_dim) {
+const FlowNode* CreateFullyConnected(Flow& flow, const FlowNode* parent,
+                                     int output_dim) {
   std::vector<int> input_shape = parent->shape();
   if (input_shape.size() != 1) {
     PANIC("Fully-connected layer expects 1D input", input_shape);

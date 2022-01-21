@@ -14,7 +14,7 @@ class Add : public FlowNode {
  public:
   Add(std::vector<int> shape);
 
-  void Accept(FlowVisitor& visitor) override;
+  void Accept(FlowVisitor& visitor) const override;
   std::vector<int> shape() const override;
   std::string op_type() const override;
 

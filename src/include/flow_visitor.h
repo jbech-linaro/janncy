@@ -16,15 +16,15 @@ class Flatten;
 
 class FlowVisitor {
  public:
-  virtual void Visit(ConvLayer& node) = 0;
-  virtual void Visit(FullyConnected& node) = 0;
-  virtual void Visit(AveragePool& node) = 0;
-  virtual void Visit(BatchNormalization& node) = 0;
-  virtual void Visit(Add& node) = 0;
-  virtual void Visit(Input& node) = 0;
-  virtual void Visit(ReLU& node) = 0;
-  virtual void Visit(MaxPool& node) = 0;
-  virtual void Visit(Flatten& node) = 0;
+  virtual void Visit(const ConvLayer& node) = 0;
+  virtual void Visit(const FullyConnected& node) = 0;
+  virtual void Visit(const AveragePool& node) = 0;
+  virtual void Visit(const BatchNormalization& node) = 0;
+  virtual void Visit(const Add& node) = 0;
+  virtual void Visit(const Input& node) = 0;
+  virtual void Visit(const ReLU& node) = 0;
+  virtual void Visit(const MaxPool& node) = 0;
+  virtual void Visit(const Flatten& node) = 0;
 };
 
 }  // namespace janncy

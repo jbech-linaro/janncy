@@ -5,7 +5,7 @@
 
 namespace janncy {
 
-void CtRotate::Accept(CtGraphVisitor& visitor) { visitor.Visit(*this); }
+void CtRotate::Accept(CtGraphVisitor& visitor) const { visitor.Visit(*this); }
 std::string CtRotate::op_type() const { return "CtRotate"; }
 
 int CtRotate::amt() const { return amt_; }

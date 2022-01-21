@@ -20,7 +20,7 @@ const std::string ATTR_AXIS = "axis";
 
 }  // namespace
 
-OnnxNode::OnnxNode(const onnx::NodeProto *node_proto,
+OnnxNode::OnnxNode(const onnx::NodeProto* node_proto,
                    std::vector<std::vector<int>> input_shapes)
     : node_proto_(node_proto), input_shapes_(input_shapes) {}
 
@@ -39,9 +39,9 @@ std::vector<std::string> OnnxNode::output() const {
   return result;
 }
 
-const onnx::AttributeProto *OnnxNode::attribute(
-    const std::string &attr_name) const {
-  for (const auto &attr : node_proto_->attribute()) {
+const onnx::AttributeProto* OnnxNode::attribute(
+    const std::string& attr_name) const {
+  for (const auto& attr : node_proto_->attribute()) {
     if (attr.name() == attr_name) {
       return &attr;
     }
@@ -51,9 +51,9 @@ const onnx::AttributeProto *OnnxNode::attribute(
 
 std::vector<int> OnnxNode::shape() const { return shape_; }
 
-const onnx::AttributeProto *OnnxNode::typed_attribute(
-    const std::string &attr_name,
-    const onnx::AttributeProto::AttributeType &attr_type) const {
+const onnx::AttributeProto* OnnxNode::typed_attribute(
+    const std::string& attr_name,
+    const onnx::AttributeProto::AttributeType& attr_type) const {
   auto attr = attribute(attr_name);
   if ((attr == nullptr) || (attr->type() != attr_type)) {
     return nullptr;
@@ -62,11 +62,11 @@ const onnx::AttributeProto *OnnxNode::typed_attribute(
   }
 }
 
-bool OnnxNode::AttributeExists(const std::string &attr_name) const {
+bool OnnxNode::AttributeExists(const std::string& attr_name) const {
   return attribute(attr_name) != nullptr;
 }
 
-int OnnxNode::int_attribute(const std::string &attr_name) const {
+int OnnxNode::int_attribute(const std::string& attr_name) const {
   auto attr = typed_attribute(attr_name, onnx::AttributeProto::INT);
   PANIC_IF(attr == nullptr, "INT attribute `" + attr_name + "' not found!");
   return attr->i();
@@ -80,14 +80,14 @@ std::vector<std::string> OnnxNode::input() const {
   return result;
 }
 
-std::vector<int> OnnxNode::ints_attribute(const std::string &attr_name) const {
+std::vector<int> OnnxNode::ints_attribute(const std::string& attr_name) const {
   auto attr = typed_attribute(attr_name, onnx::AttributeProto::INTS);
   PANIC_IF(attr == nullptr, "INTS attribute `" + attr_name + "' not found!");
   return std::vector<int>(attr->ints().begin(), attr->ints().end());
 }
 
 std::vector<int> OnnxNode::optional_ints_attribute(
-    const std::string &attr_name) const {
+    const std::string& attr_name) const {
   auto attr = typed_attribute(attr_name, onnx::AttributeProto::INTS);
   if (attr == nullptr) {
     return {};

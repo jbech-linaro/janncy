@@ -6,7 +6,9 @@
 
 namespace janncy {
 
-void CtAdd::Accept(CtGraphVisitor& visitor) { return visitor.Visit(*this); }
+void CtAdd::Accept(CtGraphVisitor& visitor) const {
+  return visitor.Visit(*this);
+}
 std::string CtAdd::op_type() const { return "CtAdd"; }
 
 }  // namespace janncy

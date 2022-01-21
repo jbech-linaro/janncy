@@ -11,7 +11,7 @@ class CtGraphVisitor;
 
 class CtPtMul : public CtOp {
  public:
-  void Accept(CtGraphVisitor& visitor) override;
+  void Accept(CtGraphVisitor& visitor) const override;
   std::string op_type() const override;
 
   std::vector<double> value() const;

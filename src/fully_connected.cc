@@ -10,7 +10,9 @@ namespace janncy {
 FullyConnected::FullyConnected(int input_size, int output_size)
     : input_size_(input_size), output_size_(output_size) {}
 
-void FullyConnected::Accept(FlowVisitor& visitor) { visitor.Visit(*this); }
+void FullyConnected::Accept(FlowVisitor& visitor) const {
+  visitor.Visit(*this);
+}
 std::string FullyConnected::op_type() const { return "FullyConnected"; }
 std::vector<int> FullyConnected::shape() const { return {output_size()}; }
 

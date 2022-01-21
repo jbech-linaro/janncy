@@ -12,7 +12,7 @@ class CtOp {
  public:
   virtual ~CtOp(){};
 
-  virtual void Accept(CtGraphVisitor& visitor) = 0;
+  virtual void Accept(CtGraphVisitor& visitor) const = 0;
   virtual std::string op_type() const = 0;
 };
 
