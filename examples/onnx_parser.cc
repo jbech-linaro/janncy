@@ -12,6 +12,7 @@
 #include "include/cipherfier.h"
 #include "include/flow.h"
 #include "include/graph.h"
+#include "include/onnx_graph.h"
 #include "include/panic.h"
 
 using namespace janncy;
@@ -106,16 +107,16 @@ std::vector<int> get_padding(onnx::NodeProto &onnx_node) {
   return get_optional_ints_attribute(onnx_node, ATTR_PADDING);
 }
 
-FlowNode *create_relu(Flow &flow, onnx::NodeProto &onnx_node) {
+FlowNode *CreateRelu(Flow &flow, onnx::NodeProto &onnx_node) {
   const FlowNode *par = get_parent_nodes(onnx_node)[0];
   return flow::CreateRelu(flow, par);
 }
 
-FlowNode *create_add(Flow &flow, onnx::NodeProto &onnx_node) {
+FlowNode *CreateAdd(Flow &flow, onnx::NodeProto &onnx_node) {
   return flow::CreateAdd(flow, get_parent_nodes(onnx_node));
 }
 
-FlowNode *create_conv(Flow &flow, onnx::NodeProto &onnx_node) {
+FlowNode *CreateConv(Flow &flow, onnx::NodeProto &onnx_node) {
   std::vector<std::vector<int>> input_shapes = get_input_shapes(onnx_node);
 
   // Infer from weights input shape
@@ -132,26 +133,26 @@ FlowNode *create_conv(Flow &flow, onnx::NodeProto &onnx_node) {
   return flow::CreateConvLayer(flow, par, kernel, output_channel_cnt);
 }
 
-FlowNode *create_max_pool(Flow &flow, onnx::NodeProto &onnx_node) {
+FlowNode *CreateMaxPool(Flow &flow, onnx::NodeProto &onnx_node) {
   const FlowNode *par = get_parent_nodes(onnx_node)[0];
   KernelAttributes kernel(get_ints_attribute(onnx_node, ATTR_KERNEL_SHAPE),
                           get_strides(onnx_node), get_padding(onnx_node));
   return flow::CreateMaxPool(flow, par, kernel);
 }
 
-FlowNode *create_average_pool(Flow &flow, onnx::NodeProto &onnx_node) {
+FlowNode *CreateAveragePool(Flow &flow, onnx::NodeProto &onnx_node) {
   const FlowNode *par = get_parent_nodes(onnx_node)[0];
   KernelAttributes kernel(get_ints_attribute(onnx_node, ATTR_KERNEL_SHAPE),
                           get_strides(onnx_node), get_padding(onnx_node));
   return flow::CreateAveragePool(flow, par, kernel);
 }
 
-FlowNode *create_global_average_pool(Flow &flow, onnx::NodeProto &onnx_node) {
+FlowNode *CreateGlobalAveragePool(Flow &flow, onnx::NodeProto &onnx_node) {
   const FlowNode *par = get_parent_nodes(onnx_node)[0];
   return flow::CreateGlobalAveragePool(flow, par);
 }
 
-FlowNode *create_fully_connected(Flow &flow, onnx::NodeProto &onnx_node) {
+FlowNode *CreateFullyConnected(Flow &flow, onnx::NodeProto &onnx_node) {
   std::vector<std::vector<int>> input_shapes = get_input_shapes(onnx_node);
 
   PANIC_IF(input_shapes.size() < 2 || input_shapes.size() > 3);
@@ -169,7 +170,7 @@ FlowNode *create_fully_connected(Flow &flow, onnx::NodeProto &onnx_node) {
   return flow::CreateFullyConnected(flow, par, input_shapes[1][0]);
 }
 
-FlowNode *create_flatten(Flow &flow, onnx::NodeProto &onnx_node) {
+FlowNode *CreateFlatten(Flow &flow, onnx::NodeProto &onnx_node) {
   int axis = 1;
   if (attribute_exists(onnx_node, ATTR_AXIS)) {
     axis = get_attribute_int(onnx_node, ATTR_AXIS);
@@ -182,25 +183,25 @@ FlowNode *create_flatten(Flow &flow, onnx::NodeProto &onnx_node) {
 
 // Specification of ONNX operations:
 // https://github.com/onnx/onnx/blob/master/docs/Operators.md
-void create_node(Flow &flow, onnx::NodeProto &onnx_node) {
+void CreateNode(Flow &flow, onnx::NodeProto &onnx_node) {
   FlowNode *new_node = nullptr;
 
   if (onnx_node.op_type() == "Add") {
-    new_node = create_add(flow, onnx_node);
+    new_node = CreateAdd(flow, onnx_node);
   } else if (onnx_node.op_type() == "AveragePool") {
-    new_node = create_average_pool(flow, onnx_node);
+    new_node = CreateAveragePool(flow, onnx_node);
   } else if (onnx_node.op_type() == "Conv") {
-    new_node = create_conv(flow, onnx_node);
+    new_node = CreateConv(flow, onnx_node);
   } else if (onnx_node.op_type() == "Flatten") {
-    new_node = create_flatten(flow, onnx_node);
+    new_node = CreateFlatten(flow, onnx_node);
   } else if (onnx_node.op_type() == "Gemm") {
-    new_node = create_fully_connected(flow, onnx_node);
+    new_node = CreateFullyConnected(flow, onnx_node);
   } else if (onnx_node.op_type() == "GlobalAveragePool") {
-    new_node = create_global_average_pool(flow, onnx_node);
+    new_node = CreateGlobalAveragePool(flow, onnx_node);
   } else if (onnx_node.op_type() == "MaxPool") {
-    new_node = create_max_pool(flow, onnx_node);
+    new_node = CreateMaxPool(flow, onnx_node);
   } else if (onnx_node.op_type() == "Relu") {
-    new_node = create_relu(flow, onnx_node);
+    new_node = CreateRelu(flow, onnx_node);
   } else {
     PANIC("ONNX operation `" + onnx_node.op_type() + "' not supported!");
   }
@@ -212,7 +213,7 @@ void create_node(Flow &flow, onnx::NodeProto &onnx_node) {
   flownode_map[output_name] = new_node;
 }
 
-std::unique_ptr<onnx::ModelProto> parse_model(const std::string &filepath) {
+std::unique_ptr<onnx::ModelProto> ParseModel(const std::string &filepath) {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
   bool file_exists = std::experimental::filesystem::exists(
       std::experimental::filesystem::path(filepath));
@@ -230,26 +231,16 @@ std::unique_ptr<onnx::ModelProto> parse_model(const std::string &filepath) {
   return model;
 }
 
-int main(int argc, char **argv) {
-  PANIC_IF(argc != 2,
-           "Please provide filepath to *.onnx file as "
-           "command-line argument!");
-  auto model = parse_model(argv[1]);
-  std::cout << model->has_graph() << std::endl;
-  if (!model->has_graph()) {
-    PANIC("Model does not have a graph!");
-  }
-  auto graph = model->graph();
-
-  auto flow = std::make_unique<Flow>();
-
+void LoadInitializers(const onnx::GraphProto &graph) {
   for (auto ini : graph.initializer()) {
     std::vector<int> shape(ini.dims().begin(), ini.dims().end());
     shape_map[ini.name()] = shape;
     std::cerr << "Found initializer " << ini.name() << " with shape " << shape
               << "\n";
   }
+}
 
+void LoadInputs(const onnx::GraphProto &graph, Flow &flow) {
   for (const auto &node : graph.input()) {
     const auto &type = node.type();
     PANIC_IF(!type.has_tensor_type(), "Only tensor inputs are supported!");
@@ -270,14 +261,30 @@ int main(int argc, char **argv) {
     shape_map[node.name()] = shape;
     std::cerr << "Found input " << node.name() << " with shape " << shape
               << "\n";
-    flownode_map[node.name()] = flow::CreateInput(*flow, shape);
+    flownode_map[node.name()] = flow::CreateInput(flow, shape);
   }
+}
 
+void LoadNodes(const onnx::GraphProto &graph, Flow &flow) {
   for (auto node : graph.node()) {
-    create_node(*flow, node);
+    CreateNode(flow, node);
   }
-  google::protobuf::ShutdownProtobufLibrary();
+}
 
+int main(int argc, char **argv) {
+  PANIC_IF(argc != 2,
+           "Please provide filepath to *.onnx file as "
+           "command-line argument!");
+  auto model = ParseModel(argv[1]);
+  std::cout << model->has_graph() << std::endl;
+  if (!model->has_graph()) {
+    PANIC("Model does not have a graph!");
+  }
+  auto graph = model->graph();
+
+  auto flow = OnnxGraph::MakeFlow(&graph);
+
+  google::protobuf::ShutdownProtobufLibrary();
   janncy::Draw(*flow, "flow");
   std::cerr << "Nodes in flow: " << flow->nodes().size() << "\n";
   CtGraph ct_graph = Cipherfier::Cipherfy(*flow);

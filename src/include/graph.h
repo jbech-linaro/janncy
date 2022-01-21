@@ -74,6 +74,7 @@ class Graph {
   std::unordered_map<const T*, std::vector<T*>> parent_map_;
 
   std::vector<T*> GetRawNodePointers() const {
+    // TODO(nsamar): Use back inserter and an empty result{}
     std::vector<T*> result(nodes_.size());
     std::transform(nodes_.begin(), nodes_.end(), result.begin(),
                    [](const auto& ptr) { return ptr.get(); });
