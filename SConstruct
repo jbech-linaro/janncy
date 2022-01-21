@@ -17,25 +17,27 @@ clang_version = 10
 cpp_version = 17
 
 # apt-get packages
-packages = [f"clang-tools-{clang_version}",
-            f"cmake llvm-{clang_version}",
-            "graphviz",
-            "libgraphviz-dev",
-            "libjpeg-dev",
-            "libprotobuf-dev",
-            "protobuf-compiler",
-            "python3-pip",
-            "zlib1g-dev",
-            ]
+packages = [
+        f"clang-tools-{clang_version}",
+        f"cmake llvm-{clang_version}",
+        "graphviz",
+        "libgraphviz-dev",
+        "libjpeg-dev",
+        "libprotobuf-dev",
+        "protobuf-compiler",
+        "python3-pip",
+        "zlib1g-dev"
+        ]
 
 # Python pip packages
-pip_packages = ["image",
-                "numpy"
-                # "pep8",
-                "scons",
-                "torch",
-                # "virtualenv",
-                ]
+pip_packages = [
+        "image",
+        "numpy"
+        # "pep8",
+        "scons",
+        "torch",
+        # "virtualenv",
+        ]
 ###############################################################################
 # Paths
 ###############################################################################
@@ -48,17 +50,19 @@ test_dir = Path("test/")
 clangpp_path = Path(f"/usr/bin/clang++-{clang_version}")
 clang_path = Path(f"/usr/bin/clang-{clang_version}")
 
-onnx_path = Path(".dependencies/onnx")
-heaanlib_path = Path(".dependencies/HEAAN/HEAAN/lib/libHEAAN.a")
-
 gtest_path = Path("googletest")
 gtest_headers = Path("{}/googletest/include".format(gtest_path))
 gtest_lib_path = Path("{}/build/lib".format(gtest_path))
 libgtest = Path("{}/libgtest.a".format(gtest_lib_path))
 
-ntl_path = Path(".dependencies/ntl")
+heaan_path = Path("HEAAN")
+heaanlib_path = Path("{}/HEAAN/lib/libHEAAN.a".format(heaan_path))
+
+ntl_path = Path("ntl")
 ntl_headers = Path("{}/include".format(ntl_path))
 ntl_lib_path = Path("{}/src/ntl.a".format(ntl_path))
+
+onnx_path = Path("onnx")
 
 ###############################################################################
 # Helpers
@@ -82,16 +86,13 @@ def cmd(cmd_str: str) -> str:
 
 
 def compile_onnx() -> None:
-    cmd("protoc -I=.dependencies/onnx/onnx/ "
-        "--cpp_out=.dependencies/onnx/onnx "
-        ".dependencies/onnx/onnx/onnx.proto")
-    cmd("protoc -I=.dependencies/onnx/ -I=.dependencies/onnx/onnx/ "
-        "--cpp_out=.dependencies/onnx/onnx "
-        ".dependencies/onnx/onnx/onnx-operators.proto")
+    cmd("protoc -I=onnx/onnx/ --cpp_out=onnx/onnx onnx/onnx/onnx.proto")
+    cmd("protoc -I=onnx/ -I=onnx/onnx/ --cpp_out=onnx/onnx "
+        "onnx/onnx/onnx-operators.proto")
 
 
 def compile_heaan() -> None:
-    cmd("cd .dependencies/HEAAN/HEAAN/lib; make all")
+    cmd("cd {}/HEAAN/lib; make all".format(heaan_path))
 
 
 def compile_gtest() -> None:
@@ -104,7 +105,7 @@ def compile_gtest() -> None:
 
 def compile_ntl() -> None:
     if not os.path.exists(ntl_lib_path):
-        cmd("cd .dependencies/ntl/src && ./configure && make -j8")
+        cmd("cd {}/src && ./configure && make -j8".format(ntl_path))
 
 
 def download_models() -> None:
@@ -136,9 +137,9 @@ def install_dependencies() -> None:
 
 def compile_dependencies() -> None:
     compile_gtest()
-    # compile_onnx()
-    # compile_ntl()
-    # compile_heaan()
+    compile_onnx()
+    compile_ntl()
+    compile_heaan()
 
 
 ###############################################################################
@@ -184,10 +185,10 @@ env.CompilationDatabase()
 # onnx
 onnx_parser_cpps = [
         "examples/onnx_parser.cc",
-        ".dependencies/onnx/onnx/onnx.pb.cc",
-        ".dependencies/onnx/onnx/defs/tensor_proto_util.cc",
-        ".dependencies/onnx/onnx/defs/data_type_utils.cc",
-        ".dependencies/onnx/onnx/defs/shape_inference.cc", ] + Glob("src/*.cc")
+        "onnx/onnx/onnx.pb.cc",
+        "onnx/onnx/defs/tensor_proto_util.cc",
+        "onnx/onnx/defs/data_type_utils.cc",
+        "onnx/onnx/defs/shape_inference.cc", ] + Glob("src/*.cc")
 env.Append(CPPPATH=[ntl_headers])
 env.Program(str(build_dir / "onnx_parser"), onnx_parser_cpps)
 
