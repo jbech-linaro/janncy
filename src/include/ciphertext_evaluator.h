@@ -12,7 +12,7 @@ namespace janncy {
 
 class CiphertextEvaluator : public CtGraphVisitor {
  public:
-  static std::vector<Message> Evaluate(const CtGraph& ct_graph,
+  static std::vector<Message> Evaluate(const CtDag& ct_dag,
                                        std::vector<Message> inputs);
 
   void Visit(const CtAdd& node) override;
@@ -25,8 +25,8 @@ class CiphertextEvaluator : public CtGraphVisitor {
   std::vector<Message> result() const;
 
  private:
-  CiphertextEvaluator(const CtGraph& ct_graph, std::vector<Message> inputs);
-  const CtGraph& ct_graph_;
+  CiphertextEvaluator(const CtDag& ct_dag, std::vector<Message> inputs);
+  const CtDag& ct_dag_;
   std::vector<Message> inputs_;
   std::unordered_map<const CtOp*, Ciphertext> node_map_;
 };

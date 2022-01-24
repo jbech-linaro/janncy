@@ -13,7 +13,7 @@ namespace janncy {
 
 class Cipherfier : public FlowVisitor {
  public:
-  static CtGraph Cipherfy(const Flow& flow);
+  static CtDag Cipherfy(const Flow& flow);
 
   void Visit(const ConvLayer& node) override;
   void Visit(const FullyConnected& node) override;
@@ -26,7 +26,7 @@ class Cipherfier : public FlowVisitor {
   void Visit(const Flatten& node) override;
 
  private:
-  CtGraph ct_graph_;
+  CtDag ct_dag_;
   const Flow& flow_;
   std::unordered_map<const FlowNode*, CtTensor> tensor_map_;
 
