@@ -6,18 +6,18 @@
 #include <unordered_map>
 #include <vector>
 
-#include "include/add.h"
-#include "include/average_pool.h"
-#include "include/batch_normalization.h"
+#include "include/add_layer.h"
+#include "include/average_pool_layer.h"
+#include "include/batch_normalization_layer.h"
 #include "include/conv_layer.h"
 #include "include/ct_dag.h"
-#include "include/flatten.h"
-#include "include/fully_connected.h"
-#include "include/input.h"
-#include "include/max_pool.h"
+#include "include/flatten_layer.h"
+#include "include/fully_connected_layer.h"
+#include "include/input_layer.h"
+#include "include/max_pool_layer.h"
 #include "include/neural_network.h"
 #include "include/panic.h"
-#include "include/relu.h"
+#include "include/relu_layer.h"
 
 namespace janncy {
 
@@ -146,7 +146,7 @@ void Cipherfier::Visit(const ConvLayer& node) {
   tensor_map_.emplace(&node, CtTensor(std::move(output_channels)));
 }
 
-void Cipherfier::Visit(const AveragePool& node) {
+void Cipherfier::Visit(const AveragePoolLayer& node) {
   // TODO(alex): verify correctness and make it work for non-global Average
   // pool
   // TODO(alex): make it work for non 2D stuff (or explicitly decide not to
@@ -157,13 +157,13 @@ void Cipherfier::Visit(const AveragePool& node) {
   tensor_map_.emplace(&node, tensor);
 }
 
-void Cipherfier::Visit(const MaxPool& node) {
+void Cipherfier::Visit(const MaxPoolLayer& node) {
   // TODO(nsamar): this node is currently just bypassed
   CtTensor tensor = get_parent_tensor(node);  // copies parent tensor
   tensor_map_.emplace(&node, tensor);
 }
 
-void Cipherfier::Visit(const FullyConnected& node) {
+void Cipherfier::Visit(const FullyConnectedLayer& node) {
   const CtTensor& parent_tensor = get_parent_tensor(node);
   PANIC_IF(parent_tensor.ciphertexts().size() != 1);
   const CtOp& input_ct = *parent_tensor.ciphertexts()[0];
@@ -178,7 +178,7 @@ void Cipherfier::Visit(const FullyConnected& node) {
   tensor_map_.emplace(&node, CtTensor({&FlattenSlots(ct_dag_, slots)}));
 }
 
-void Cipherfier::Visit(const Flatten& node) {
+void Cipherfier::Visit(const FlattenLayer& node) {
   // alex: Not super correct, but forces things into a single CT as expected
   // by FullyConnected
   const CtOp& result =
@@ -186,7 +186,7 @@ void Cipherfier::Visit(const Flatten& node) {
   tensor_map_.emplace(&node, CtTensor({&result}));
 }
 
-void Cipherfier::Visit(const BatchNormalization& node) {
+void Cipherfier::Visit(const BatchNormalizationLayer& node) {
   const std::vector<const CtOp*>& par_cts =
       get_parent_tensor(node).ciphertexts();
 
@@ -200,7 +200,7 @@ void Cipherfier::Visit(const BatchNormalization& node) {
   tensor_map_.emplace(&node, CtTensor(result));
 }
 
-void Cipherfier::Visit(const Add& node) {
+void Cipherfier::Visit(const AddLayer& node) {
   const std::vector<const CtOp*>& p0_cts =
       get_parent_tensor(node, 0).ciphertexts();
   const std::vector<const CtOp*>& p1_cts =
@@ -213,7 +213,7 @@ void Cipherfier::Visit(const Add& node) {
   tensor_map_.emplace(&node, CtTensor(std::move(sum_cts)));
 }
 
-void Cipherfier::Visit(const Input& node) {
+void Cipherfier::Visit(const InputLayer& node) {
   int channel_cnt = node.shape()[0];
   std::vector<const CtOp*> input_cts;
   for (int i = 0; i < channel_cnt; ++i) {
@@ -222,7 +222,7 @@ void Cipherfier::Visit(const Input& node) {
   tensor_map_.emplace(&node, CtTensor(std::move(input_cts)));
 }
 
-void Cipherfier::Visit(const ReLU& node) {
+void Cipherfier::Visit(const ReluLayer& node) {
   const CtTensor& parent_tensor = get_parent_tensor(node);
   std::vector<const CtOp*> output_cts;
   for (const CtOp* ct : parent_tensor.ciphertexts()) {

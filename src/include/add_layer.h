@@ -1,5 +1,5 @@
-#ifndef JANNCY_BATCH_NORMALIZATION_H_
-#define JANNCY_BATCH_NORMALIZATION_H_
+#ifndef JANNCY_ADD_LAYER_H_
+#define JANNCY_ADD_LAYER_H_
 
 #include <string>
 #include <vector>
@@ -7,13 +7,13 @@
 #include "include/layer.h"
 #include "include/shape.h"
 
-class LayerVisitor;
-
 namespace janncy {
 
-class BatchNormalization : public Layer {
+class LayerVisitor;
+
+class AddLayer : public Layer {
  public:
-  BatchNormalization(Shape shape);
+  AddLayer(Shape shape);
 
   void Accept(LayerVisitor& visitor) const override;
   std::string op_type() const override;
@@ -25,4 +25,4 @@ class BatchNormalization : public Layer {
 
 }  // namespace janncy
 
-#endif  // JANNCY_BATCH_NORMALIZATION_H_
+#endif  // JANNCY_ADD_LAYER_H_

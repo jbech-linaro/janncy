@@ -1,5 +1,5 @@
-#ifndef JANNCY_FULLY_CONNECTED_H_
-#define JANNCY_FULLY_CONNECTED_H_
+#ifndef JANNCY_FULLY_CONNECTED_LAYER_H_
+#define JANNCY_FULLY_CONNECTED_LAYER_H_
 
 #include "include/layer.h"
 #include "include/shape.h"
@@ -8,9 +8,9 @@ namespace janncy {
 
 class LayerVisitor;
 
-class FullyConnected : public Layer {
+class FullyConnectedLayer : public Layer {
  public:
-  FullyConnected(int input_size, int output_size);
+  FullyConnectedLayer(int input_size, int output_size);
 
   void Accept(LayerVisitor& visitor) const override;
   std::string op_type() const override;
@@ -26,4 +26,4 @@ class FullyConnected : public Layer {
 
 }  // namespace janncy
 
-#endif  // JANNCY_FULLY_CONNECTRED_H_
+#endif  // JANNCY_FULLY_CONNECTED_LAYER_H_

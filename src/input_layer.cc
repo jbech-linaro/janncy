@@ -1,4 +1,4 @@
-#include "include/input.h"
+#include "include/input_layer.h"
 
 #include <utility>
 #include <vector>
@@ -8,6 +8,6 @@
 
 namespace janncy {
 
-void Input::Accept(LayerVisitor& visitor) const { visitor.Visit(*this); }
+void InputLayer::Accept(LayerVisitor& visitor) const { visitor.Visit(*this); }
 
 }  // namespace janncy

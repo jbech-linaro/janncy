@@ -1,5 +1,5 @@
-#ifndef JANNCY_MAX_POOL_H_
-#define JANNCY_MAX_POOL_H_
+#ifndef JANNCY_AVERAGE_POOL_LAYER_H_
+#define JANNCY_AVERAGE_POOL_LAYER_H_
 
 #include <string>
 #include <vector>
@@ -12,13 +12,15 @@ namespace janncy {
 
 class LayerVisitor;
 
-class MaxPool : public Layer {
+class AveragePoolLayer : public Layer {
  public:
-  MaxPool(Shape input_shape, KernelAttributes kernel);
+  AveragePoolLayer(Shape input_shape, KernelAttributes kernel);
 
   void Accept(LayerVisitor& visitor) const override;
   std::string op_type() const override;
   Shape shape() const override;
+
+  const KernelAttributes& kernel() const;
 
  private:
   KernelAttributes kernel_;
@@ -27,4 +29,4 @@ class MaxPool : public Layer {
 
 }  // namespace janncy
 
-#endif  // JANNCY_MAX_POOL_H_
+#endif  // JANNCY_AVERAGE_POOL_LAYER_H_

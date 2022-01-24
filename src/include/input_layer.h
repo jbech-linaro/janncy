@@ -1,5 +1,5 @@
-#ifndef JANNCY_INPUT_H_
-#define JANNCY_INPUT_H_
+#ifndef JANNCY_INPUT_LAYER_H_
+#define JANNCY_INPUT_LAYER_H_
 
 #include <vector>
 
@@ -9,9 +9,9 @@ namespace janncy {
 
 class LayerVisitor;
 
-class Input : public Layer {
+class InputLayer : public Layer {
  public:
-  Input(Shape shape) : shape_(std::move(shape)){};
+  InputLayer(Shape shape) : shape_(std::move(shape)){};
 
   void Accept(LayerVisitor& visitor) const override;
   std::string op_type() const override { return "InputLayer"; };
@@ -23,4 +23,4 @@ class Input : public Layer {
 
 }  // namespace janncy
 
-#endif  // JANNCY_INPUT_H_
+#endif  // JANNCY_INPUT_LAYER_H_

@@ -16,14 +16,14 @@ class Cipherfier : public LayerVisitor {
   static CtDag Cipherfy(const NeuralNetwork& nn);
 
   void Visit(const ConvLayer& node) override;
-  void Visit(const FullyConnected& node) override;
-  void Visit(const AveragePool& node) override;
-  void Visit(const BatchNormalization& node) override;
-  void Visit(const Add& node) override;
-  void Visit(const Input& node) override;
-  void Visit(const ReLU& node) override;
-  void Visit(const MaxPool& node) override;
-  void Visit(const Flatten& node) override;
+  void Visit(const FullyConnectedLayer& node) override;
+  void Visit(const AveragePoolLayer& node) override;
+  void Visit(const BatchNormalizationLayer& node) override;
+  void Visit(const AddLayer& node) override;
+  void Visit(const InputLayer& node) override;
+  void Visit(const ReluLayer& node) override;
+  void Visit(const MaxPoolLayer& node) override;
+  void Visit(const FlattenLayer& node) override;
 
  private:
   CtDag ct_dag_;

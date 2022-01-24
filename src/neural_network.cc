@@ -1,14 +1,14 @@
 #include "include/neural_network.h"
 
-#include "include/add.h"
-#include "include/average_pool.h"
+#include "include/add_layer.h"
+#include "include/average_pool_layer.h"
 #include "include/conv_layer.h"
-#include "include/flatten.h"
-#include "include/fully_connected.h"
-#include "include/input.h"
-#include "include/max_pool.h"
+#include "include/flatten_layer.h"
+#include "include/fully_connected_layer.h"
+#include "include/input_layer.h"
+#include "include/max_pool_layer.h"
 #include "include/panic.h"
-#include "include/relu.h"
+#include "include/relu_layer.h"
 #include "include/shape.h"
 
 namespace janncy {
@@ -19,7 +19,7 @@ const Layer& CreateAdd(NeuralNetwork& nn, const Layer& parent0,
                        const Layer& parent1) {
   PANIC_IF(parent0.shape() != parent1.shape());
   Shape shape = parent0.shape();
-  return nn.AddNode(std::make_unique<Add>(shape), {&parent0, &parent1});
+  return nn.AddNode(std::make_unique<AddLayer>(shape), {&parent0, &parent1});
 }
 
 const Layer& CreateConvLayer(NeuralNetwork& nn, const Layer& parent,
@@ -31,12 +31,12 @@ const Layer& CreateConvLayer(NeuralNetwork& nn, const Layer& parent,
 
 const Layer& CreateAveragePool(NeuralNetwork& nn, const Layer& parent,
                                KernelAttributes kernel) {
-  return nn.AddNode(std::make_unique<AveragePool>(parent.shape(), kernel),
+  return nn.AddNode(std::make_unique<AveragePoolLayer>(parent.shape(), kernel),
                     {&parent});
 }
 const Layer& CreateMaxPool(NeuralNetwork& nn, const Layer& parent,
                            KernelAttributes kernel) {
-  return nn.AddNode(std::make_unique<MaxPool>(parent.shape(), kernel),
+  return nn.AddNode(std::make_unique<MaxPoolLayer>(parent.shape(), kernel),
                     {&parent});
 }
 
@@ -48,13 +48,13 @@ const Layer& CreateGlobalAveragePool(NeuralNetwork& nn, const Layer& parent) {
 }
 
 const Layer& CreateInput(NeuralNetwork& nn, Shape shape) {
-  return nn.AddNode(std::make_unique<Input>(std::move(shape)), {});
+  return nn.AddNode(std::make_unique<InputLayer>(std::move(shape)), {});
 }
 const Layer& CreateRelu(NeuralNetwork& nn, const Layer& parent) {
-  return nn.AddNode(std::make_unique<ReLU>(parent.shape()), {&parent});
+  return nn.AddNode(std::make_unique<ReluLayer>(parent.shape()), {&parent});
 }
 const Layer& CreateFlatten(NeuralNetwork& nn, const Layer& parent) {
-  return nn.AddNode(std::make_unique<Flatten>(parent.shape()), {&parent});
+  return nn.AddNode(std::make_unique<FlattenLayer>(parent.shape()), {&parent});
 }
 const Layer& CreateFullyConnected(NeuralNetwork& nn, const Layer& parent,
                                   int output_dim) {
@@ -62,8 +62,8 @@ const Layer& CreateFullyConnected(NeuralNetwork& nn, const Layer& parent,
   PANIC_IF(input_shape.dimension_cnt() != 1,
            "Fully-connected layer expects 1D input", input_shape);
   int input_dim = input_shape[0];
-  return nn.AddNode(std::make_unique<FullyConnected>(input_dim, output_dim),
-                    {&parent});
+  return nn.AddNode(
+      std::make_unique<FullyConnectedLayer>(input_dim, output_dim), {&parent});
 }
 
 }  // namespace neural_network

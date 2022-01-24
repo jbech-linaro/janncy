@@ -1,5 +1,5 @@
-#ifndef JANNCY_RELU_H_
-#define JANNCY_RELU_H_
+#ifndef JANNCY_RELU_LAYER_H_
+#define JANNCY_RELU_LAYER_H_
 
 #include <string>
 #include <vector>
@@ -11,9 +11,9 @@ namespace janncy {
 
 class LayerVisitor;
 
-class ReLU : public Layer {
+class ReluLayer : public Layer {
  public:
-  ReLU(Shape shape);
+  ReluLayer(Shape shape);
 
   void Accept(LayerVisitor& visitor) const override;
   std::string op_type() const override;
@@ -25,4 +25,4 @@ class ReLU : public Layer {
 
 }  // namespace janncy
 
-#endif  // JANNCY_RELU_H_
+#endif  // JANNCY_RELU_LAYER_H_
