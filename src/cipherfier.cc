@@ -23,9 +23,9 @@ namespace janncy {
 
 static const std::string kAllKeysAddedStamp = "serkey/AllKeysAddedStamp";
 
-CtDag Cipherfier::Cipherfy(const Flow& flow) {
-  Cipherfier cipherfier(flow);
-  for (const FlowNode* node : flow.nodes()) {
+CtDag Cipherfier::Cipherfy(const NeuralNetwork& nn) {
+  Cipherfier cipherfier(nn);
+  for (const FlowNode* node : nn.nodes()) {
     int old_dag_size = cipherfier.ct_dag_.nodes().size();
     std::cout << "Visiting " << node->op_type() << "(" << node << ") "
               << node->shape() << "; ";
@@ -39,14 +39,14 @@ CtDag Cipherfier::Cipherfy(const Flow& flow) {
   return std::move(cipherfier.ct_dag_);
 }
 
-Cipherfier::Cipherfier(const Flow& flow) : flow_(flow) {}
+Cipherfier::Cipherfier(const NeuralNetwork& nn) : nn_(nn) {}
 
 const CtTensor& Cipherfier::get_parent_tensor(const FlowNode& node) const {
   return get_parent_tensor(node, 0);
 }
 const CtTensor& Cipherfier::get_parent_tensor(const FlowNode& node,
                                               int parent_ind) const {
-  return tensor_map_.at(flow_.parents(node)[parent_ind]);
+  return tensor_map_.at(nn_.parents(node)[parent_ind]);
 }
 
 const CtOp& SumCiphertexts(CtDag& ct_dag, const std::vector<const CtOp*>& cts) {

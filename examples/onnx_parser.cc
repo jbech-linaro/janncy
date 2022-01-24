@@ -45,15 +45,13 @@ int main(int argc, char** argv) {
 
   auto graph = model->graph();
 
-  auto flow = OnnxGraph::MakeFlow(graph);
+  auto nn = OnnxGraph::MakeNeuralNetwork(graph);
 
   google::protobuf::ShutdownProtobufLibrary();
-  janncy::DrawDag(*flow, "flow");
-  std::cerr << "Nodes in flow: " << flow->nodes().size() << "\n";
-  /*
-  CtGraph ct_graph = Cipherfier::Cipherfy(*flow);
+  janncy::DrawDag(*nn, "neural_network");
+  std::cerr << "Nodes in neural network: " << nn->nodes().size() << "\n";
+  CtDag ct_dag = Cipherfier::Cipherfy(*nn);
 
-  janncy::DrawGraph(ct_graph, "ct_graph");
-  std::cerr << "Nodes in ct_graph: " << ct_graph.nodes().size() << "\n";
-  */
+  janncy::DrawDag(ct_dag, "ct_dag");
+  std::cerr << "Nodes in ct_dag: " << ct_dag.nodes().size() << "\n";
 }

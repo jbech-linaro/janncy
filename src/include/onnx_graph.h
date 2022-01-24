@@ -20,19 +20,20 @@ class FlowNode;
 
 class OnnxGraph {
  public:
-  static std::unique_ptr<Flow> MakeFlow(const onnx::GraphProto& graph_proto);
+  static std::unique_ptr<NeuralNetwork> MakeNeuralNetwork(
+      const onnx::GraphProto& graph_proto);
 
  private:
   explicit OnnxGraph(const onnx::GraphProto& graph);
   std::vector<const OnnxNode*> Parents(const OnnxNode& node);
-  std::vector<const FlowNode*> FlownodeParents(const OnnxNode& node);
+  std::vector<const FlowNode*> FlowNodeParents(const OnnxNode& node);
   void LoadInitializers();
   void LoadNodes();
   void LoadInputs();
   void AddFlowNode(const OnnxNode& onnx_node);
 
   const onnx::GraphProto& graph_;
-  std::unique_ptr<Flow> flow_;
+  std::unique_ptr<NeuralNetwork> nn_;
   std::vector<OnnxNode*> nodes_;
   std::unordered_map<std::string, const OnnxNode*> onnxnode_map_;
   std::unordered_map<const OnnxNode*, const FlowNode*> flownode_map_;

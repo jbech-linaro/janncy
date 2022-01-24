@@ -17,16 +17,17 @@ namespace janncy {
 
 // TODO(nsamar): OnnxGraph should be a Graph<OnnxNode>
 
-std::unique_ptr<Flow> OnnxGraph::MakeFlow(const onnx::GraphProto& graph_proto) {
+std::unique_ptr<NeuralNetwork> OnnxGraph::MakeNeuralNetwork(
+    const onnx::GraphProto& graph_proto) {
   auto onnx_graph = OnnxGraph(graph_proto);
   onnx_graph.LoadInitializers();
   onnx_graph.LoadInputs();
   onnx_graph.LoadNodes();
-  return std::move(onnx_graph.flow_);
+  return std::move(onnx_graph.nn_);
 }
 
 OnnxGraph::OnnxGraph(const onnx::GraphProto& graph)
-    : graph_(graph), flow_(std::make_unique<Flow>()) {}
+    : graph_(graph), nn_(std::make_unique<NeuralNetwork>()) {}
 
 std::vector<const OnnxNode*> OnnxGraph::Parents(const OnnxNode& node) {
   std::vector<const OnnxNode*> result;
@@ -39,7 +40,7 @@ std::vector<const OnnxNode*> OnnxGraph::Parents(const OnnxNode& node) {
   return result;
 }
 
-std::vector<const FlowNode*> OnnxGraph::FlownodeParents(const OnnxNode& node) {
+std::vector<const FlowNode*> OnnxGraph::FlowNodeParents(const OnnxNode& node) {
   auto parents_vec = Parents(node);
   std::vector<const FlowNode*> result;
   for (auto parent : parents_vec) {
@@ -82,7 +83,8 @@ void OnnxGraph::LoadInputs() {
               << "\n";
     nodes_.push_back(new OnnxNode(shape));
     onnxnode_map_[node_proto.name()] = nodes_.back();
-    flownode_map_.emplace(nodes_.back(), &flow::CreateInput(*flow_, shape));
+    flownode_map_.emplace(nodes_.back(),
+                          &neural_network::CreateInput(*nn_, shape));
   }
 }
 
@@ -94,17 +96,17 @@ const std::string ATTR_AUTO_PAD = "auto_pad";
 const std::string ATTR_KERNEL_SHAPE = "kernel_shape";
 const std::string ATTR_AXIS = "axis";
 
-const FlowNode& CreateRelu(Flow& flow, const OnnxNode& onnx_node,
+const FlowNode& CreateRelu(NeuralNetwork& nn, const OnnxNode& onnx_node,
                            const FlowNode& parent) {
-  return flow::CreateRelu(flow, parent);
+  return neural_network::CreateRelu(nn, parent);
 }
 
-const FlowNode& CreateAdd(Flow& flow, const OnnxNode& onnx_node,
+const FlowNode& CreateAdd(NeuralNetwork& nn, const OnnxNode& onnx_node,
                           const FlowNode& parent0, const FlowNode& parent1) {
-  return flow::CreateAdd(flow, parent0, parent1);
+  return neural_network::CreateAdd(nn, parent0, parent1);
 }
 
-const FlowNode& CreateConv(Flow& flow, const OnnxNode& onnx_node,
+const FlowNode& CreateConv(NeuralNetwork& nn, const OnnxNode& onnx_node,
                            const FlowNode& parent) {
   std::vector<Shape> input_shapes = onnx_node.input_shapes();
 
@@ -124,25 +126,30 @@ const FlowNode& CreateConv(Flow& flow, const OnnxNode& onnx_node,
   KernelAttributes kernel(kernel_shape, onnx_node.strides(),
                           onnx_node.padding());
 
-  return flow::CreateConvLayer(flow, parent, kernel, output_channel_cnt);
+  return neural_network::CreateConvLayer(nn, parent, kernel,
+                                         output_channel_cnt);
 }
 
-const FlowNode& CreateMaxPool(Flow& flow, const OnnxNode& onnx_node,
+const FlowNode& CreateMaxPool(NeuralNetwork& nn, const OnnxNode& onnx_node,
                               const FlowNode& parent) {
-  return flow::CreateMaxPool(flow, parent, onnx_node.kernel_for_pooling());
+  return neural_network::CreateMaxPool(nn, parent,
+                                       onnx_node.kernel_for_pooling());
 }
 
-const FlowNode& CreateAveragePool(Flow& flow, const OnnxNode& onnx_node,
+const FlowNode& CreateAveragePool(NeuralNetwork& nn, const OnnxNode& onnx_node,
                                   const FlowNode& parent) {
-  return flow::CreateAveragePool(flow, parent, onnx_node.kernel_for_pooling());
+  return neural_network::CreateAveragePool(nn, parent,
+                                           onnx_node.kernel_for_pooling());
 }
 
-const FlowNode& CreateGlobalAveragePool(Flow& flow, const OnnxNode& onnx_node,
+const FlowNode& CreateGlobalAveragePool(NeuralNetwork& nn,
+                                        const OnnxNode& onnx_node,
                                         const FlowNode& parent) {
-  return flow::CreateGlobalAveragePool(flow, parent);
+  return neural_network::CreateGlobalAveragePool(nn, parent);
 }
 
-const FlowNode& CreateFullyConnected(Flow& flow, const OnnxNode& onnx_node,
+const FlowNode& CreateFullyConnected(NeuralNetwork& nn,
+                                     const OnnxNode& onnx_node,
                                      const FlowNode& parent) {
   std::vector<Shape> input_shapes = onnx_node.input_shapes();
 
@@ -157,10 +164,10 @@ const FlowNode& CreateFullyConnected(Flow& flow, const OnnxNode& onnx_node,
   PANIC_IF(input_shapes.size() >= 3 &&
            input_shapes[2][0] != input_shapes[1][0]);
 
-  return flow::CreateFullyConnected(flow, parent, input_shapes[1][0]);
+  return neural_network::CreateFullyConnected(nn, parent, input_shapes[1][0]);
 }
 
-const FlowNode& CreateFlatten(Flow& flow, const OnnxNode& onnx_node,
+const FlowNode& CreateFlatten(NeuralNetwork& nn, const OnnxNode& onnx_node,
                               const FlowNode& parent) {
   int axis = 1;
   if (onnx_node.AttributeExists(ATTR_AXIS)) {
@@ -168,29 +175,29 @@ const FlowNode& CreateFlatten(Flow& flow, const OnnxNode& onnx_node,
   }
   PANIC_IF(axis != 1, axis, "We support only flattening all axes!");
 
-  return flow::CreateFlatten(flow, parent);
+  return neural_network::CreateFlatten(nn, parent);
 }
 
-const FlowNode& CreateFlowNode(Flow& flow, const OnnxNode& onnx_node,
+const FlowNode& CreateFlowNode(NeuralNetwork& nn, const OnnxNode& onnx_node,
                                std::vector<const FlowNode*> parents) {
   PANIC_IF(parents.size() < 1 || !parents[0]);
   if (onnx_node.op_type() == "Add") {
     PANIC_IF(parents.size() < 2 && !parents[1]);
-    return CreateAdd(flow, onnx_node, *parents[0], *parents[1]);
+    return CreateAdd(nn, onnx_node, *parents[0], *parents[1]);
   } else if (onnx_node.op_type() == "AveragePool") {
-    return CreateAveragePool(flow, onnx_node, *parents[0]);
+    return CreateAveragePool(nn, onnx_node, *parents[0]);
   } else if (onnx_node.op_type() == "Conv") {
-    return CreateConv(flow, onnx_node, *parents[0]);
+    return CreateConv(nn, onnx_node, *parents[0]);
   } else if (onnx_node.op_type() == "Flatten") {
-    return CreateFlatten(flow, onnx_node, *parents[0]);
+    return CreateFlatten(nn, onnx_node, *parents[0]);
   } else if (onnx_node.op_type() == "Gemm") {
-    return CreateFullyConnected(flow, onnx_node, *parents[0]);
+    return CreateFullyConnected(nn, onnx_node, *parents[0]);
   } else if (onnx_node.op_type() == "GlobalAveragePool") {
-    return CreateGlobalAveragePool(flow, onnx_node, *parents[0]);
+    return CreateGlobalAveragePool(nn, onnx_node, *parents[0]);
   } else if (onnx_node.op_type() == "MaxPool") {
-    return CreateMaxPool(flow, onnx_node, *parents[0]);
+    return CreateMaxPool(nn, onnx_node, *parents[0]);
   } else if (onnx_node.op_type() == "Relu") {
-    return CreateRelu(flow, onnx_node, *parents[0]);
+    return CreateRelu(nn, onnx_node, *parents[0]);
   } else {
     PANIC("ONNX operation `" + onnx_node.op_type() + "' not supported!");
   }
@@ -201,9 +208,9 @@ const FlowNode& CreateFlowNode(Flow& flow, const OnnxNode& onnx_node,
 // Specification of ONNX operations:
 // https://github.com/onnx/onnx/blob/master/docs/Operators.md
 void OnnxGraph::AddFlowNode(const OnnxNode& onnx_node) {
-  auto parents = FlownodeParents(onnx_node);
+  auto parents = FlowNodeParents(onnx_node);
   std::cout << "parents size: " << parents.size() << std::endl;
-  const FlowNode& new_flow_node = CreateFlowNode(*flow_, onnx_node, parents);
+  const FlowNode& new_flow_node = CreateFlowNode(*nn_, onnx_node, parents);
   const std::string output_name = onnx_node.output()[0];
   shape_map_.emplace(output_name, new_flow_node.shape());
   std::cerr << "Found " << onnx_node.op_type() << " with name " << output_name

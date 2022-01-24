@@ -9,28 +9,29 @@
 
 namespace janncy {
 
-using Flow = Dag<FlowNode>;
+using NeuralNetwork = Dag<FlowNode>;
 
-namespace flow {
+namespace neural_network {
 
-const FlowNode& CreateAdd(Flow& flow, const FlowNode& parent0,
+const FlowNode& CreateAdd(NeuralNetwork& nn, const FlowNode& parent0,
                           const FlowNode& parent1);
 
-const FlowNode& CreateConvLayer(Flow& flow, const FlowNode& parent,
+const FlowNode& CreateConvLayer(NeuralNetwork& nn, const FlowNode& parent,
                                 KernelAttributes kernel,
                                 int output_channel_cnt);
-const FlowNode& CreateAveragePool(Flow& Flow, const FlowNode& parent,
+const FlowNode& CreateAveragePool(NeuralNetwork& nn, const FlowNode& parent,
                                   KernelAttributes kernel);
-const FlowNode& CreateMaxPool(Flow& flow, const FlowNode& parent,
+const FlowNode& CreateMaxPool(NeuralNetwork& nn, const FlowNode& parent,
                               KernelAttributes kernel);
-const FlowNode& CreateGlobalAveragePool(Flow& flow, const FlowNode& parent);
+const FlowNode& CreateGlobalAveragePool(NeuralNetwork& nn,
+                                        const FlowNode& parent);
 
-const FlowNode& CreateInput(Flow& flow, Shape shape);
-const FlowNode& CreateRelu(Flow& flow, const FlowNode& parent);
-const FlowNode& CreateFlatten(Flow& flow, const FlowNode& parent);
-const FlowNode& CreateFullyConnected(Flow& flow, const FlowNode& parent,
+const FlowNode& CreateInput(NeuralNetwork& nn, Shape shape);
+const FlowNode& CreateRelu(NeuralNetwork& nn, const FlowNode& parent);
+const FlowNode& CreateFlatten(NeuralNetwork& nn, const FlowNode& parent);
+const FlowNode& CreateFullyConnected(NeuralNetwork& nn, const FlowNode& parent,
                                      int output_dim);
-}  // namespace flow
+}  // namespace neural_network
 
 }  // namespace janncy
 
