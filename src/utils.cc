@@ -1,8 +1,6 @@
 #include <cstdlib>
 #include <random>
 
-#include "include/flow_node.h"
-
 namespace janncy {
 
 double GetUniformRandom() {

@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "include/flow_node.h"
 #include "include/kernel_attributes.h"
+#include "include/layer.h"
 #include "include/shape.h"
 
 namespace janncy {

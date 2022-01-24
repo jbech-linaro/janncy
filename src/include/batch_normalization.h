@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "include/flow_node.h"
+#include "include/layer.h"
 #include "include/shape.h"
 
 class FlowVisitor;

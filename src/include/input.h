@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "include/flow_node.h"
+#include "include/layer.h"
 
 namespace janncy {
 

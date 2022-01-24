@@ -1,5 +1,5 @@
-#ifndef JANNCY_FLOW_NODE_H_
-#define JANNCY_FLOW_NODE_H_
+#ifndef JANNCY_LAYER_H_
+#define JANNCY_LAYER_H_
 
 #include <string>
 #include <vector>
@@ -23,4 +23,4 @@ std::ostream& operator<<(std::ostream& stream, const FlowNode& node);
 
 }  // namespace janncy
 
-#endif  // JANNCY_FLOW_NODE_H_
+#endif  // JANNCY_LAYER_H_

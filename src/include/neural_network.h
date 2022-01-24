@@ -1,11 +1,11 @@
-#ifndef JANNCY_FLOW_H_
-#define JANNCY_FLOW_H_
+#ifndef JANNCY_NEURAL_NETWORK_H_
+#define JANNCY_NEURAL_NETWORK_H_
 
 #include <vector>
 
-#include "include/flow_node.h"
 #include "include/graph.h"
 #include "include/kernel_attributes.h"
+#include "include/layer.h"
 
 namespace janncy {
 
@@ -34,4 +34,4 @@ const FlowNode& CreateFullyConnected(Flow& flow, const FlowNode& parent,
 
 }  // namespace janncy
 
-#endif  // JANNCY_FLOW_H_
+#endif  // JANNCY_NEURAL_NETWORK_H_

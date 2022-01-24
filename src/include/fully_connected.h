@@ -1,7 +1,7 @@
 #ifndef JANNCY_FULLY_CONNECTED_H_
 #define JANNCY_FULLY_CONNECTED_H_
 
-#include "include/flow_node.h"
+#include "include/layer.h"
 #include "include/shape.h"
 
 namespace janncy {
