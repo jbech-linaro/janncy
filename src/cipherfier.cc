@@ -12,10 +12,10 @@
 #include "include/conv_layer.h"
 #include "include/ct_graph.h"
 #include "include/flatten.h"
-#include "include/flow.h"
 #include "include/fully_connected.h"
 #include "include/input.h"
 #include "include/max_pool.h"
+#include "include/neural_network.h"
 #include "include/panic.h"
 #include "include/relu.h"
 

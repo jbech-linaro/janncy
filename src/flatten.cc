@@ -1,8 +1,8 @@
 #include "include/flatten.h"
 
-#include "include/flow.h"
 #include "include/flow_node.h"
 #include "include/flow_visitor.h"
+#include "include/neural_network.h"
 
 namespace janncy {
 

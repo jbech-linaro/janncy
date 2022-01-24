@@ -5,9 +5,9 @@
 
 #include "include/ct_graph.h"
 #include "include/ct_tensor.h"
-#include "include/flow.h"
 #include "include/flow_visitor.h"
 #include "include/kernel_attributes.h"
+#include "include/neural_network.h"
 
 namespace janncy {
 

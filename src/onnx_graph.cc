@@ -7,7 +7,7 @@
 #include <onnx/onnx_pb.h>
 #include <onnx/proto_utils.h>
 
-#include "include/flow.h"
+#include "include/neural_network.h"
 #include "include/panic.h"
 
 namespace janncy {
