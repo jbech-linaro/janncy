@@ -10,8 +10,8 @@
 #include <graphviz/gvc.h>
 #include <graphviz/types.h>
 
-#include "graph.h"
-#include "utils.h"
+#include "include/dag.h"
+#include "include/utils.h"
 
 namespace janncy {
 

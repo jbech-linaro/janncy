@@ -1,5 +1,5 @@
-#ifndef JANNCY_GRAPH_H_
-#define JANNCY_GRAPH_H_
+#ifndef JANNCY_DAG_H_
+#define JANNCY_DAG_H_
 
 #include <algorithm>
 #include <cassert>
@@ -63,4 +63,4 @@ std::ostream& operator<<(std::ostream& stream, const Graph<T>& graph) {
 
 }  // namespace janncy
 
-#endif  //  JANNCY_GRAPH_H_
+#endif  //  JANNCY_DAG_H_

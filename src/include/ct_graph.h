@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "include/ct_op.h"
-#include "include/graph.h"
+#include "include/dag.h"
 
 namespace janncy {
 

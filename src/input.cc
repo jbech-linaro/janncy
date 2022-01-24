@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "include/flow_visitor.h"
-#include "include/graph.h"
 #include "include/neural_network.h"
 
 namespace janncy {

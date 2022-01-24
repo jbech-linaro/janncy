@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "include/graph.h"
+#include "include/dag.h"
 #include "include/kernel_attributes.h"
 #include "include/layer.h"
 

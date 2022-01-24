@@ -5,10 +5,11 @@
 #include <iostream>
 
 // Needs to include everything that overloads operator<<
-#include "ct_op.h"
-#include "graph.h"
-#include "shape.h"
-#include "utils.h"
+// TODO(nsamar): Why?
+#include "include/ct_op.h"
+#include "include/dag.h"
+#include "include/shape.h"
+#include "include/utils.h"
 
 namespace janncy {
 
