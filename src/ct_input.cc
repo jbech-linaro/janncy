@@ -1,11 +1,11 @@
 #include "include/ct_input.h"
 
 #include "include/ct_dag.h"
-#include "include/ct_graph_visitor.h"
+#include "include/ct_op_visitor.h"
 
 namespace janncy {
 
-void CtInput::Accept(CtGraphVisitor& visitor) const {
+void CtInput::Accept(CtOpVisitor& visitor) const {
   return visitor.Visit(*this);
 }
 std::string CtInput::op_type() const { return "CtInput"; }

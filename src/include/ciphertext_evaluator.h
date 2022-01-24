@@ -6,11 +6,11 @@
 
 #include "include/ciphertext.h"
 #include "include/ct_dag.h"
-#include "include/ct_graph_visitor.h"
+#include "include/ct_op_visitor.h"
 
 namespace janncy {
 
-class CiphertextEvaluator : public CtGraphVisitor {
+class CiphertextEvaluator : public CtOpVisitor {
  public:
   static std::vector<Message> Evaluate(const CtDag& ct_dag,
                                        std::vector<Message> inputs);

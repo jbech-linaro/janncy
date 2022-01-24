@@ -1,5 +1,5 @@
-#ifndef JANNCY_CT_GRAPH_VISITOR_H_
-#define JANNCY_CT_GRAPH_VISITOR_H_
+#ifndef JANNCY_CT_OP_VISITOR_H_
+#define JANNCY_CT_OP_VISITOR_H_
 
 namespace janncy {
 
@@ -11,7 +11,7 @@ class CtPtMul;
 class CtRotate;
 class CtInput;
 
-class CtGraphVisitor {
+class CtOpVisitor {
  public:
   virtual void Visit(const CtInput& node) = 0;
   virtual void Visit(const CtAdd& node) = 0;
@@ -23,4 +23,4 @@ class CtGraphVisitor {
 
 }  // namespace janncy
 
-#endif  // JANNCY_CT_GRAPH_VISITOR_H_
+#endif  // JANNCY_CT_OP_VISITOR_H_

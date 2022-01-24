@@ -5,12 +5,12 @@
 #include <vector>
 
 #include "include/ct_dag.h"
-#include "include/ct_graph_visitor.h"
+#include "include/ct_op_visitor.h"
 #include "include/message.h"
 
 namespace janncy {
 
-class CleartextEvaluator : public CtGraphVisitor {
+class CleartextEvaluator : public CtOpVisitor {
  public:
   static std::vector<Message> Evaluate(const CtDag& ct_dag,
                                        std::vector<Message> inputs);
