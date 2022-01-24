@@ -1,5 +1,5 @@
-#ifndef JANNCY_FLOW_VISITOR_H_
-#define JANNCY_FLOW_VISITOR_H_
+#ifndef JANNCY_LAYER_VISITOR_H_
+#define JANNCY_LAYER_VISITOR_H_
 
 namespace janncy {
 
@@ -14,7 +14,7 @@ class ReLU;
 class MaxPool;
 class Flatten;
 
-class FlowVisitor {
+class LayerVisitor {
  public:
   virtual void Visit(const ConvLayer& node) = 0;
   virtual void Visit(const FullyConnected& node) = 0;
@@ -29,4 +29,4 @@ class FlowVisitor {
 
 }  // namespace janncy
 
-#endif  // JANNCY_FLOW_VISITOR_H_
+#endif  // JANNCY_LAYER_VISITOR_H_

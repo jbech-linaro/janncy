@@ -8,11 +8,11 @@
 
 namespace janncy {
 
-class FlowVisitor;
+class LayerVisitor;
 
 class Layer {
  public:
-  virtual void Accept(FlowVisitor& visitor) const = 0;
+  virtual void Accept(LayerVisitor& visitor) const = 0;
   virtual std::string op_type() const = 0;
   virtual Shape shape() const = 0;
 

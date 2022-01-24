@@ -6,13 +6,13 @@
 
 namespace janncy {
 
-class FlowVisitor;
+class LayerVisitor;
 
 class FullyConnected : public Layer {
  public:
   FullyConnected(int input_size, int output_size);
 
-  void Accept(FlowVisitor& visitor) const override;
+  void Accept(LayerVisitor& visitor) const override;
   std::string op_type() const override;
   Shape shape() const override;
 

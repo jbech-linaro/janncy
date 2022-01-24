@@ -7,13 +7,13 @@
 
 namespace janncy {
 
-class FlowVisitor;
+class LayerVisitor;
 
 class Input : public Layer {
  public:
   Input(Shape shape) : shape_(std::move(shape)){};
 
-  void Accept(FlowVisitor& visitor) const override;
+  void Accept(LayerVisitor& visitor) const override;
   std::string op_type() const override { return "InputLayer"; };
   Shape shape() const override { return shape_; }
 

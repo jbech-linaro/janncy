@@ -10,13 +10,13 @@
 
 namespace janncy {
 
-class FlowVisitor;
+class LayerVisitor;
 
 class AveragePool : public Layer {
  public:
   AveragePool(Shape input_shape, KernelAttributes kernel);
 
-  void Accept(FlowVisitor& visitor) const override;
+  void Accept(LayerVisitor& visitor) const override;
   std::string op_type() const override;
   Shape shape() const override;
 

@@ -9,13 +9,13 @@
 
 namespace janncy {
 
-class FlowVisitor;
+class LayerVisitor;
 
 class Flatten : public Layer {
  public:
   Flatten(const Shape& input_shape);
 
-  void Accept(FlowVisitor& visitor) const override;
+  void Accept(LayerVisitor& visitor) const override;
   std::string op_type() const override;
   Shape shape() const override;
 

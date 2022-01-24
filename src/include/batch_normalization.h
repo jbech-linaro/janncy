@@ -7,7 +7,7 @@
 #include "include/layer.h"
 #include "include/shape.h"
 
-class FlowVisitor;
+class LayerVisitor;
 
 namespace janncy {
 
@@ -15,7 +15,7 @@ class BatchNormalization : public Layer {
  public:
   BatchNormalization(Shape shape);
 
-  void Accept(FlowVisitor& visitor) const override;
+  void Accept(LayerVisitor& visitor) const override;
   std::string op_type() const override;
   Shape shape() const override;
 

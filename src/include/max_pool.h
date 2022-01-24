@@ -10,13 +10,13 @@
 
 namespace janncy {
 
-class FlowVisitor;
+class LayerVisitor;
 
 class MaxPool : public Layer {
  public:
   MaxPool(Shape input_shape, KernelAttributes kernel);
 
-  void Accept(FlowVisitor& visitor) const override;
+  void Accept(LayerVisitor& visitor) const override;
   std::string op_type() const override;
   Shape shape() const override;
 

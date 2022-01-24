@@ -3,14 +3,14 @@
 #include <string>
 #include <vector>
 
-#include "include/flow_visitor.h"
+#include "include/layer_visitor.h"
 
 namespace janncy {
 
 FullyConnected::FullyConnected(int input_size, int output_size)
     : input_size_(input_size), output_size_(output_size) {}
 
-void FullyConnected::Accept(FlowVisitor& visitor) const {
+void FullyConnected::Accept(LayerVisitor& visitor) const {
   visitor.Visit(*this);
 }
 std::string FullyConnected::op_type() const { return "FullyConnected"; }

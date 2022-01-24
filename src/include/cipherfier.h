@@ -5,13 +5,13 @@
 
 #include "include/ct_dag.h"
 #include "include/ct_tensor.h"
-#include "include/flow_visitor.h"
 #include "include/kernel_attributes.h"
+#include "include/layer_visitor.h"
 #include "include/neural_network.h"
 
 namespace janncy {
 
-class Cipherfier : public FlowVisitor {
+class Cipherfier : public LayerVisitor {
  public:
   static CtDag Cipherfy(const NeuralNetwork& nn);
 

@@ -9,13 +9,13 @@
 
 namespace janncy {
 
-class FlowVisitor;
+class LayerVisitor;
 
 class ConvLayer : public Layer {
  public:
   ConvLayer(Shape input_shape, KernelAttributes kernel, int output_ch);
 
-  void Accept(FlowVisitor& visitor) const override;
+  void Accept(LayerVisitor& visitor) const override;
   std::string op_type() const override;
   Shape shape() const override;
 

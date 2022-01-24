@@ -4,14 +4,14 @@
 #include <utility>
 #include <vector>
 
-#include "include/flow_visitor.h"
+#include "include/layer_visitor.h"
 
 namespace janncy {
 
 BatchNormalization::BatchNormalization(Shape shape)
     : shape_(std::move(shape)) {}
 
-void BatchNormalization::Accept(FlowVisitor& visitor) const {
+void BatchNormalization::Accept(LayerVisitor& visitor) const {
   visitor.Visit(*this);
 }
 std::string BatchNormalization::op_type() const { return "BatchNormalization"; }
