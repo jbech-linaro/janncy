@@ -1,5 +1,5 @@
-#ifndef JANNCY_CT_GRAPH_H_
-#define JANNCY_CT_GRAPH_H_
+#ifndef JANNCY_CT_DAG_H_
+#define JANNCY_CT_DAG_H_
 
 #include <vector>
 
@@ -25,4 +25,4 @@ const CtOp& CreateRotate(CtGraph& ct_graph, const CtOp& parent);
 
 }  // namespace janncy
 
-#endif  // JANNCY_CT_GRAPH_H_
+#endif  // JANNCY_CT_DAG_H_

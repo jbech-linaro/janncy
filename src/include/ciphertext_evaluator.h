@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "include/ciphertext.h"
-#include "include/ct_graph.h"
+#include "include/ct_dag.h"
 #include "include/ct_graph_visitor.h"
 
 namespace janncy {

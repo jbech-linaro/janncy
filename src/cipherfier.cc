@@ -10,7 +10,7 @@
 #include "include/average_pool.h"
 #include "include/batch_normalization.h"
 #include "include/conv_layer.h"
-#include "include/ct_graph.h"
+#include "include/ct_dag.h"
 #include "include/flatten.h"
 #include "include/fully_connected.h"
 #include "include/input.h"

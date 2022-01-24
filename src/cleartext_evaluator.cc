@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "include/ct_add.h"
-#include "include/ct_graph.h"
+#include "include/ct_dag.h"
 #include "include/ct_input.h"
 #include "include/ct_mul.h"
 #include "include/ct_op.h"

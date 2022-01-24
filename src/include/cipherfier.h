@@ -3,7 +3,7 @@
 
 #include <unordered_map>
 
-#include "include/ct_graph.h"
+#include "include/ct_dag.h"
 #include "include/ct_tensor.h"
 #include "include/flow_visitor.h"
 #include "include/kernel_attributes.h"
