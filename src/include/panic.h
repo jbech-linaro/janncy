@@ -4,19 +4,12 @@
 #include <cstdlib>
 #include <iostream>
 
-// Needs to include everything that overloads operator<<
-// TODO(nsamar): Why?
-#include "include/ct_op.h"
-#include "include/dag.h"
-#include "include/shape.h"
-#include "include/utils.h"
-
 namespace janncy {
 
 inline void CerrVariadic_() {}
 
 template <typename T, typename... TArgs>
-inline void CerrVariadic_(T value, TArgs... args) {
+void CerrVariadic_(T value, TArgs... args) {
   std::cerr << value << "\n";
   CerrVariadic_(args...);
 }
