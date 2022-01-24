@@ -11,7 +11,7 @@ class FlowVisitor;
 
 namespace janncy {
 
-class BatchNormalization : public FlowNode {
+class BatchNormalization : public Layer {
  public:
   BatchNormalization(Shape shape);
 

@@ -10,16 +10,16 @@ namespace janncy {
 
 class FlowVisitor;
 
-class FlowNode {
+class Layer {
  public:
   virtual void Accept(FlowVisitor& visitor) const = 0;
   virtual std::string op_type() const = 0;
   virtual Shape shape() const = 0;
 
-  virtual ~FlowNode() {}
+  virtual ~Layer() {}
 };
 
-std::ostream& operator<<(std::ostream& stream, const FlowNode& node);
+std::ostream& operator<<(std::ostream& stream, const Layer& node);
 
 }  // namespace janncy
 

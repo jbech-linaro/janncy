@@ -25,7 +25,7 @@ static const std::string kAllKeysAddedStamp = "serkey/AllKeysAddedStamp";
 
 CtDag Cipherfier::Cipherfy(const NeuralNetwork& nn) {
   Cipherfier cipherfier(nn);
-  for (const FlowNode* node : nn.nodes()) {
+  for (const Layer* node : nn.nodes()) {
     int old_dag_size = cipherfier.ct_dag_.nodes().size();
     std::cout << "Visiting " << node->op_type() << "(" << node << ") "
               << node->shape() << "; ";
@@ -41,10 +41,10 @@ CtDag Cipherfier::Cipherfy(const NeuralNetwork& nn) {
 
 Cipherfier::Cipherfier(const NeuralNetwork& nn) : nn_(nn) {}
 
-const CtTensor& Cipherfier::get_parent_tensor(const FlowNode& node) const {
+const CtTensor& Cipherfier::get_parent_tensor(const Layer& node) const {
   return get_parent_tensor(node, 0);
 }
-const CtTensor& Cipherfier::get_parent_tensor(const FlowNode& node,
+const CtTensor& Cipherfier::get_parent_tensor(const Layer& node,
                                               int parent_ind) const {
   return tensor_map_.at(nn_.parents(node)[parent_ind]);
 }

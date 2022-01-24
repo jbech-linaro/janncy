@@ -9,7 +9,7 @@ namespace janncy {
 
 class FlowVisitor;
 
-class Input : public FlowNode {
+class Input : public Layer {
  public:
   Input(Shape shape) : shape_(std::move(shape)){};
 

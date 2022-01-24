@@ -16,7 +16,7 @@
 
 namespace janncy {
 
-class FlowNode;
+class Layer;
 
 class OnnxGraph {
  public:
@@ -26,17 +26,17 @@ class OnnxGraph {
  private:
   explicit OnnxGraph(const onnx::GraphProto& graph);
   std::vector<const OnnxNode*> Parents(const OnnxNode& node);
-  std::vector<const FlowNode*> FlowNodeParents(const OnnxNode& node);
+  std::vector<const Layer*> LayerParents(const OnnxNode& node);
   void LoadInitializers();
   void LoadNodes();
   void LoadInputs();
-  void AddFlowNode(const OnnxNode& onnx_node);
+  void AddLayer(const OnnxNode& onnx_node);
 
   const onnx::GraphProto& graph_;
   std::unique_ptr<NeuralNetwork> nn_;
   std::vector<OnnxNode*> nodes_;
   std::unordered_map<std::string, const OnnxNode*> onnxnode_map_;
-  std::unordered_map<const OnnxNode*, const FlowNode*> flownode_map_;
+  std::unordered_map<const OnnxNode*, const Layer*> layer_map_;
   std::unordered_map<std::string, Shape> shape_map_;
 };
 

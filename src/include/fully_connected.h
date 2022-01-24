@@ -8,7 +8,7 @@ namespace janncy {
 
 class FlowVisitor;
 
-class FullyConnected : public FlowNode {
+class FullyConnected : public Layer {
  public:
   FullyConnected(int input_size, int output_size);
 

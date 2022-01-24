@@ -11,7 +11,7 @@ namespace janncy {
 
 class FlowVisitor;
 
-class ConvLayer : public FlowNode {
+class ConvLayer : public Layer {
  public:
   ConvLayer(Shape input_shape, KernelAttributes kernel, int output_ch);
 

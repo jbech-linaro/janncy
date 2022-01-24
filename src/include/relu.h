@@ -11,7 +11,7 @@ namespace janncy {
 
 class FlowVisitor;
 
-class ReLU : public FlowNode {
+class ReLU : public Layer {
  public:
   ReLU(Shape shape);
 

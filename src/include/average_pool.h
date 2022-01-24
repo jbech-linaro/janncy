@@ -12,7 +12,7 @@ namespace janncy {
 
 class FlowVisitor;
 
-class AveragePool : public FlowNode {
+class AveragePool : public Layer {
  public:
   AveragePool(Shape input_shape, KernelAttributes kernel);
 

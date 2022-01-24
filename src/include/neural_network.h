@@ -9,28 +9,26 @@
 
 namespace janncy {
 
-using NeuralNetwork = Dag<FlowNode>;
+using NeuralNetwork = Dag<Layer>;
 
 namespace neural_network {
 
-const FlowNode& CreateAdd(NeuralNetwork& nn, const FlowNode& parent0,
-                          const FlowNode& parent1);
+const Layer& CreateAdd(NeuralNetwork& nn, const Layer& parent0,
+                       const Layer& parent1);
 
-const FlowNode& CreateConvLayer(NeuralNetwork& nn, const FlowNode& parent,
-                                KernelAttributes kernel,
-                                int output_channel_cnt);
-const FlowNode& CreateAveragePool(NeuralNetwork& nn, const FlowNode& parent,
-                                  KernelAttributes kernel);
-const FlowNode& CreateMaxPool(NeuralNetwork& nn, const FlowNode& parent,
-                              KernelAttributes kernel);
-const FlowNode& CreateGlobalAveragePool(NeuralNetwork& nn,
-                                        const FlowNode& parent);
+const Layer& CreateConvLayer(NeuralNetwork& nn, const Layer& parent,
+                             KernelAttributes kernel, int output_channel_cnt);
+const Layer& CreateAveragePool(NeuralNetwork& nn, const Layer& parent,
+                               KernelAttributes kernel);
+const Layer& CreateMaxPool(NeuralNetwork& nn, const Layer& parent,
+                           KernelAttributes kernel);
+const Layer& CreateGlobalAveragePool(NeuralNetwork& nn, const Layer& parent);
 
-const FlowNode& CreateInput(NeuralNetwork& nn, Shape shape);
-const FlowNode& CreateRelu(NeuralNetwork& nn, const FlowNode& parent);
-const FlowNode& CreateFlatten(NeuralNetwork& nn, const FlowNode& parent);
-const FlowNode& CreateFullyConnected(NeuralNetwork& nn, const FlowNode& parent,
-                                     int output_dim);
+const Layer& CreateInput(NeuralNetwork& nn, Shape shape);
+const Layer& CreateRelu(NeuralNetwork& nn, const Layer& parent);
+const Layer& CreateFlatten(NeuralNetwork& nn, const Layer& parent);
+const Layer& CreateFullyConnected(NeuralNetwork& nn, const Layer& parent,
+                                  int output_dim);
 }  // namespace neural_network
 
 }  // namespace janncy

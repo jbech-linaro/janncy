@@ -15,51 +15,49 @@ namespace janncy {
 
 namespace neural_network {
 
-const FlowNode& CreateAdd(NeuralNetwork& nn, const FlowNode& parent0,
-                          const FlowNode& parent1) {
+const Layer& CreateAdd(NeuralNetwork& nn, const Layer& parent0,
+                       const Layer& parent1) {
   PANIC_IF(parent0.shape() != parent1.shape());
   Shape shape = parent0.shape();
   return nn.AddNode(std::make_unique<Add>(shape), {&parent0, &parent1});
 }
 
-const FlowNode& CreateConvLayer(NeuralNetwork& nn, const FlowNode& parent,
-                                KernelAttributes kernel,
-                                int output_channel_cnt) {
+const Layer& CreateConvLayer(NeuralNetwork& nn, const Layer& parent,
+                             KernelAttributes kernel, int output_channel_cnt) {
   return nn.AddNode(
       std::make_unique<ConvLayer>(parent.shape(), kernel, output_channel_cnt),
       {&parent});
 }
 
-const FlowNode& CreateAveragePool(NeuralNetwork& nn, const FlowNode& parent,
-                                  KernelAttributes kernel) {
+const Layer& CreateAveragePool(NeuralNetwork& nn, const Layer& parent,
+                               KernelAttributes kernel) {
   return nn.AddNode(std::make_unique<AveragePool>(parent.shape(), kernel),
                     {&parent});
 }
-const FlowNode& CreateMaxPool(NeuralNetwork& nn, const FlowNode& parent,
-                              KernelAttributes kernel) {
+const Layer& CreateMaxPool(NeuralNetwork& nn, const Layer& parent,
+                           KernelAttributes kernel) {
   return nn.AddNode(std::make_unique<MaxPool>(parent.shape(), kernel),
                     {&parent});
 }
 
-const FlowNode& CreateGlobalAveragePool(NeuralNetwork& nn,
-                                        const FlowNode& parent) {
+const Layer& CreateGlobalAveragePool(NeuralNetwork& nn, const Layer& parent) {
   Shape kernel_shape = parent.shape().SpatialShape();
   std::vector<int> strides(kernel_shape.begin(), kernel_shape.end());
   KernelAttributes kernel(kernel_shape, strides, {});
   return CreateAveragePool(nn, parent, kernel);
 }
 
-const FlowNode& CreateInput(NeuralNetwork& nn, Shape shape) {
+const Layer& CreateInput(NeuralNetwork& nn, Shape shape) {
   return nn.AddNode(std::make_unique<Input>(std::move(shape)), {});
 }
-const FlowNode& CreateRelu(NeuralNetwork& nn, const FlowNode& parent) {
+const Layer& CreateRelu(NeuralNetwork& nn, const Layer& parent) {
   return nn.AddNode(std::make_unique<ReLU>(parent.shape()), {&parent});
 }
-const FlowNode& CreateFlatten(NeuralNetwork& nn, const FlowNode& parent) {
+const Layer& CreateFlatten(NeuralNetwork& nn, const Layer& parent) {
   return nn.AddNode(std::make_unique<Flatten>(parent.shape()), {&parent});
 }
-const FlowNode& CreateFullyConnected(NeuralNetwork& nn, const FlowNode& parent,
-                                     int output_dim) {
+const Layer& CreateFullyConnected(NeuralNetwork& nn, const Layer& parent,
+                                  int output_dim) {
   Shape input_shape = parent.shape();
   PANIC_IF(input_shape.dimension_cnt() != 1,
            "Fully-connected layer expects 1D input", input_shape);

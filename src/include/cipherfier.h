@@ -28,12 +28,12 @@ class Cipherfier : public FlowVisitor {
  private:
   CtDag ct_dag_;
   const NeuralNetwork& nn_;
-  std::unordered_map<const FlowNode*, CtTensor> tensor_map_;
+  std::unordered_map<const Layer*, CtTensor> tensor_map_;
 
   Cipherfier(const NeuralNetwork& nn);
 
-  const CtTensor& get_parent_tensor(const FlowNode& node) const;
-  const CtTensor& get_parent_tensor(const FlowNode& node, int parent_ind) const;
+  const CtTensor& get_parent_tensor(const Layer& node) const;
+  const CtTensor& get_parent_tensor(const Layer& node, int parent_ind) const;
 };
 
 }  // namespace janncy

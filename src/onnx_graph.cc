@@ -40,12 +40,12 @@ std::vector<const OnnxNode*> OnnxGraph::Parents(const OnnxNode& node) {
   return result;
 }
 
-std::vector<const FlowNode*> OnnxGraph::FlowNodeParents(const OnnxNode& node) {
+std::vector<const Layer*> OnnxGraph::LayerParents(const OnnxNode& node) {
   auto parents_vec = Parents(node);
-  std::vector<const FlowNode*> result;
+  std::vector<const Layer*> result;
   for (auto parent : parents_vec) {
     std::cout << "New parent of " << node.name() << std::endl;
-    result.push_back(flownode_map_.at(parent));
+    result.push_back(layer_map_.at(parent));
   }
   return result;
 }
@@ -83,8 +83,8 @@ void OnnxGraph::LoadInputs() {
               << "\n";
     nodes_.push_back(new OnnxNode(shape));
     onnxnode_map_[node_proto.name()] = nodes_.back();
-    flownode_map_.emplace(nodes_.back(),
-                          &neural_network::CreateInput(*nn_, shape));
+    layer_map_.emplace(nodes_.back(),
+                       &neural_network::CreateInput(*nn_, shape));
   }
 }
 
@@ -96,18 +96,18 @@ const std::string ATTR_AUTO_PAD = "auto_pad";
 const std::string ATTR_KERNEL_SHAPE = "kernel_shape";
 const std::string ATTR_AXIS = "axis";
 
-const FlowNode& CreateRelu(NeuralNetwork& nn, const OnnxNode& onnx_node,
-                           const FlowNode& parent) {
+const Layer& CreateRelu(NeuralNetwork& nn, const OnnxNode& onnx_node,
+                        const Layer& parent) {
   return neural_network::CreateRelu(nn, parent);
 }
 
-const FlowNode& CreateAdd(NeuralNetwork& nn, const OnnxNode& onnx_node,
-                          const FlowNode& parent0, const FlowNode& parent1) {
+const Layer& CreateAdd(NeuralNetwork& nn, const OnnxNode& onnx_node,
+                       const Layer& parent0, const Layer& parent1) {
   return neural_network::CreateAdd(nn, parent0, parent1);
 }
 
-const FlowNode& CreateConv(NeuralNetwork& nn, const OnnxNode& onnx_node,
-                           const FlowNode& parent) {
+const Layer& CreateConv(NeuralNetwork& nn, const OnnxNode& onnx_node,
+                        const Layer& parent) {
   std::vector<Shape> input_shapes = onnx_node.input_shapes();
 
   // Infer from weights input shape
@@ -130,27 +130,26 @@ const FlowNode& CreateConv(NeuralNetwork& nn, const OnnxNode& onnx_node,
                                          output_channel_cnt);
 }
 
-const FlowNode& CreateMaxPool(NeuralNetwork& nn, const OnnxNode& onnx_node,
-                              const FlowNode& parent) {
+const Layer& CreateMaxPool(NeuralNetwork& nn, const OnnxNode& onnx_node,
+                           const Layer& parent) {
   return neural_network::CreateMaxPool(nn, parent,
                                        onnx_node.kernel_for_pooling());
 }
 
-const FlowNode& CreateAveragePool(NeuralNetwork& nn, const OnnxNode& onnx_node,
-                                  const FlowNode& parent) {
+const Layer& CreateAveragePool(NeuralNetwork& nn, const OnnxNode& onnx_node,
+                               const Layer& parent) {
   return neural_network::CreateAveragePool(nn, parent,
                                            onnx_node.kernel_for_pooling());
 }
 
-const FlowNode& CreateGlobalAveragePool(NeuralNetwork& nn,
-                                        const OnnxNode& onnx_node,
-                                        const FlowNode& parent) {
+const Layer& CreateGlobalAveragePool(NeuralNetwork& nn,
+                                     const OnnxNode& onnx_node,
+                                     const Layer& parent) {
   return neural_network::CreateGlobalAveragePool(nn, parent);
 }
 
-const FlowNode& CreateFullyConnected(NeuralNetwork& nn,
-                                     const OnnxNode& onnx_node,
-                                     const FlowNode& parent) {
+const Layer& CreateFullyConnected(NeuralNetwork& nn, const OnnxNode& onnx_node,
+                                  const Layer& parent) {
   std::vector<Shape> input_shapes = onnx_node.input_shapes();
 
   PANIC_IF(input_shapes.size() < 2 || input_shapes.size() > 3);
@@ -167,8 +166,8 @@ const FlowNode& CreateFullyConnected(NeuralNetwork& nn,
   return neural_network::CreateFullyConnected(nn, parent, input_shapes[1][0]);
 }
 
-const FlowNode& CreateFlatten(NeuralNetwork& nn, const OnnxNode& onnx_node,
-                              const FlowNode& parent) {
+const Layer& CreateFlatten(NeuralNetwork& nn, const OnnxNode& onnx_node,
+                           const Layer& parent) {
   int axis = 1;
   if (onnx_node.AttributeExists(ATTR_AXIS)) {
     axis = onnx_node.int_attribute(ATTR_AXIS);
@@ -178,8 +177,8 @@ const FlowNode& CreateFlatten(NeuralNetwork& nn, const OnnxNode& onnx_node,
   return neural_network::CreateFlatten(nn, parent);
 }
 
-const FlowNode& CreateFlowNode(NeuralNetwork& nn, const OnnxNode& onnx_node,
-                               std::vector<const FlowNode*> parents) {
+const Layer& CreateLayer(NeuralNetwork& nn, const OnnxNode& onnx_node,
+                         std::vector<const Layer*> parents) {
   PANIC_IF(parents.size() < 1 || !parents[0]);
   if (onnx_node.op_type() == "Add") {
     PANIC_IF(parents.size() < 2 && !parents[1]);
@@ -207,15 +206,15 @@ const FlowNode& CreateFlowNode(NeuralNetwork& nn, const OnnxNode& onnx_node,
 
 // Specification of ONNX operations:
 // https://github.com/onnx/onnx/blob/master/docs/Operators.md
-void OnnxGraph::AddFlowNode(const OnnxNode& onnx_node) {
-  auto parents = FlowNodeParents(onnx_node);
+void OnnxGraph::AddLayer(const OnnxNode& onnx_node) {
+  auto parents = LayerParents(onnx_node);
   std::cout << "parents size: " << parents.size() << std::endl;
-  const FlowNode& new_flow_node = CreateFlowNode(*nn_, onnx_node, parents);
+  const Layer& new_flow_node = CreateLayer(*nn_, onnx_node, parents);
   const std::string output_name = onnx_node.output()[0];
   shape_map_.emplace(output_name, new_flow_node.shape());
   std::cerr << "Found " << onnx_node.op_type() << " with name " << output_name
             << " and shape " << new_flow_node.shape() << "\n";
-  flownode_map_.emplace(&onnx_node, &new_flow_node);
+  layer_map_.emplace(&onnx_node, &new_flow_node);
 }
 
 void OnnxGraph::LoadNodes() {
@@ -227,7 +226,7 @@ void OnnxGraph::LoadNodes() {
     nodes_.push_back(new OnnxNode(node_proto, input_shapes));
     std::cout << node_proto.name() << std::endl;
     onnxnode_map_[nodes_.back()->output()[0]] = nodes_.back();
-    AddFlowNode(*nodes_.back());
+    AddLayer(*nodes_.back());
   }
 }
 

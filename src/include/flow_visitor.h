@@ -3,7 +3,7 @@
 
 namespace janncy {
 
-class FlowNode;
+class Layer;
 class ConvLayer;
 class FullyConnected;
 class AveragePool;

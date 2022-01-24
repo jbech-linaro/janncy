@@ -6,7 +6,7 @@
 
 namespace janncy {
 
-std::ostream& operator<<(std::ostream& stream, const FlowNode& node) {
+std::ostream& operator<<(std::ostream& stream, const Layer& node) {
   return stream << node.op_type() << "@" << &node << " " << node.shape();
 }
 

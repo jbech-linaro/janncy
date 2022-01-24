@@ -11,7 +11,7 @@ namespace janncy {
 
 class FlowVisitor;
 
-class Flatten : public FlowNode {
+class Flatten : public Layer {
  public:
   Flatten(const Shape& input_shape);
 

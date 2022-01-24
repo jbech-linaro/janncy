@@ -11,7 +11,7 @@ namespace janncy {
 
 class FlowVisitor;
 
-class Add : public FlowNode {
+class Add : public Layer {
  public:
   Add(Shape shape);
 

@@ -12,7 +12,7 @@ namespace janncy {
 
 class FlowVisitor;
 
-class MaxPool : public FlowNode {
+class MaxPool : public Layer {
  public:
   MaxPool(Shape input_shape, KernelAttributes kernel);
 
