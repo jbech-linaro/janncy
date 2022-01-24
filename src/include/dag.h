@@ -12,7 +12,7 @@
 namespace janncy {
 
 template <class T>
-class Graph {
+class Dag {
  public:
   // Transfers ownership of `new_node` to the Graph object
   const T& AddNode(std::unique_ptr<T> new_node,
@@ -53,10 +53,10 @@ class Graph {
 };
 
 template <class T>
-std::ostream& operator<<(std::ostream& stream, const Graph<T>& graph) {
-  stream << "Graph{\n";
-  for (const T* node : graph.nodes()) {
-    stream << "  " << *node << " -> " << graph.children(node) << "\n";
+std::ostream& operator<<(std::ostream& stream, const Dag<T>& dag) {
+  stream << "DAG{\n";
+  for (const T* node : dag.nodes()) {
+    stream << "  " << *node << " -> " << dag.children(node) << "\n";
   }
   return stream << "}";
 }

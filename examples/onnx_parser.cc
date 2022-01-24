@@ -10,7 +10,7 @@
 #include <onnx/proto_utils.h>
 
 #include "include/cipherfier.h"
-#include "include/draw_graph.h"
+#include "include/draw_dag.h"
 #include "include/neural_network.h"
 #include "include/onnx_graph.h"
 #include "include/panic.h"
@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
   auto flow = OnnxGraph::MakeFlow(graph);
 
   google::protobuf::ShutdownProtobufLibrary();
-  janncy::DrawGraph(*flow, "flow");
+  janncy::DrawDag(*flow, "flow");
   std::cerr << "Nodes in flow: " << flow->nodes().size() << "\n";
   /*
   CtGraph ct_graph = Cipherfier::Cipherfy(*flow);

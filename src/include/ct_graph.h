@@ -8,7 +8,7 @@
 
 namespace janncy {
 
-using CtGraph = Graph<CtOp>;
+using CtGraph = Dag<CtOp>;
 
 namespace ct_graph {
 

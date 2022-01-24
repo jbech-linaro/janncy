@@ -9,7 +9,7 @@
 
 namespace janncy {
 
-using Flow = Graph<FlowNode>;
+using Flow = Dag<FlowNode>;
 
 namespace flow {
 

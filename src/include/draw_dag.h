@@ -16,7 +16,7 @@
 namespace janncy {
 
 template <class T>
-void DrawGraph(const Graph<T>& graph, const std::string& filename) {
+void DrawDag(const Dag<T>& graph, const std::string& filename) {
   Agraph_t* g = agopen((char*)"g", Agdirected, nullptr);
 
   for (const T* node : graph.nodes()) {
