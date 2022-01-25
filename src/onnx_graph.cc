@@ -29,23 +29,13 @@ std::unique_ptr<NeuralNetwork> OnnxGraph::MakeNeuralNetwork(
 OnnxGraph::OnnxGraph(const onnx::GraphProto& graph)
     : graph_(graph), nn_(std::make_unique<NeuralNetwork>()) {}
 
-std::vector<const OnnxNode*> OnnxGraph::Parents(const OnnxNode& node) {
-  std::vector<const OnnxNode*> result;
-  for (auto parent_string : node.input()) {
-    std::cout << "parent string: " << parent_string << std::endl;
-    if (onnxnode_map_.count(parent_string)) {
-      result.push_back(onnxnode_map_.at(parent_string));
-    }
-  }
-  return result;
-}
-
 std::vector<const Layer*> OnnxGraph::LayerParents(const OnnxNode& node) {
-  auto parents_vec = Parents(node);
+  auto parents_vec = onnx_dag_.parents(node);
   std::vector<const Layer*> result;
   for (auto parent : parents_vec) {
-    std::cout << "New parent of " << node.name() << std::endl;
-    result.push_back(layer_map_.at(parent));
+    if (layer_map_.count(parent)) {
+      result.push_back(layer_map_.at(parent));
+    }
   }
   return result;
 }
@@ -53,9 +43,12 @@ std::vector<const Layer*> OnnxGraph::LayerParents(const OnnxNode& node) {
 void OnnxGraph::LoadInitializers() {
   for (auto& ini : graph_.initializer()) {
     Shape shape(ini.dims().begin(), ini.dims().end());
-    shape_map_[ini.name()] = shape;
+    const OnnxNode& new_node =
+        onnx_dag_.AddNode(std::make_unique<OnnxNode>(shape), {});
+    shape_map_.emplace(ini.name(), shape);
+    onnxnode_map_[ini.name()] = &new_node;
     std::cerr << "Found initializer " << ini.name() << " with shape " << shape
-              << "\n";
+              << " at address " << &new_node << "\n";
   }
 }
 
@@ -79,22 +72,16 @@ void OnnxGraph::LoadInputs() {
     }
 
     shape_map_.emplace(node_proto.name(), shape);
+    const OnnxNode& new_node =
+        onnx_dag_.AddNode(std::make_unique<OnnxNode>(shape), {});
     std::cerr << "Found input " << node_proto.name() << " with shape " << shape
-              << "\n";
-    nodes_.push_back(new OnnxNode(shape));
-    onnxnode_map_[node_proto.name()] = nodes_.back();
-    layer_map_.emplace(nodes_.back(),
-                       &neural_network::CreateInput(*nn_, shape));
+              << " with address " << &new_node << "\n";
+    onnxnode_map_[node_proto.name()] = &new_node;
+    layer_map_.emplace(&new_node, &neural_network::CreateInput(*nn_, shape));
   }
 }
 
 namespace {
-
-const std::string ATTR_STRIDES = "strides";
-const std::string ATTR_PADDING = "pads";
-const std::string ATTR_AUTO_PAD = "auto_pad";
-const std::string ATTR_KERNEL_SHAPE = "kernel_shape";
-const std::string ATTR_AXIS = "axis";
 
 const Layer& CreateRelu(NeuralNetwork& nn, const OnnxNode& onnx_node,
                         const Layer& parent) {
@@ -108,38 +95,18 @@ const Layer& CreateAdd(NeuralNetwork& nn, const OnnxNode& onnx_node,
 
 const Layer& CreateConv(NeuralNetwork& nn, const OnnxNode& onnx_node,
                         const Layer& parent) {
-  std::vector<Shape> input_shapes = onnx_node.input_shapes();
-
-  // Infer from weights input shape
-  PANIC_IF(input_shapes.size() < 2);
-  if (input_shapes.size() > 2) {
-    std::cerr << "WARNING: ignoring biases of ConvLayer " << onnx_node.name()
-              << "\n";
-  }
-  const Shape& weights_shape = input_shapes[1];
-  int output_channel_cnt = weights_shape[0];
-  PANIC_IF(weights_shape[1] != input_shapes[0][0],
-           "ConvLayer mismatching number of channels", weights_shape,
-           input_shapes[0]);
-
-  Shape kernel_shape = weights_shape.SubShape(2);
-  KernelAttributes kernel(kernel_shape, onnx_node.strides(),
-                          onnx_node.padding());
-
-  return neural_network::CreateConvLayer(nn, parent, kernel,
-                                         output_channel_cnt);
+  return neural_network::CreateConvLayer(nn, parent, onnx_node.kernel(),
+                                         onnx_node.output_channel_count());
 }
 
 const Layer& CreateMaxPool(NeuralNetwork& nn, const OnnxNode& onnx_node,
                            const Layer& parent) {
-  return neural_network::CreateMaxPool(nn, parent,
-                                       onnx_node.kernel_for_pooling());
+  return neural_network::CreateMaxPool(nn, parent, onnx_node.kernel());
 }
 
 const Layer& CreateAveragePool(NeuralNetwork& nn, const OnnxNode& onnx_node,
                                const Layer& parent) {
-  return neural_network::CreateAveragePool(nn, parent,
-                                           onnx_node.kernel_for_pooling());
+  return neural_network::CreateAveragePool(nn, parent, onnx_node.kernel());
 }
 
 const Layer& CreateGlobalAveragePool(NeuralNetwork& nn,
@@ -168,12 +135,8 @@ const Layer& CreateFullyConnected(NeuralNetwork& nn, const OnnxNode& onnx_node,
 
 const Layer& CreateFlatten(NeuralNetwork& nn, const OnnxNode& onnx_node,
                            const Layer& parent) {
-  int axis = 1;
-  if (onnx_node.AttributeExists(ATTR_AXIS)) {
-    axis = onnx_node.int_attribute(ATTR_AXIS);
-  }
-  PANIC_IF(axis != 1, axis, "We support only flattening all axes!");
-
+  PANIC_IF(onnx_node.axis() != 1, onnx_node.axis(),
+           "We support only flattening all axes!");
   return neural_network::CreateFlatten(nn, parent);
 }
 
@@ -204,6 +167,19 @@ const Layer& CreateLayer(NeuralNetwork& nn, const OnnxNode& onnx_node,
 
 }  // namespace
 
+void OnnxGraph::AddOnnxNode(std::unique_ptr<OnnxNode> onnx_node) {
+  std::vector<std::string> parent_strings = onnx_node->input();
+  std::vector<const OnnxNode*> onnx_node_parents;
+  onnx_node_parents.reserve(parent_strings.size());
+  std::transform(parent_strings.begin(), parent_strings.end(),
+                 std::back_inserter(onnx_node_parents),
+                 [&](auto x) { return onnxnode_map_.at(x); });
+  const OnnxNode& new_node =
+      onnx_dag_.AddNode(std::move(onnx_node), onnx_node_parents);
+  onnxnode_map_[new_node.output()[0]] = &new_node;
+  AddLayer(new_node);
+}
+
 // Specification of ONNX operations:
 // https://github.com/onnx/onnx/blob/master/docs/Operators.md
 void OnnxGraph::AddLayer(const OnnxNode& onnx_node) {
@@ -223,10 +199,7 @@ void OnnxGraph::LoadNodes() {
     for (const auto& input_name : node_proto.input()) {
       input_shapes.push_back(shape_map_.at(input_name));
     }
-    nodes_.push_back(new OnnxNode(node_proto, input_shapes));
-    std::cout << node_proto.name() << std::endl;
-    onnxnode_map_[nodes_.back()->output()[0]] = nodes_.back();
-    AddLayer(*nodes_.back());
+    AddOnnxNode(std::make_unique<OnnxNode>(node_proto, input_shapes));
   }
 }
 

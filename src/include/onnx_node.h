@@ -26,27 +26,25 @@ class OnnxNode {
   std::vector<std::string> input() const;
   std::string op_type() const;
   std::vector<Shape> input_shapes() const;
-  std::vector<int> ints_attribute(const std::string& attr_name) const;
-  std::vector<int> optional_ints_attribute(const std::string& attr_name) const;
-  int int_attribute(const std::string& attr_name) const;
-  const onnx::AttributeProto* attribute(const std::string& attr_name) const;
-  std::vector<int> strides() const;
-  std::vector<int> padding() const;
-  Shape kernel_shape() const;
-  KernelAttributes kernel_for_pooling() const;
+  KernelAttributes kernel() const;
+  int output_channel_count() const;
+  std::vector<std::string> output() const;
+  std::string name() const;
 
+  int axis() const;
+
+ private:
+  const onnx::AttributeProto* attribute(const std::string& attr_name) const;
   const onnx::AttributeProto* typed_attribute(
       const std::string& attr_name,
       const onnx::AttributeProto::AttributeType& attr_type) const;
-
-  Shape shape() const;
-
-  std::vector<std::string> output() const;
-
+  Shape kernel_shape() const;
+  int int_attribute(const std::string& attr_name) const;
+  std::vector<int> strides() const;
+  std::vector<int> padding() const;
   bool AttributeExists(const std::string& attr_name) const;
-  std::string name() const;
-
- private:
+  std::vector<int> ints_attribute(const std::string& attr_name) const;
+  std::vector<int> optional_ints_attribute(const std::string& attr_name) const;
   const onnx::NodeProto* node_proto_;
   std::vector<Shape> input_shapes_;
   Shape shape_;

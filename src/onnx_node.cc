@@ -36,6 +36,14 @@ OnnxNode::OnnxNode(Shape shape)
 
 std::vector<Shape> OnnxNode::input_shapes() const { return input_shapes_; }
 
+int OnnxNode::axis() const {
+  PANIC_IF(op_type() != "Flatten");
+  if (!AttributeExists(ATTR_AXIS)) {
+    return 1;
+  }
+  return int_attribute(ATTR_AXIS);
+}
+
 std::vector<std::string> OnnxNode::output() const {
   std::vector<std::string> result;
   for (auto out_val : node_proto_->output()) {
@@ -57,7 +65,13 @@ const onnx::AttributeProto* OnnxNode::attribute(
   return nullptr;
 }
 
-Shape OnnxNode::shape() const { return shape_; }
+int OnnxNode::output_channel_count() const {
+  PANIC_IF(op_type() != "Conv");
+  std::vector<Shape> input_shapes_vec = input_shapes();
+  PANIC_IF(input_shapes_vec.size() < 2);
+  const Shape& weights_shape = input_shapes_vec[1];
+  return weights_shape[0];
+}
 
 const onnx::AttributeProto* OnnxNode::typed_attribute(
     const std::string& attr_name,
@@ -110,10 +124,31 @@ std::vector<int> OnnxNode::strides() const {
 std::vector<int> OnnxNode::padding() const {
   return optional_ints_attribute(ATTR_PADDING);
 }
+
+// https://github.com/onnx/onnx/blob/main/docs/Operators.md
+// ONNX IR specification says that the `kernel_shape` attribute
+// MUST be present for `AveragePool` and `MaxPool`.
+// However, `kernel_shape` MAY be ommitted from `Conv`; in this
+// case the `kernel_shape` should be infered from input `W`.
 Shape OnnxNode::kernel_shape() const {
-  return Shape(optional_ints_attribute(ATTR_KERNEL_SHAPE));
+  if (AttributeExists(ATTR_KERNEL_SHAPE)) {
+    return Shape(optional_ints_attribute(ATTR_KERNEL_SHAPE));
+  }
+  std::vector<Shape> input_shapes_vec = input_shapes();
+  // Infer input shape from weights
+  if (input_shapes_vec.size() > 2) {
+    std::cerr << "WARNING: ignoring biases of ConvLayer " << name() << "\n";
+  }
+  const Shape& weights_shape = input_shapes_vec[1];
+  PANIC_IF(weights_shape[1] != input_shapes_vec[0][0],
+           "ConvLayer mismatching number of channels", weights_shape,
+           input_shapes_vec[0]);
+
+  Shape kernel_shape = weights_shape.SubShape(2);
+  return kernel_shape;
 }
-KernelAttributes OnnxNode::kernel_for_pooling() const {
+
+KernelAttributes OnnxNode::kernel() const {
   return KernelAttributes(kernel_shape(), strides(), padding());
 }
 

@@ -10,6 +10,7 @@
 #include <onnx/onnx_pb.h>
 #include <onnx/proto_utils.h>
 
+#include "include/dag.h"
 #include "include/neural_network.h"
 #include "include/onnx_node.h"
 #include "include/shape.h"
@@ -25,16 +26,16 @@ class OnnxGraph {
 
  private:
   explicit OnnxGraph(const onnx::GraphProto& graph);
-  std::vector<const OnnxNode*> Parents(const OnnxNode& node);
+  void AddOnnxNode(std::unique_ptr<OnnxNode> onnx_node);
   std::vector<const Layer*> LayerParents(const OnnxNode& node);
+  Dag<OnnxNode> onnx_dag_;
   void LoadInitializers();
   void LoadNodes();
   void LoadInputs();
   void AddLayer(const OnnxNode& onnx_node);
-
   const onnx::GraphProto& graph_;
   std::unique_ptr<NeuralNetwork> nn_;
-  std::vector<OnnxNode*> nodes_;
+
   std::unordered_map<std::string, const OnnxNode*> onnxnode_map_;
   std::unordered_map<const OnnxNode*, const Layer*> layer_map_;
   std::unordered_map<std::string, Shape> shape_map_;
