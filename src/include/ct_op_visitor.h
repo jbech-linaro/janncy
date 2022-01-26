@@ -13,6 +13,12 @@ class CtInput;
 
 class CtOpVisitor {
  public:
+  CtOpVisitor() = default;
+  CtOpVisitor(CtOpVisitor&&) = default;
+  virtual ~CtOpVisitor() {}
+  CtOpVisitor(const CtOpVisitor&) = delete;
+  CtOpVisitor& operator=(const CtOpVisitor&) = delete;
+
   virtual void Visit(const CtInput& node) = 0;
   virtual void Visit(const CtAdd& node) = 0;
   virtual void Visit(const CtMul& node) = 0;
