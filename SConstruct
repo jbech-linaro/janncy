@@ -116,6 +116,7 @@ logging.basicConfig(format='%(levelname)s[%(lineno)s]: %(message)s',
 if COMMAND_LINE_TARGETS:
     if 'deps' in COMMAND_LINE_TARGETS:
         compile_dependencies()
+        download_models()
 
     if 'update' in COMMAND_LINE_TARGETS:
         print(cmd("git submodule update --init --recursive"))
