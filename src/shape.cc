@@ -6,7 +6,7 @@
 #include <ostream>
 #include <vector>
 
-#include "include/utils.h"
+#include "include/ostream_utils.h"
 
 namespace janncy {
 

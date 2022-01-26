@@ -13,11 +13,12 @@ class Shape {
   using ConstIterator = std::vector<int>::const_iterator;
 
   Shape() {}
-  Shape(int dimension_cnt) : dimensions_(dimension_cnt) {}
   Shape(std::initializer_list<int> l) : dimensions_(l) {}
-  Shape(std::vector<int> v) : dimensions_(std::move(v)) {}
+
+  explicit Shape(int dimension_cnt) : dimensions_(dimension_cnt) {}
+  explicit Shape(std::vector<int> v) : dimensions_(std::move(v)) {}
   template <typename InputIt>
-  Shape(InputIt begin, InputIt end) : dimensions_(begin, end) {}
+  explicit Shape(InputIt begin, InputIt end) : dimensions_(begin, end) {}
 
   friend bool operator==(const Shape& s1, const Shape& s2) {
     return s1.dimensions_ == s2.dimensions_;

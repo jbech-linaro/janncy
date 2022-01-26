@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "include/ostream_utils.h"
+
 namespace janncy {
 
 inline void CerrVariadic_() {}
@@ -16,23 +18,24 @@ void CerrVariadic_(T value, TArgs... args) {
 
 }  // namespace janncy
 
-#define PANIC(...)                                                             \
-  {                                                                            \
-    std::cerr << "Panic in " << __FILE__ << " on line " << __LINE__ << ": \n"; \
-    ::janncy::CerrVariadic_(__VA_ARGS__);                                      \
-    std::exit(1);                                                              \
+#define PANIC(...)                                                    \
+  {                                                                   \
+    ::std::cerr << "Panic in " << __FILE__ << " on line " << __LINE__ \
+                << ": \n";                                            \
+    ::janncy::CerrVariadic_(__VA_ARGS__);                             \
+    ::std::exit(1);                                                   \
   }
 
-#define PANIC_IF(CONDITION, ...)                                      \
-  {                                                                   \
-    bool cond_value = CONDITION;                                      \
-    if (cond_value) {                                                 \
-      std::cerr << "Panic in " << __FILE__ << " on line " << __LINE__ \
-                << ": \n"                                             \
-                << "Triggered by " << #CONDITION << "\n";             \
-      ::janncy::CerrVariadic_(__VA_ARGS__);                           \
-      std::exit(1);                                                   \
-    }                                                                 \
+#define PANIC_IF(CONDITION, ...)                                        \
+  {                                                                     \
+    bool cond_value = CONDITION;                                        \
+    if (cond_value) {                                                   \
+      ::std::cerr << "Panic in " << __FILE__ << " on line " << __LINE__ \
+                  << ": \n"                                             \
+                  << "Triggered by " << #CONDITION << "\n";             \
+      ::janncy::CerrVariadic_(__VA_ARGS__);                             \
+      ::std::exit(1);                                                   \
+    }                                                                   \
   }
 
 #endif  // JANNCY_PANIC_H_
