@@ -21,8 +21,6 @@
 
 namespace janncy {
 
-static const std::string kAllKeysAddedStamp = "serkey/AllKeysAddedStamp";
-
 CtDag Cipherfier::Cipherfy(const NeuralNetwork& nn) {
   Cipherfier cipherfier(nn);
   for (const Layer* node : nn.nodes()) {
