@@ -12,11 +12,15 @@ class LayerVisitor;
 
 class Layer {
  public:
+  Layer() = default;
+  Layer(Layer&&) = default;
+  virtual ~Layer() {}
+  Layer(const Layer&) = delete;
+  Layer& operator=(const Layer&) = delete;
+
   virtual void Accept(LayerVisitor& visitor) const = 0;
   virtual std::string op_type() const = 0;
   virtual Shape shape() const = 0;
-
-  virtual ~Layer() {}
 };
 
 std::ostream& operator<<(std::ostream& stream, const Layer& node);

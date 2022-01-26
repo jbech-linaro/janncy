@@ -10,7 +10,11 @@ class CtOpVisitor;
 
 class CtOp {
  public:
-  virtual ~CtOp(){};
+  CtOp() = default;
+  CtOp(CtOp&&) = default;
+  virtual ~CtOp() {}
+  CtOp(const CtOp&) = delete;
+  CtOp& operator=(const CtOp&) = delete;
 
   virtual void Accept(CtOpVisitor& visitor) const = 0;
   virtual std::string op_type() const = 0;

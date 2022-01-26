@@ -14,6 +14,11 @@ namespace janncy {
 template <class T>
 class Dag {
  public:
+  Dag<T>() = default;
+  Dag<T>(Dag<T>&&) = default;
+  Dag<T>(const Dag<T>&) = delete;
+  Dag<T>& operator=(const Dag<T>&) = delete;
+
   // Transfers ownership of `new_node` to the Graph object
   const T& AddNode(std::unique_ptr<T> new_node,
                    const std::vector<const T*>& parents) {
