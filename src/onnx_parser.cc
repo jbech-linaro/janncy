@@ -14,8 +14,6 @@
 
 namespace janncy {
 
-using OwnedOnnxNodeVec = std::vector<std::unique_ptr<OnnxNode>>;
-
 namespace {
 
 const std::string ONNX_ATTR_STRIDES = "strides";
@@ -110,14 +108,15 @@ OwnedOnnxNodeVec LoadInputs(const onnx::GraphProto& graph_proto) {
 
 std::unique_ptr<OnnxNode> ReadReluLayer(const onnx::NodeProto& node_proto) {
   PANIC_IF(node_proto.input().size() != 1);
-  return std::make_unique<OnnxReluLayer>(node_proto.name(),
-                                         node_proto.input()[0]);
+  return std::make_unique<OnnxReluLayer>(
+      node_proto.name(), node_proto.input()[0], node_proto.output()[0]);
 }
 
 std::unique_ptr<OnnxNode> ReadAddLayer(const onnx::NodeProto& node_proto) {
   PANIC_IF(node_proto.input().size() != 2);
   return std::make_unique<OnnxAddLayer>(
-      node_proto.name(), node_proto.input()[1], node_proto.input()[0]);
+      node_proto.name(), node_proto.input()[1], node_proto.input()[0],
+      node_proto.output()[0]);
 }
 
 std::unique_ptr<OnnxNode> ReadConvLayer(const onnx::NodeProto& node_proto) {
@@ -126,30 +125,53 @@ std::unique_ptr<OnnxNode> ReadConvLayer(const onnx::NodeProto& node_proto) {
     std::cerr << "We do not handle bias in ConvLayer yet!" << std::endl;
   }
   return std::make_unique<OnnxConvLayer>(
-      node_proto.name(), node_proto.input()[0], node_proto.input()[1]);
+      node_proto.name(), node_proto.input()[0], node_proto.input()[1],
+      node_proto.output()[0]);
+}
+
+std::vector<int> optional_ints_attribute(const onnx::NodeProto& node_proto,
+                                         const std::string& attr_name) {
+  auto attr =
+      typed_attribute(node_proto, attr_name, onnx::AttributeProto::INTS);
+  return std::vector<int>(attr.ints().begin(), attr.ints().end());
+}
+
+std::vector<int> kernel_shape(const onnx::NodeProto& node_proto) {
+  return optional_ints_attribute(node_proto, ONNX_ATTR_KERNEL_SHAPE);
+}
+
+std::vector<int> strides(const onnx::NodeProto& node_proto) {
+  return optional_ints_attribute(node_proto, ONNX_ATTR_STRIDES);
+}
+std::vector<int> padding(const onnx::NodeProto& node_proto) {
+  return optional_ints_attribute(node_proto, ONNX_ATTR_PADDING);
+}
+
+KernelAttributes ReadKernelAttributes(const onnx::NodeProto& node_proto) {
+  return KernelAttributes(kernel_shape(node_proto), strides(node_proto),
+                          padding(node_proto));
 }
 
 std::unique_ptr<OnnxNode> ReadMaxPoolLayer(const onnx::NodeProto& node_proto) {
   PANIC_IF(node_proto.input().size() != 1);
   return std::make_unique<OnnxAveragePoolLayer>(
-      node_proto.name(), node_proto.input()[0],
-      KernelAttributes(Shape(), std::vector<int>(), std::vector<int>()));
+      node_proto.name(), node_proto.input()[0], node_proto.output()[0],
+      ReadKernelAttributes(node_proto));
 }
 
 std::unique_ptr<OnnxNode> ReadAveragePoolLayer(
     const onnx::NodeProto& node_proto) {
   PANIC_IF(node_proto.input().size() != 1);
   return std::make_unique<OnnxAveragePoolLayer>(
-      node_proto.name(), node_proto.input()[0],
-      KernelAttributes(Shape(), std::vector<int>(), std::vector<int>()));
+      node_proto.name(), node_proto.input()[0], node_proto.output()[0],
+      ReadKernelAttributes(node_proto));
 }
 
 std::unique_ptr<OnnxNode> ReadGlobalAveragePoolLayer(
     const onnx::NodeProto& node_proto) {
   PANIC_IF(node_proto.input().size() != 1);
-  return std::make_unique<OnnxAveragePoolLayer>(
-      node_proto.name(), node_proto.input()[0],
-      KernelAttributes(Shape(), std::vector<int>(), std::vector<int>()));
+  return std::make_unique<OnnxGlobalAveragePoolLayer>(
+      node_proto.name(), node_proto.input()[0], node_proto.output()[0]);
 }
 
 std::unique_ptr<OnnxNode> ReadFullyConnectedLayer(
@@ -160,17 +182,26 @@ std::unique_ptr<OnnxNode> ReadFullyConnectedLayer(
               << std::endl;
   }
   return std::make_unique<OnnxFullyConnectedLayer>(
-      node_proto.name(), node_proto.input()[0], node_proto.input()[1]);
+      node_proto.name(), node_proto.input()[0], node_proto.input()[1],
+      node_proto.output()[0]);
 }
 
 std::unique_ptr<OnnxNode> ReadFlattenLayer(const onnx::NodeProto& node_proto) {
   PANIC_IF(node_proto.input().size() != 1);
   int axis = int_attribute(node_proto, ONNX_ATTR_AXIS);
-  return std::make_unique<OnnxFlattenLayer>(node_proto.name(),
-                                            node_proto.input()[0], axis);
+  return std::make_unique<OnnxFlattenLayer>(
+      node_proto.name(), node_proto.input()[0], node_proto.output()[0], axis);
 }
 
 std::unique_ptr<OnnxNode> ReadComputeNode(const onnx::NodeProto& node_proto) {
+  PANIC_IF(node_proto.output().size() == 0,
+           "At least one output expected for each NodeProto!");
+  if (node_proto.output().size() > 1) {
+    std::cerr
+        << "WARNING: Ignoring all outputs except first one, but ONNX node "
+        << node_proto.name() << " has " << node_proto.output().size()
+        << " outputs!" << std::endl;
+  }
   if (node_proto.op_type() == "Add") {
     return ReadAddLayer(node_proto);
   } else if (node_proto.op_type() == "AveragePool") {

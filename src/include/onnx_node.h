@@ -14,8 +14,9 @@ using OnnxNodeId = std::string;
 
 class OnnxNode {
  public:
-  OnnxNode(OnnxNodeId name, std::vector<OnnxNodeId> inputs)
-      : name_(name), inputs_(inputs) {}
+  OnnxNode(OnnxNodeId name, std::vector<OnnxNodeId> inputs,
+           OnnxNodeId output_name)
+      : name_(name), inputs_(inputs), output_(output_name) {}
   OnnxNode(OnnxNode&&) = default;
   OnnxNode(const OnnxNode&) = delete;
   OnnxNode& operator=(const OnnxNode&) = delete;
@@ -23,23 +24,27 @@ class OnnxNode {
 
   OnnxNodeId name() const { return name_; }
   std::vector<OnnxNodeId> inputs() const { return inputs_; }
+  OnnxNodeId output() const { return output_; }
 
  private:
   OnnxNodeId name_;
   std::vector<OnnxNodeId> inputs_;
+  OnnxNodeId output_;
 };
 
 class OnnxConvLayer : public OnnxNode {
  public:
-  OnnxConvLayer(OnnxNodeId name, OnnxNodeId X, OnnxNodeId W)
-      : OnnxNode(name, {X, W}) {}
+  OnnxConvLayer(OnnxNodeId name, OnnxNodeId X, OnnxNodeId W,
+                OnnxNodeId output_name)
+      : OnnxNode(name, {X, W}, output_name) {}
 };
 
 class OnnxAveragePoolLayer : public OnnxNode {
  public:
-  OnnxAveragePoolLayer(OnnxNodeId name, OnnxNodeId X,
+  OnnxAveragePoolLayer(OnnxNodeId name, OnnxNodeId X, OnnxNodeId output_name,
                        KernelAttributes kernel_attributes)
-      : OnnxNode(name, {X}), kernel_attributes_(kernel_attributes) {}
+      : OnnxNode(name, {X}, output_name),
+        kernel_attributes_(kernel_attributes) {}
 
  private:
   KernelAttributes kernel_attributes_;
@@ -47,14 +52,16 @@ class OnnxAveragePoolLayer : public OnnxNode {
 
 class OnnxReluLayer : public OnnxNode {
  public:
-  OnnxReluLayer(OnnxNodeId name, OnnxNodeId X) : OnnxNode(name, {X}) {}
+  OnnxReluLayer(OnnxNodeId name, OnnxNodeId X, OnnxNodeId output_name)
+      : OnnxNode(name, {X}, output_name) {}
 };
 
 class OnnxMaxPoolLayer : public OnnxNode {
  public:
-  OnnxMaxPoolLayer(OnnxNodeId name, OnnxNodeId X,
+  OnnxMaxPoolLayer(OnnxNodeId name, OnnxNodeId X, OnnxNodeId output_name,
                    KernelAttributes kernel_attributes)
-      : OnnxNode(name, {X}), kernel_attributes_(kernel_attributes) {}
+      : OnnxNode(name, {X}, output_name),
+        kernel_attributes_(kernel_attributes) {}
 
  private:
   KernelAttributes kernel_attributes_;
@@ -62,27 +69,30 @@ class OnnxMaxPoolLayer : public OnnxNode {
 
 class OnnxFullyConnectedLayer : public OnnxNode {
  public:
-  OnnxFullyConnectedLayer(OnnxNodeId name, OnnxNodeId A, OnnxNodeId B)
-      : OnnxNode(name, {A, B}) {}
+  OnnxFullyConnectedLayer(OnnxNodeId name, OnnxNodeId A, OnnxNodeId B,
+                          OnnxNodeId output_name)
+      : OnnxNode(name, {A, B}, output_name) {}
 };
 
 class OnnxAddLayer : public OnnxNode {
  public:
-  OnnxAddLayer(OnnxNodeId name, OnnxNodeId A, OnnxNodeId B)
-      : OnnxNode(name, {A, B}) {}
+  OnnxAddLayer(OnnxNodeId name, OnnxNodeId A, OnnxNodeId B,
+               OnnxNodeId output_name)
+      : OnnxNode(name, {A, B}, output_name) {}
 };
 
 class OnnxGlobalAveragePoolLayer : public OnnxNode {
  public:
   OnnxGlobalAveragePoolLayer(OnnxNodeId name, OnnxNodeId X,
-                             KernelAttributes kernel_attributes)
-      : OnnxNode(name, {X}) {}
+                             OnnxNodeId output_name)
+      : OnnxNode(name, {X}, output_name) {}
 };
 
 class OnnxFlattenLayer : public OnnxNode {
  public:
-  OnnxFlattenLayer(OnnxNodeId name, OnnxNodeId X, int axis)
-      : OnnxNode(name, {X}), axis_(axis) {
+  OnnxFlattenLayer(OnnxNodeId name, OnnxNodeId X, OnnxNodeId output_name,
+                   int axis)
+      : OnnxNode(name, {X}, output_name), axis_(axis) {
     PANIC_IF(axis != 1);
   }
   int axis() const { return axis_; }
@@ -94,7 +104,7 @@ class OnnxFlattenLayer : public OnnxNode {
 class OnnxInitializer : public OnnxNode {
  public:
   OnnxInitializer(OnnxNodeId name, Shape shape)
-      : OnnxNode(name, {}), shape_(shape) {}
+      : OnnxNode(name, {}, name), shape_(shape) {}
 
  private:
   Shape shape_;
@@ -102,11 +112,14 @@ class OnnxInitializer : public OnnxNode {
 
 class OnnxInput : public OnnxNode {
  public:
-  OnnxInput(OnnxNodeId name, Shape shape) : OnnxNode(name, {}), shape_(shape) {}
+  OnnxInput(OnnxNodeId name, Shape shape)
+      : OnnxNode(name, {}, name), shape_(shape) {}
 
  private:
   Shape shape_;
 };
+
+using OwnedOnnxNodeVec = std::vector<std::unique_ptr<OnnxNode>>;
 
 }  // namespace janncy
 
