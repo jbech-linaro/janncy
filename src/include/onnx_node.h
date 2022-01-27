@@ -4,49 +4,107 @@
 #include <string>
 #include <vector>
 
-#include <onnx/defs/tensor_proto_util.h>
-#include <onnx/onnx_pb.h>
-#include <onnx/proto_utils.h>
-
-#include "kernel_attributes.h"
-#include "shape.h"
+#include "include/kernel_attributes.h"
+#include "include/panic.h"
+#include "include/shape.h"
 
 namespace janncy {
 
-// TODO(nsamar): OnnxNode should not keep a NodeProto pointer,
-// There should just be a convenience function outside of OnnxNode
-// that initializes all relevant attributes by reading node_proto
-// fields and call a do-nothing OnnxNode constructor that assigns
-// these values to the attributes in OnnxNode.
+using OnnxNodeId = std::string;
+
 class OnnxNode {
  public:
-  OnnxNode(const onnx::NodeProto& node_proto, std::vector<Shape> input_shapes);
-  explicit OnnxNode(Shape shape);
+  OnnxNode(OnnxNodeId name, std::vector<OnnxNodeId> inputs)
+      : name_(name), inputs_(inputs) {}
+  OnnxNode(OnnxNode&&) = default;
+  OnnxNode(const OnnxNode&) = delete;
+  OnnxNode& operator=(const OnnxNode&) = delete;
+  virtual ~OnnxNode() {}
 
-  std::vector<std::string> input() const;
-  std::string op_type() const;
-  std::vector<Shape> input_shapes() const;
-  KernelAttributes kernel() const;
-  int output_channel_count() const;
-  std::vector<std::string> output() const;
-  std::string name() const;
-
-  int axis() const;
+  OnnxNodeId name() const { return name_; }
+  std::vector<OnnxNodeId> inputs() const { return inputs_; }
 
  private:
-  const onnx::AttributeProto* attribute(const std::string& attr_name) const;
-  const onnx::AttributeProto* typed_attribute(
-      const std::string& attr_name,
-      const onnx::AttributeProto::AttributeType& attr_type) const;
-  Shape kernel_shape() const;
-  int int_attribute(const std::string& attr_name) const;
-  std::vector<int> strides() const;
-  std::vector<int> padding() const;
-  bool AttributeExists(const std::string& attr_name) const;
-  std::vector<int> ints_attribute(const std::string& attr_name) const;
-  std::vector<int> optional_ints_attribute(const std::string& attr_name) const;
-  const onnx::NodeProto* node_proto_;
-  std::vector<Shape> input_shapes_;
+  OnnxNodeId name_;
+  std::vector<OnnxNodeId> inputs_;
+};
+
+class OnnxConvLayer : public OnnxNode {
+ public:
+  OnnxConvLayer(OnnxNodeId name, OnnxNodeId X, OnnxNodeId W)
+      : OnnxNode(name, {X, W}) {}
+};
+
+class OnnxAveragePoolLayer : public OnnxNode {
+ public:
+  OnnxAveragePoolLayer(OnnxNodeId name, OnnxNodeId X,
+                       KernelAttributes kernel_attributes)
+      : OnnxNode(name, {X}), kernel_attributes_(kernel_attributes) {}
+
+ private:
+  KernelAttributes kernel_attributes_;
+};
+
+class OnnxReluLayer : public OnnxNode {
+ public:
+  OnnxReluLayer(OnnxNodeId name, OnnxNodeId X) : OnnxNode(name, {X}) {}
+};
+
+class OnnxMaxPoolLayer : public OnnxNode {
+ public:
+  OnnxMaxPoolLayer(OnnxNodeId name, OnnxNodeId X,
+                   KernelAttributes kernel_attributes)
+      : OnnxNode(name, {X}), kernel_attributes_(kernel_attributes) {}
+
+ private:
+  KernelAttributes kernel_attributes_;
+};
+
+class OnnxFullyConnectedLayer : public OnnxNode {
+ public:
+  OnnxFullyConnectedLayer(OnnxNodeId name, OnnxNodeId A, OnnxNodeId B)
+      : OnnxNode(name, {A, B}) {}
+};
+
+class OnnxAddLayer : public OnnxNode {
+ public:
+  OnnxAddLayer(OnnxNodeId name, OnnxNodeId A, OnnxNodeId B)
+      : OnnxNode(name, {A, B}) {}
+};
+
+class OnnxGlobalAveragePoolLayer : public OnnxNode {
+ public:
+  OnnxGlobalAveragePoolLayer(OnnxNodeId name, OnnxNodeId X,
+                             KernelAttributes kernel_attributes)
+      : OnnxNode(name, {X}) {}
+};
+
+class OnnxFlattenLayer : public OnnxNode {
+ public:
+  OnnxFlattenLayer(OnnxNodeId name, OnnxNodeId X, int axis)
+      : OnnxNode(name, {X}), axis_(axis) {
+    PANIC_IF(axis != 1);
+  }
+  int axis() const { return axis_; }
+
+ private:
+  int axis_;
+};
+
+class OnnxInitializer : public OnnxNode {
+ public:
+  OnnxInitializer(OnnxNodeId name, Shape shape)
+      : OnnxNode(name, {}), shape_(shape) {}
+
+ private:
+  Shape shape_;
+};
+
+class OnnxInput : public OnnxNode {
+ public:
+  OnnxInput(OnnxNodeId name, Shape shape) : OnnxNode(name, {}), shape_(shape) {}
+
+ private:
   Shape shape_;
 };
 
