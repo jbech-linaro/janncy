@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "include/kernel_attributes.h"
+#include "include/onnx_node_visitor.h"
 #include "include/panic.h"
 #include "include/shape.h"
 
@@ -26,6 +27,8 @@ class OnnxNode {
   std::vector<OnnxNodeId> inputs() const { return inputs_; }
   OnnxNodeId output() const { return output_; }
 
+  virtual void Accept(OnnxNodeVisitor& visitor) const = 0;
+
  private:
   OnnxNodeId name_;
   std::vector<OnnxNodeId> inputs_;
@@ -37,6 +40,8 @@ class OnnxConvLayer : public OnnxNode {
   OnnxConvLayer(OnnxNodeId name, OnnxNodeId X, OnnxNodeId W,
                 OnnxNodeId output_name)
       : OnnxNode(name, {X, W}, output_name) {}
+
+  void Accept(OnnxNodeVisitor& visitor) const override { visitor.Visit(*this); }
 };
 
 class OnnxAveragePoolLayer : public OnnxNode {
@@ -46,6 +51,8 @@ class OnnxAveragePoolLayer : public OnnxNode {
       : OnnxNode(name, {X}, output_name),
         kernel_attributes_(kernel_attributes) {}
 
+  void Accept(OnnxNodeVisitor& visitor) const override { visitor.Visit(*this); }
+
  private:
   KernelAttributes kernel_attributes_;
 };
@@ -54,6 +61,8 @@ class OnnxReluLayer : public OnnxNode {
  public:
   OnnxReluLayer(OnnxNodeId name, OnnxNodeId X, OnnxNodeId output_name)
       : OnnxNode(name, {X}, output_name) {}
+
+  void Accept(OnnxNodeVisitor& visitor) const override { visitor.Visit(*this); }
 };
 
 class OnnxMaxPoolLayer : public OnnxNode {
@@ -62,6 +71,8 @@ class OnnxMaxPoolLayer : public OnnxNode {
                    KernelAttributes kernel_attributes)
       : OnnxNode(name, {X}, output_name),
         kernel_attributes_(kernel_attributes) {}
+
+  void Accept(OnnxNodeVisitor& visitor) const override { visitor.Visit(*this); }
 
  private:
   KernelAttributes kernel_attributes_;
@@ -72,6 +83,8 @@ class OnnxFullyConnectedLayer : public OnnxNode {
   OnnxFullyConnectedLayer(OnnxNodeId name, OnnxNodeId A, OnnxNodeId B,
                           OnnxNodeId output_name)
       : OnnxNode(name, {A, B}, output_name) {}
+
+  void Accept(OnnxNodeVisitor& visitor) const override { visitor.Visit(*this); }
 };
 
 class OnnxAddLayer : public OnnxNode {
@@ -79,6 +92,8 @@ class OnnxAddLayer : public OnnxNode {
   OnnxAddLayer(OnnxNodeId name, OnnxNodeId A, OnnxNodeId B,
                OnnxNodeId output_name)
       : OnnxNode(name, {A, B}, output_name) {}
+
+  void Accept(OnnxNodeVisitor& visitor) const override { visitor.Visit(*this); }
 };
 
 class OnnxGlobalAveragePoolLayer : public OnnxNode {
@@ -86,6 +101,8 @@ class OnnxGlobalAveragePoolLayer : public OnnxNode {
   OnnxGlobalAveragePoolLayer(OnnxNodeId name, OnnxNodeId X,
                              OnnxNodeId output_name)
       : OnnxNode(name, {X}, output_name) {}
+
+  void Accept(OnnxNodeVisitor& visitor) const override { visitor.Visit(*this); }
 };
 
 class OnnxFlattenLayer : public OnnxNode {
@@ -95,6 +112,8 @@ class OnnxFlattenLayer : public OnnxNode {
       : OnnxNode(name, {X}, output_name), axis_(axis) {
     PANIC_IF(axis != 1);
   }
+
+  void Accept(OnnxNodeVisitor& visitor) const override { visitor.Visit(*this); }
   int axis() const { return axis_; }
 
  private:
@@ -106,6 +125,8 @@ class OnnxInitializer : public OnnxNode {
   OnnxInitializer(OnnxNodeId name, Shape shape)
       : OnnxNode(name, {}, name), shape_(shape) {}
 
+  void Accept(OnnxNodeVisitor& visitor) const override { visitor.Visit(*this); }
+
  private:
   Shape shape_;
 };
@@ -114,6 +135,8 @@ class OnnxInput : public OnnxNode {
  public:
   OnnxInput(OnnxNodeId name, Shape shape)
       : OnnxNode(name, {}, name), shape_(shape) {}
+
+  void Accept(OnnxNodeVisitor& visitor) const override { visitor.Visit(*this); }
 
  private:
   Shape shape_;
