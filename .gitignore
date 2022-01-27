@@ -14,3 +14,4 @@ bazel.gpg
 build
 *.swp
 *.json
+.pyvenv/*
