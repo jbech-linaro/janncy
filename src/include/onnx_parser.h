@@ -1,14 +1,13 @@
 #ifndef JANNCY_ONNX_PARSER_H_
 #define JANNCY_ONNX_PARSER_H_
 
-#include <memory>
+#include <string>
 
-#include "include/onnx_node.h"
+#include "include/neural_network.h"
 
 namespace janncy {
 
-std::vector<std::unique_ptr<OnnxNode>> ParseOnnxFile(
-    const std::string& onnx_filename);
+NeuralNetwork ParseOnnxFile(const std::string& onnx_filename);
 
 }  // namespace janncy
 

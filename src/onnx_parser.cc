@@ -10,6 +10,8 @@
 #include <onnx/proto_utils.h>
 
 #include "include/kernel_attributes.h"
+#include "include/onnx_dag.h"
+#include "include/onnx_dag_converter.h"
 #include "include/onnx_node.h"
 #include "include/panic.h"
 
@@ -251,15 +253,22 @@ OwnedOnnxNodeVec ReadOnnxNodes(const onnx::GraphProto& graph_proto) {
   return result;
 }
 
-}  // namespace
-
-OwnedOnnxNodeVec ParseOnnxFile(const std::string& onnx_filename) {
+OwnedOnnxNodeVec FileToOnnxNodeVec(const std::string& onnx_filename) {
   auto model = ParseModel(onnx_filename);
   PANIC_IF(!model->has_graph(), "Model does not have a graph!");
   auto graph = model->graph();
   auto result = ReadOnnxNodes(graph);
   google::protobuf::ShutdownProtobufLibrary();
   return result;
+}
+
+}  // namespace
+
+NeuralNetwork ParseOnnxFile(const std::string& onnx_filename) {
+  auto onnx_node_vec = FileToOnnxNodeVec(onnx_filename);
+  auto onnx_dag = MakeOnnxDag(std::move(onnx_node_vec));
+  auto nn = OnnxDagConverter::TranslateOnnxDag(onnx_dag);
+  return nn;
 }
 
 }  // namespace janncy
