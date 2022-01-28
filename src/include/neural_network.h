@@ -23,6 +23,7 @@ const Layer& CreateAveragePool(NeuralNetwork& nn, const Layer& parent,
 const Layer& CreateMaxPool(NeuralNetwork& nn, const Layer& parent,
                            KernelAttributes kernel);
 const Layer& CreateGlobalAveragePool(NeuralNetwork& nn, const Layer& parent);
+const Layer& CreateBatchNormalization(NeuralNetwork& nn, const Layer& parent);
 
 const Layer& CreateInput(NeuralNetwork& nn, Shape shape);
 const Layer& CreateRelu(NeuralNetwork& nn, const Layer& parent);

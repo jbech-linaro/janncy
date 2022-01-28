@@ -1,5 +1,6 @@
 #include "include/onnx_parser.h"
 
+#include "include/draw_dag.h"
 #include "include/onnx_dag.h"
 #include "include/onnx_dag_converter.h"
 
@@ -9,5 +10,6 @@ int main(int argc, char** argv) {
            "command-line argument!");
   auto nodes = janncy::ParseOnnxFile(argv[1]);
   auto onnx_dag = MakeOnnxDag(std::move(nodes));
-  janncy::OnnxDagConverter::TranslateOnnxDag(onnx_dag);
+  auto nn = janncy::OnnxDagConverter::TranslateOnnxDag(onnx_dag);
+  DrawDag(nn, "nn");
 }

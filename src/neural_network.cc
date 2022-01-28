@@ -2,6 +2,7 @@
 
 #include "include/add_layer.h"
 #include "include/average_pool_layer.h"
+#include "include/batch_normalization_layer.h"
 #include "include/conv_layer.h"
 #include "include/flatten_layer.h"
 #include "include/fully_connected_layer.h"
@@ -37,6 +38,11 @@ const Layer& CreateAveragePool(NeuralNetwork& nn, const Layer& parent,
 const Layer& CreateMaxPool(NeuralNetwork& nn, const Layer& parent,
                            KernelAttributes kernel) {
   return nn.AddNode(std::make_unique<MaxPoolLayer>(parent.shape(), kernel),
+                    {&parent});
+}
+
+const Layer& CreateBatchNormalization(NeuralNetwork& nn, const Layer& parent) {
+  return nn.AddNode(std::make_unique<BatchNormalizationLayer>(parent.shape()),
                     {&parent});
 }
 

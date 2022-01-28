@@ -15,7 +15,7 @@ class OnnxAveragePoolLayer;
 class OnnxGlobalAveragePoolLayer;
 class OnnxBatchNormalizationLayer;
 class OnnxAddLayer;
-class OnnxInputLayer;
+class OnnxInput;
 class ONnxReluLayer;
 class OnnxMaxPollLayer;
 class OnnxFlattenLayer;
@@ -31,7 +31,7 @@ class OnnxDagConverter : public OnnxNodeVisitor {
   void Visit(const OnnxGlobalAveragePoolLayer& onnx_node) override;
   void Visit(const OnnxBatchNormalizationLayer& onnx_node) override;
   void Visit(const OnnxAddLayer& onnx_node) override;
-  void Visit(const OnnxInputLayer& onnx_node) override;
+  void Visit(const OnnxInput& onnx_node) override;
   void Visit(const OnnxReluLayer& onnx_node) override;
   void Visit(const OnnxMaxPoolLayer& onnx_node) override;
   void Visit(const OnnxFlattenLayer& onnx_node) override;
@@ -39,7 +39,7 @@ class OnnxDagConverter : public OnnxNodeVisitor {
  private:
   NeuralNetwork nn_;
   const OnnxDag& onnx_dag_;
-  std::unordered_map<const OnnxNode*, Layer*> layer_map_;
+  std::unordered_map<OnnxNodeId, const Layer*> layer_map_;
 
   OnnxDagConverter(const OnnxDag& onnx_dag);
 };

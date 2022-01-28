@@ -119,16 +119,6 @@ std::unique_ptr<OnnxNode> ReadAddLayer(const onnx::NodeProto& node_proto) {
       node_proto.output()[0]);
 }
 
-std::unique_ptr<OnnxNode> ReadConvLayer(const onnx::NodeProto& node_proto) {
-  PANIC_IF(node_proto.input().size() != 2 && node_proto.input().size() != 3);
-  if (node_proto.input().size() == 3) {
-    std::cerr << "We do not handle bias in ConvLayer yet!" << std::endl;
-  }
-  return std::make_unique<OnnxConvLayer>(
-      node_proto.name(), node_proto.input()[0], node_proto.input()[1],
-      node_proto.output()[0]);
-}
-
 std::vector<int> optional_ints_attribute(const onnx::NodeProto& node_proto,
                                          const std::string& attr_name) {
   auto attr =
@@ -136,15 +126,25 @@ std::vector<int> optional_ints_attribute(const onnx::NodeProto& node_proto,
   return std::vector<int>(attr.ints().begin(), attr.ints().end());
 }
 
-std::vector<int> kernel_shape(const onnx::NodeProto& node_proto) {
-  return optional_ints_attribute(node_proto, ONNX_ATTR_KERNEL_SHAPE);
-}
-
 std::vector<int> strides(const onnx::NodeProto& node_proto) {
   return optional_ints_attribute(node_proto, ONNX_ATTR_STRIDES);
 }
 std::vector<int> padding(const onnx::NodeProto& node_proto) {
   return optional_ints_attribute(node_proto, ONNX_ATTR_PADDING);
+}
+
+std::unique_ptr<OnnxNode> ReadConvLayer(const onnx::NodeProto& node_proto) {
+  PANIC_IF(node_proto.input().size() != 2 && node_proto.input().size() != 3);
+  if (node_proto.input().size() == 3) {
+    std::cerr << "We do not handle bias in ConvLayer yet!" << std::endl;
+  }
+  return std::make_unique<OnnxConvLayer>(
+      node_proto.name(), node_proto.input()[0], node_proto.input()[1],
+      node_proto.output()[0], strides(node_proto), padding(node_proto));
+}
+
+std::vector<int> kernel_shape(const onnx::NodeProto& node_proto) {
+  return optional_ints_attribute(node_proto, ONNX_ATTR_KERNEL_SHAPE);
 }
 
 KernelAttributes ReadKernelAttributes(const onnx::NodeProto& node_proto) {

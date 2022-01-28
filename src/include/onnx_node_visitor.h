@@ -9,7 +9,7 @@ class OnnxFullyConnectedLayer;
 class OnnxAveragePoolLayer;
 class OnnxBatchNormalizationLayer;
 class OnnxAddLayer;
-class OnnxInputLayer;
+class OnnxInput;
 class OnnxReluLayer;
 class OnnxMaxPoolLayer;
 class OnnxFlattenLayer;
@@ -30,7 +30,7 @@ class OnnxNodeVisitor {
   virtual void Visit(const OnnxGlobalAveragePoolLayer& onnx_node) = 0;
   virtual void Visit(const OnnxBatchNormalizationLayer& onnx_node) = 0;
   virtual void Visit(const OnnxAddLayer& onnx_node) = 0;
-  virtual void Visit(const OnnxInputLayer& onnx_node) = 0;
+  virtual void Visit(const OnnxInput& onnx_node) = 0;
   virtual void Visit(const OnnxReluLayer& onnx_node) = 0;
   virtual void Visit(const OnnxMaxPoolLayer& onnx_node) = 0;
   virtual void Visit(const OnnxFlattenLayer& onnx_node) = 0;
