@@ -9,6 +9,7 @@
 #include <onnx/onnx_pb.h>
 #include <onnx/proto_utils.h>
 
+#include "include/kernel_attributes.h"
 #include "include/onnx_node.h"
 #include "include/panic.h"
 
@@ -143,8 +144,8 @@ std::unique_ptr<OnnxNode> ReadConvLayer(const onnx::NodeProto& node_proto) {
       node_proto.output()[0], strides(node_proto), padding(node_proto));
 }
 
-std::vector<int> kernel_shape(const onnx::NodeProto& node_proto) {
-  return optional_ints_attribute(node_proto, ONNX_ATTR_KERNEL_SHAPE);
+Shape kernel_shape(const onnx::NodeProto& node_proto) {
+  return Shape(optional_ints_attribute(node_proto, ONNX_ATTR_KERNEL_SHAPE));
 }
 
 KernelAttributes ReadKernelAttributes(const onnx::NodeProto& node_proto) {
