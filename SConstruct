@@ -134,7 +134,7 @@ env.VariantDir(build_dir, src_dir, duplicate=0)
 
 # Compiler flags
 env.Append(CPPFLAGS=["-fsanitize=address", "-O3"])
-env.Append(CPPFLAGS=["-ggdb", "-fno-omit-frame-pointer", "-g",
+env.Append(CPPFLAGS=["-ggdb", "-fno-omit-frame-pointer", "-g", "-fno-exception",
                      f"-std=c++{cpp_version}", "-Wall",
                      "-DONNX_NAMESPACE=onnx"])
 
