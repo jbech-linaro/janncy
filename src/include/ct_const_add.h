@@ -1,5 +1,5 @@
-#ifndef JANNCY_CT_PT_MUL_H_
-#define JANNCY_CT_PT_MUL_H_
+#ifndef CT_CONST_ADD_H_
+#define CT_CONST_ADD_H_
 
 #include <vector>
 
@@ -7,9 +7,7 @@
 
 namespace janncy {
 
-class CtGraphVisitor;
-
-class CtPtMul : public CtOp {
+class CtConstAdd : public CtOp {
  public:
   void Accept(CtOpVisitor& visitor) const override;
   std::string op_type() const override;
@@ -22,4 +20,4 @@ class CtPtMul : public CtOp {
 
 }  // namespace janncy
 
-#endif  // JANNCY_CT_PT_MUL_H_
+#endif CT_CONST_ADD_H_

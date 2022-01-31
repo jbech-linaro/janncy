@@ -14,10 +14,10 @@ class CtPtAdd : public CtOp {
   void Accept(CtOpVisitor& visitor) const override;
   std::string op_type() const override;
 
-  std::vector<double> value() const;
+  ValueName value() const { return value_; }
 
  private:
-  std::vector<double> value_;
+  ValueName value_;
 };
 
 }  // namespace janncy

@@ -22,6 +22,9 @@ class Ciphertext {
 
   static int num_slots();
 
+  Ciphertext ConstMultiply(double rhs) const;
+  Ciphertext ConstAdd(double rhs) const;
+
   Ciphertext Multiply(const Ciphertext& rhs) const;
   Ciphertext Add(const Ciphertext& rhs) const;
   Ciphertext Subtract(const Ciphertext& rhs) const;
@@ -30,6 +33,7 @@ class Ciphertext {
 
  private:
   static void InitScheme();
+  static int logp;
 
   static heaan::Scheme* scheme();
   heaan::Ciphertext ciphertext_;

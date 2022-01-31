@@ -8,6 +8,8 @@ namespace janncy {
 
 class CtOpVisitor;
 
+using ValueName = std::string;
+
 class CtOp {
  public:
   CtOp() = default;

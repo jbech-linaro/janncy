@@ -13,6 +13,8 @@
 
 namespace janncy {
 
+int Ciphertext::logp = 30;
+
 heaan::Scheme* Ciphertext::scheme_ = nullptr;
 heaan::Ring* Ciphertext::ring_ = nullptr;
 heaan::SecretKey* Ciphertext::secret_key_ = nullptr;
@@ -27,6 +29,22 @@ Ciphertext Ciphertext::Bootstrap() {
 
 Ciphertext::Ciphertext(heaan::Ciphertext ciphertext)
     : ciphertext_(ciphertext) {}
+
+Ciphertext Ciphertext::ConstMultiply(double constant) const {
+  heaan::Ciphertext ct_result(ciphertext_);
+  Ciphertext::scheme_->multByConst(ct_result,
+                                   const_cast<heaan::Ciphertext&>(ciphertext_),
+                                   constant, Ciphertext::logp);
+  return Ciphertext(ct_result);
+}
+
+Ciphertext Ciphertext::ConstAdd(double constant) const {
+  heaan::Ciphertext ct_result(ciphertext_);
+  Ciphertext::scheme_->addConst(ct_result,
+                                const_cast<heaan::Ciphertext&>(ciphertext_),
+                                constant, Ciphertext::logp);
+  return Ciphertext(ct_result);
+}
 
 Ciphertext Ciphertext::Multiply(const Ciphertext& rhs) const {
   heaan::Ciphertext ct_result(ciphertext_);
@@ -99,7 +117,7 @@ Ciphertext Ciphertext::Encrypt(const Message& values) {
     value_array[idx] = values[idx];
   }
   Ciphertext::scheme()->encrypt(ct, value_array, Ciphertext::num_slots(),
-                                /*logp=*/30, /*logQ=*/800);
+                                Ciphertext::logp, /*logQ=*/800);
   std::cout << "Slots: " << ct.n << std::endl;
   delete[] value_array;
   return Ciphertext(ct);
@@ -118,7 +136,8 @@ Ciphertext Ciphertext::MultPtVec(Message pt_vec) {
   for (int idx = 0; idx < Ciphertext::num_slots(); idx++) {
     const_vec[idx] = pt_vec[idx];
   }
-  scheme_->multByConstVec(ct_result, ciphertext_, const_vec, /*logp/2=*/15);
+  scheme_->multByConstVec(ct_result, ciphertext_, const_vec,
+                          Ciphertext::logp / 2);
   delete[] const_vec;
   return Ciphertext(ct_result);
 }

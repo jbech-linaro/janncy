@@ -8,7 +8,7 @@ namespace janncy {
 void CtPtAdd::Accept(CtOpVisitor& visitor) const {
   return visitor.Visit(*this);
 }
+
 std::string CtPtAdd::op_type() const { return "CtPtAdd"; }
 
-std::vector<double> CtPtAdd::value() const { return value_; }
 }  // namespace janncy

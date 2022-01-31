@@ -8,8 +8,7 @@ namespace janncy {
 void CtPtMul::Accept(CtOpVisitor& visitor) const {
   return visitor.Visit(*this);
 }
-std::string CtPtMul::op_type() const { return "CtPtMul"; }
 
-std::vector<double> CtPtMul::value() const { return value_; }
+std::string CtPtMul::op_type() const { return "CtPtMul"; }
 
 }  // namespace janncy
