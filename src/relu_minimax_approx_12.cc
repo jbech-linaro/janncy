@@ -6,61 +6,31 @@ namespace janncy {
 
 namespace {
 
-using Coefficient = double;
+// Source: https://arxiv.org/pdf/2105.10879.pdf
+auto poly0 = std::vector<double>{+3.28671253798158E-45, +1.15523042357223E+01,
+                                 -2.92342552286817E-43, -6.77794513440968E+01,
+                                 +9.33659553243619E-43, +1.25283740404562E+02,
+                                 -6.41319512076187E-43, -6.90142908232934E+01};
 
-std::vector<std::string> poly0 = {"relu_minimax_approx_12/poly0/coeff00",
-                                  "relu_minimax_approx_12/poly0/coeff01",
-                                  "relu_minimax_approx_12/poly0/coeff02",
-                                  "relu_minimax_approx_12/poly0/coeff03",
-                                  "relu_minimax_approx_12/poly0/coeff04",
-                                  "relu_minimax_approx_12/poly0/coeff05",
-                                  "relu_minimax_approx_12/poly0/coeff06",
-                                  "relu_minimax_approx_12/poly0/coeff07"};
+auto poly1 = std::vector<double>{
+    +6.41087388948633E-46, +9.65167636181626E+00, -1.22822329506037E-43,
+    -6.16939174538469E+01, +6.20624566340835E-43, +1.55170351652298E+02,
+    -9.96218491919333E-43, -1.82697582383214E+02, +7.27748968270610E-43,
+    +1.12910726525406E+02, -2.69134924845614E-43, -3.77752411770263E+01,
+    +4.93235088742835E-44, +6.47503909732344E+00, -3.56876826458906E-45,
+    -4.45613365723361E-01};
 
-std::vector<std::string> poly1 = {"relu_minimax_approx_12/poly1/coeff00",
-                                  "relu_minimax_approx_12/poly1/coeff01",
-                                  "relu_minimax_approx_12/poly1/coeff02",
-                                  "relu_minimax_approx_12/poly1/coeff03",
-                                  "relu_minimax_approx_12/poly1/coeff04",
-                                  "relu_minimax_approx_12/poly1/coeff05",
-                                  "relu_minimax_approx_12/poly1/coeff07",
-                                  "relu_minimax_approx_12/poly1/coeff08",
-                                  "relu_minimax_approx_12/poly1/coeff09",
-                                  "relu_minimax_approx_12/poly1/coeff10",
-                                  "relu_minimax_approx_12/poly1/coeff11",
-                                  "relu_minimax_approx_12/poly1/coeff12",
-                                  "relu_minimax_approx_12/poly1/coeff13",
-                                  "relu_minimax_approx_12/poly1/coeff14",
-                                  "relu_minimax_approx_12/poly1/coeff15"};
-
-std::vector<std::string> poly2 = {"relu_minimax_approx_12/poly2/coeff00",
-                                  "relu_minimax_approx_12/poly2/coeff01",
-                                  "relu_minimax_approx_12/poly2/coeff02",
-                                  "relu_minimax_approx_12/poly2/coeff03",
-                                  "relu_minimax_approx_12/poly2/coeff04",
-                                  "relu_minimax_approx_12/poly2/coeff05",
-                                  "relu_minimax_approx_12/poly2/coeff06",
-                                  "relu_minimax_approx_12/poly2/coeff07",
-                                  "relu_minimax_approx_12/poly2/coeff08",
-                                  "relu_minimax_approx_12/poly2/coeff09",
-                                  "relu_minimax_approx_12/poly2/coeff10",
-                                  "relu_minimax_approx_12/poly2/coeff11",
-                                  "relu_minimax_approx_12/poly2/coeff12",
-                                  "relu_minimax_approx_12/poly2/coeff13",
-                                  "relu_minimax_approx_12/poly2/coeff14",
-                                  "relu_minimax_approx_12/poly2/coeff15",
-                                  "relu_minimax_approx_12/poly2/coeff16",
-                                  "relu_minimax_approx_12/poly2/coeff17",
-                                  "relu_minimax_approx_12/poly2/coeff18",
-                                  "relu_minimax_approx_12/poly2/coeff19",
-                                  "relu_minimax_approx_12/poly2/coeff20",
-                                  "relu_minimax_approx_12/poly2/coeff21",
-                                  "relu_minimax_approx_12/poly2/coeff22",
-                                  "relu_minimax_approx_12/poly2/coeff23",
-                                  "relu_minimax_approx_12/poly2/coeff24",
-                                  "relu_minimax_approx_12/poly2/coeff25",
-                                  "relu_minimax_approx_12/poly2/coeff26",
-                                  "relu_minimax_approx_12/poly2/coeff27"};
+auto poly2 = std::vector<double>{
+    +4.77710576312791E-47, +5.25888355571745E+00, -2.94571921438375E-45,
+    -3.37233593794284E+01, +4.43279401132879E-44, +1.64983085013457E+02,
+    -2.76863985519552E-43, -5.41408891406992E+02, +9.15181002994263E-43,
+    +1.22296207997963E+03, -1.82071128047940E-42, -1.95201910566479E+03,
+    +2.34852758455781E-42, +2.24084021378300E+03, -2.05169300503205E-42,
+    -1.86634916983170E+03, +1.24157528220800E-42, +1.12722117843121E+03,
+    -5.22850779777304E-43, -4.88070474638380E+02, +1.50923249713814E-43,
+    +1.47497846308920E+02, -2.85763045364643E-44, -2.95171048879526E+01,
+    +3.20768549654760E-45, +3.51269520930994E+00, -1.62263985493395E-46,
+    -1.88101836557879E-01};
 
 }  // namespace
 

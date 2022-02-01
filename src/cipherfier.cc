@@ -56,8 +56,8 @@ const CtOp& SumCiphertexts(CtDag& ct_dag, const std::vector<const CtOp*>& cts) {
     std::vector<const CtOp*> first_half(cts.begin(), cts_mid);
     std::vector<const CtOp*> second_half(cts_mid, cts.end());
 
-    return ct_dag::CreateAdd(ct_dag, SumCiphertexts(ct_dag, first_half),
-                             SumCiphertexts(ct_dag, second_half));
+    return ct_dag::CreateAddCC(ct_dag, SumCiphertexts(ct_dag, first_half),
+                               SumCiphertexts(ct_dag, second_half));
   }
 }
 
@@ -70,8 +70,8 @@ const CtOp& PrefixSums(CtDag& ct_dag, const CtOp& ct, int sum_length) {
     int rotate_by =
         std::min(current_sum_length, sum_length - current_sum_length);
     current_sum_length += rotate_by;
-    result = &ct_dag::CreateAdd(ct_dag, *result,
-                                ct_dag::CreateRotate(ct_dag, *result));
+    result = &ct_dag::CreateAddCC(ct_dag, *result,
+                                  ct_dag::CreateRotateC(ct_dag, *result));
   }
   assert(current_sum_length == sum_length);
   return *result;
@@ -81,7 +81,7 @@ const CtOp& PrefixSums(CtDag& ct_dag, const CtOp& ct, int sum_length) {
 const CtOp& FlattenSlots(CtDag& ct_dag, const std::vector<const CtOp*>& cts) {
   std::vector<const CtOp*> slots;
   for (const CtOp* ct : cts) {
-    slots.push_back(&ct_dag::CreateRotate(ct_dag, *ct));
+    slots.push_back(&ct_dag::CreateRotateC(ct_dag, *ct));
   }
   return SumCiphertexts(ct_dag, slots);
 }
@@ -95,8 +95,8 @@ const CtOp& ApplyFilter(CtDag& ct_dag, const CtTensor& input,
   std::vector<const CtOp*> partial_filters;
   for (const CtOp* channel : input.ciphertexts()) {
     for (int i = 0; i < kernel_size; ++i) {
-      const CtOp& rotated = ct_dag::CreateRotate(ct_dag, *channel);
-      const CtOp& multiplied = ct_dag::CreatePtMul(ct_dag, rotated);
+      const CtOp& rotated = ct_dag::CreateRotateC(ct_dag, *channel);
+      const CtOp& multiplied = ct_dag::CreateMulCP(ct_dag, rotated);
       partial_filters.push_back(&multiplied);
     }
   }
@@ -113,17 +113,17 @@ std::vector<const CtOp*> CtPowers(CtDag& ct_dag, const CtOp& ct, int degree) {
   const CtOp& mid_power = *powers.back();
   for (int i = low_degrees; i < degree; ++i) {
     powers.push_back(
-        &ct_dag::CreateMul(ct_dag, *powers[i - low_degrees], mid_power));
+        &ct_dag::CreateMulCC(ct_dag, *powers[i - low_degrees], mid_power));
   }
   return powers;
 }
 const CtOp& PolyEval(CtDag& ct_dag, const CtOp& parent, int degree) {
   std::vector<const CtOp*> multiplied_powers;
   for (const CtOp* p : CtPowers(ct_dag, parent, degree)) {
-    multiplied_powers.push_back(&ct_dag::CreatePtMul(ct_dag, *p));
+    multiplied_powers.push_back(&ct_dag::CreateMulCP(ct_dag, *p));
   }
   const CtOp& summed_powers = SumCiphertexts(ct_dag, multiplied_powers);
-  return ct_dag::CreatePtAdd(ct_dag,
+  return ct_dag::CreateAddCP(ct_dag,
                              summed_powers);  // add in constant factor
 }
 const CtOp& ReluPolynomial(CtDag& ct_dag, const CtOp& parent) {
@@ -168,9 +168,9 @@ void Cipherfier::Visit(const FullyConnectedLayer& node) {
 
   std::vector<const CtOp*> slots;
   for (int i = 0; i < node.output_size(); i++) {
-    const CtOp& weighted_row = ct_dag::CreatePtMul(ct_dag_, input_ct);
+    const CtOp& weighted_row = ct_dag::CreateMulCP(ct_dag_, input_ct);
     const CtOp& summed = PrefixSums(ct_dag_, weighted_row, node.input_size());
-    const CtOp& masked = ct_dag::CreatePtMul(ct_dag_, summed);
+    const CtOp& masked = ct_dag::CreateMulCP(ct_dag_, summed);
     slots.push_back(&masked);
   }
   tensor_map_.emplace(&node, CtTensor({&FlattenSlots(ct_dag_, slots)}));
@@ -192,8 +192,8 @@ void Cipherfier::Visit(const BatchNormalizationLayer& node) {
   result.reserve(par_cts.size());
   std::transform(par_cts.begin(), par_cts.end(), std::back_inserter(result),
                  [this](const CtOp* ct) {
-                   return &ct_dag::CreatePtMul(
-                       ct_dag_, ct_dag::CreatePtAdd(ct_dag_, *ct));
+                   return &ct_dag::CreateMulCP(
+                       ct_dag_, ct_dag::CreateAddCP(ct_dag_, *ct));
                  });
   tensor_map_.emplace(&node, CtTensor(result));
 }
@@ -206,7 +206,7 @@ void Cipherfier::Visit(const AddLayer& node) {
 
   std::vector<const CtOp*> sum_cts(p0_cts.size());
   for (int i = 0; i < int(p0_cts.size()); ++i) {
-    sum_cts[i] = &ct_dag::CreateAdd(ct_dag_, *p0_cts[i], *p1_cts[i]);
+    sum_cts[i] = &ct_dag::CreateAddCC(ct_dag_, *p0_cts[i], *p1_cts[i]);
   }
   tensor_map_.emplace(&node, CtTensor(std::move(sum_cts)));
 }

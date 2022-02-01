@@ -3,12 +3,11 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 namespace janncy {
 
 class CtOpVisitor;
-
-using ValueName = std::string;
 
 class CtOp {
  public:

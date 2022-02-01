@@ -3,13 +3,14 @@
 #include <memory>
 #include <vector>
 
-#include "include/cleartext_evaluator.h"
-#include "include/ct_add.h"
+#include "include/add_cc.h"
+#include "include/add_cp.h"
+#include "include/add_cs.h"
 #include "include/ct_input.h"
-#include "include/ct_mul.h"
-#include "include/ct_pt_add.h"
-#include "include/ct_pt_mul.h"
-#include "include/ct_rotate.h"
+#include "include/mul_cc.h"
+#include "include/mul_cp.h"
+#include "include/mul_cs.h"
+#include "include/rotate_c.h"
 
 namespace janncy {
 
@@ -19,26 +20,34 @@ const CtOp& CreateInput(CtDag& ct_dag) {
   return ct_dag.AddNode(std::make_unique<CtInput>(), {});
 }
 
-const CtOp& CreateAdd(CtDag& ct_dag, const CtOp& parent_1,
-                      const CtOp& parent_2) {
-  return ct_dag.AddNode(std::make_unique<CtAdd>(), {&parent_1, &parent_2});
+const CtOp& CreateAddCC(CtDag& ct_dag, const CtOp& parent_1,
+                        const CtOp& parent_2) {
+  return ct_dag.AddNode(std::make_unique<AddCC>(), {&parent_1, &parent_2});
 }
 
-const CtOp& CreateMul(CtDag& ct_dag, const CtOp& parent_1,
-                      const CtOp& parent_2) {
-  return ct_dag.AddNode(std::make_unique<CtMul>(), {&parent_1, &parent_2});
+const CtOp& CreateAddCP(CtDag& ct_dag, const CtOp& parent) {
+  return ct_dag.AddNode(std::make_unique<AddCP>(), {&parent});
 }
 
-const CtOp& CreatePtAdd(CtDag& ct_dag, const CtOp& parent) {
-  return ct_dag.AddNode(std::make_unique<CtPtAdd>(), {&parent});
+const CtOp& CreateAddCS(CtDag& ct_dag, const CtOp& parent) {
+  return ct_dag.AddNode(std::make_unique<AddCS>(), {&parent});
 }
 
-const CtOp& CreatePtMul(CtDag& ct_dag, const CtOp& parent) {
-  return ct_dag.AddNode(std::make_unique<CtPtMul>(), {&parent});
+const CtOp& CreateMulCC(CtDag& ct_dag, const CtOp& parent_1,
+                        const CtOp& parent_2) {
+  return ct_dag.AddNode(std::make_unique<MulCC>(), {&parent_1, &parent_2});
 }
 
-const CtOp& CreateRotate(CtDag& ct_dag, const CtOp& parent) {
-  return ct_dag.AddNode(std::make_unique<CtRotate>(), {&parent});
+const CtOp& CreateMulCP(CtDag& ct_dag, const CtOp& parent) {
+  return ct_dag.AddNode(std::make_unique<MulCP>(), {&parent});
+}
+
+const CtOp& CreateMulCS(CtDag& ct_dag, const CtOp& parent) {
+  return ct_dag.AddNode(std::make_unique<MulCS>(), {&parent});
+}
+
+const CtOp& CreateRotateC(CtDag& ct_dag, const CtOp& parent) {
+  return ct_dag.AddNode(std::make_unique<RotateC>(), {&parent});
 }
 
 }  // namespace ct_dag

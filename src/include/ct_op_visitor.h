@@ -4,11 +4,13 @@
 namespace janncy {
 
 class CtOp;
-class CtAdd;
-class CtMul;
-class CtPtAdd;
-class CtPtMul;
-class CtRotate;
+class AddCC;
+class AddCP;
+class AddCS;
+class MulCC;
+class MulCP;
+class MulCS;
+class RotateC;
 class CtInput;
 
 class CtOpVisitor {
@@ -20,11 +22,13 @@ class CtOpVisitor {
   CtOpVisitor& operator=(const CtOpVisitor&) = delete;
 
   virtual void Visit(const CtInput& node) = 0;
-  virtual void Visit(const CtAdd& node) = 0;
-  virtual void Visit(const CtMul& node) = 0;
-  virtual void Visit(const CtPtAdd& node) = 0;
-  virtual void Visit(const CtPtMul& node) = 0;
-  virtual void Visit(const CtRotate& node) = 0;
+  virtual void Visit(const AddCC& node) = 0;
+  virtual void Visit(const AddCP& node) = 0;
+  virtual void Visit(const AddCS& node) = 0;
+  virtual void Visit(const MulCC& node) = 0;
+  virtual void Visit(const MulCP& node) = 0;
+  virtual void Visit(const MulCS& node) = 0;
+  virtual void Visit(const RotateC& node) = 0;
 };
 
 }  // namespace janncy

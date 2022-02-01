@@ -11,25 +11,22 @@ class Ciphertext {
  public:
   explicit Ciphertext(heaan::Ciphertext ciphertext);
 
-  Ciphertext Rotate(int amount);
-
-  Ciphertext Bootstrap();
-
-  Ciphertext AddPtVec(Message pt_vec);
-  Ciphertext MultPtVec(Message pt_vec);
-
-  Message Decrypt();
+  Ciphertext Bootstrap() const;
 
   static int num_slots();
 
-  Ciphertext ConstMultiply(double rhs) const;
-  Ciphertext ConstAdd(double rhs) const;
+  Ciphertext MulCC(const Ciphertext& rhs) const;
+  Ciphertext MulCP(const Message::Vector& message_vec) const;
+  Ciphertext MulCS(Message::Scalar scalar) const;
 
-  Ciphertext Multiply(const Ciphertext& rhs) const;
-  Ciphertext Add(const Ciphertext& rhs) const;
-  Ciphertext Subtract(const Ciphertext& rhs) const;
+  Ciphertext AddCC(const Ciphertext& rhs) const;
+  Ciphertext AddCP(const Message::Vector& message_vec) const;
+  Ciphertext AddCS(const Message::Scalar scalar) const;
 
-  static Ciphertext Encrypt(const Message& values);
+  Ciphertext RotateC(int amt) const;
+
+  static Ciphertext Encrypt(const Message::Vector& values);
+  Message::Vector Decrypt() const;
 
  private:
   static void InitScheme();

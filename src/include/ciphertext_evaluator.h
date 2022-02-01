@@ -7,27 +7,32 @@
 #include "include/ciphertext.h"
 #include "include/ct_dag.h"
 #include "include/ct_op_visitor.h"
+#include "include/message.h"
+#include "include/message_evaluator.h"
 
 namespace janncy {
 
 class CiphertextEvaluator : public CtOpVisitor {
  public:
-  static std::vector<Message> Evaluate(const CtDag& ct_dag,
-                                       std::vector<Message> inputs);
+  static std::vector<Message::Vector> Evaluate(
+      const CtDag& ct_dag, std::vector<Message::Vector> inputs);
 
-  void Visit(const CtAdd& node) override;
-  void Visit(const CtMul& node) override;
-  void Visit(const CtPtAdd& node) override;
-  void Visit(const CtPtMul& node) override;
-  void Visit(const CtRotate& node) override;
+  void Visit(const AddCC& node) override;
+  void Visit(const AddCP& node) override;
+  void Visit(const AddCS& node) override;
+  void Visit(const MulCC& node) override;
+  void Visit(const MulCP& node) override;
+  void Visit(const MulCS& node) override;
+  void Visit(const RotateC& node) override;
   void Visit(const CtInput& node) override;
 
-  std::vector<Message> result() const;
+  std::vector<Message::Vector> result() const;
 
  private:
-  CiphertextEvaluator(const CtDag& ct_dag, std::vector<Message> inputs);
+  CiphertextEvaluator(const CtDag& ct_dag, std::vector<Message::Vector> inputs);
   const CtDag& ct_dag_;
-  std::vector<Message> inputs_;
+  MessageEvaluator message_evaluator_;
+  std::vector<Message::Vector> inputs_;
   std::unordered_map<const CtOp*, Ciphertext> node_map_;
 };
 

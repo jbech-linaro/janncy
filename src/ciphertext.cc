@@ -5,13 +5,39 @@
 
 #include <algorithm>
 #include <cassert>
+#include <complex>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <vector>
 
+#include "include/message.h"
 #include "include/utils.h"
 
 namespace janncy {
+
+namespace {
+
+std::unique_ptr<std::complex<double>[]> MessageVecToHeaanMessage(
+    const Message::Vector& message_vec) {
+  std::unique_ptr<std::complex<double>[]> result(
+      new std::complex<double>[message_vec.size()]);
+  for (int idx = 0; idx < Ciphertext::num_slots(); idx++) {
+    result[idx] = std::complex<double>(message_vec[idx], 0);
+  }
+  return result;
+}
+
+Message::Vector HeaanMessageToMessageVec(std::complex<double>* heaan_message) {
+  auto result = Message::Vector{};
+  for (int idx = 0; idx < Ciphertext::num_slots(); idx++) {
+    result.push_back(heaan_message[idx].real());
+  }
+  delete[] heaan_message;
+  return result;
+}
+
+}  // namespace
 
 int Ciphertext::logp = 30;
 
@@ -20,7 +46,7 @@ heaan::Ring* Ciphertext::ring_ = nullptr;
 heaan::SecretKey* Ciphertext::secret_key_ = nullptr;
 int Ciphertext::num_slots_ = 8;
 
-Ciphertext Ciphertext::Bootstrap() {
+Ciphertext Ciphertext::Bootstrap() const {
   heaan::Ciphertext result(ciphertext_);
   Ciphertext::scheme_->bootstrapAndEqual(result, /*logq=*/40, /*logQ=*/800,
                                          /*logT=*/4, /*logI=*/4);
@@ -30,23 +56,7 @@ Ciphertext Ciphertext::Bootstrap() {
 Ciphertext::Ciphertext(heaan::Ciphertext ciphertext)
     : ciphertext_(ciphertext) {}
 
-Ciphertext Ciphertext::ConstMultiply(double constant) const {
-  heaan::Ciphertext ct_result(ciphertext_);
-  Ciphertext::scheme_->multByConst(ct_result,
-                                   const_cast<heaan::Ciphertext&>(ciphertext_),
-                                   constant, Ciphertext::logp);
-  return Ciphertext(ct_result);
-}
-
-Ciphertext Ciphertext::ConstAdd(double constant) const {
-  heaan::Ciphertext ct_result(ciphertext_);
-  Ciphertext::scheme_->addConst(ct_result,
-                                const_cast<heaan::Ciphertext&>(ciphertext_),
-                                constant, Ciphertext::logp);
-  return Ciphertext(ct_result);
-}
-
-Ciphertext Ciphertext::Multiply(const Ciphertext& rhs) const {
+Ciphertext Ciphertext::MulCC(const Ciphertext& rhs) const {
   heaan::Ciphertext ct_result(ciphertext_);
   // TODO(nsamar): The `const_cast` is necessary because HEAAN
   // does not const-qualify its functions properly.
@@ -57,34 +67,57 @@ Ciphertext Ciphertext::Multiply(const Ciphertext& rhs) const {
   return Ciphertext(ct_result);
 }
 
-Ciphertext Ciphertext::Add(const Ciphertext& rhs) const {
+Ciphertext Ciphertext::MulCP(const Message::Vector& message_vec) const {
+  heaan::Ciphertext ct_result;
+  auto heaan_message = MessageVecToHeaanMessage(message_vec);
+  scheme_->multByConstVec(ct_result,
+                          const_cast<heaan::Ciphertext&>(ciphertext_),
+                          heaan_message.get(), Ciphertext::logp / 2);
+  return Ciphertext(ct_result);
+}
+
+Ciphertext Ciphertext::MulCS(Message::Scalar scalar) const {
+  heaan::Ciphertext ct_result(ciphertext_);
+  Ciphertext::scheme_->multByConst(ct_result,
+                                   const_cast<heaan::Ciphertext&>(ciphertext_),
+                                   scalar, Ciphertext::logp);
+  return Ciphertext(ct_result);
+}
+
+Ciphertext Ciphertext::AddCC(const Ciphertext& rhs) const {
   heaan::Ciphertext ct_result(ciphertext_);
   Ciphertext::scheme_->addAndEqual(
       ct_result, const_cast<heaan::Ciphertext&>(rhs.ciphertext_));
   return Ciphertext(ct_result);
 }
 
-Ciphertext Ciphertext::Subtract(const Ciphertext& rhs) const {
+Ciphertext Ciphertext::AddCP(const Message::Vector& message_vec) const {
+  auto pt = Encrypt(message_vec);
+  heaan::Ciphertext ct_result;
+  scheme_->add(ct_result, const_cast<heaan::Ciphertext&>(ciphertext_),
+               pt.ciphertext_);
+  return Ciphertext(ct_result);
+}
+
+Ciphertext Ciphertext::AddCS(Message::Scalar scalar) const {
   heaan::Ciphertext ct_result(ciphertext_);
-  Ciphertext::scheme_->subAndEqual(
-      ct_result, const_cast<heaan::Ciphertext&>(rhs.ciphertext_));
+  Ciphertext::scheme_->addConst(ct_result,
+                                const_cast<heaan::Ciphertext&>(ciphertext_),
+                                scalar, Ciphertext::logp);
   return Ciphertext(ct_result);
 }
 
-Ciphertext Ciphertext::Rotate(int amount) {
+Ciphertext Ciphertext::RotateC(int amount) const {
   auto ct_result = heaan::Ciphertext();
-  scheme_->leftRotateFast(ct_result, ciphertext_, amount);
+  scheme_->leftRotateFast(ct_result,
+                          const_cast<heaan::Ciphertext&>(ciphertext_), amount);
   return Ciphertext(ct_result);
 }
 
-Message Ciphertext::Decrypt() {
-  auto ptr_result = scheme_->decrypt(*secret_key_, ciphertext_);
-  auto result = Message{};
-  for (int idx = 0; idx < num_slots_; idx++) {
-    result.push_back(ptr_result[idx]);
-  }
-  delete[] ptr_result;
-  return result;
+Message::Vector Ciphertext::Decrypt() const {
+  auto heaan_message = scheme_->decrypt(
+      *secret_key_, const_cast<heaan::Ciphertext&>(ciphertext_));
+  return HeaanMessageToMessageVec(heaan_message);
 }
 
 void Ciphertext::InitScheme() {
@@ -109,37 +142,12 @@ heaan::Scheme* Ciphertext::scheme() {
 
 int Ciphertext::num_slots() { return num_slots_; }
 
-Ciphertext Ciphertext::Encrypt(const Message& values) {
-  assert(values.size() == Ciphertext::num_slots());
+Ciphertext Ciphertext::Encrypt(const Message::Vector& values) {
   auto ct = heaan::Ciphertext();
-  MessageElement* value_array = new MessageElement[Ciphertext::num_slots()];
-  for (int idx = 0; idx < Ciphertext::num_slots(); idx++) {
-    value_array[idx] = values[idx];
-  }
-  Ciphertext::scheme()->encrypt(ct, value_array, Ciphertext::num_slots(),
+  auto value_array = MessageVecToHeaanMessage(values);
+  Ciphertext::scheme()->encrypt(ct, value_array.get(), Ciphertext::num_slots(),
                                 Ciphertext::logp, /*logQ=*/800);
-  std::cout << "Slots: " << ct.n << std::endl;
-  delete[] value_array;
   return Ciphertext(ct);
-}
-
-Ciphertext Ciphertext::AddPtVec(Message pt_vec) {
-  auto pt = Encrypt(pt_vec);
-  heaan::Ciphertext ct_result;
-  scheme_->add(ct_result, ciphertext_, pt.ciphertext_);
-  return Ciphertext(ct_result);
-}
-
-Ciphertext Ciphertext::MultPtVec(Message pt_vec) {
-  heaan::Ciphertext ct_result;
-  MessageElement* const_vec = new MessageElement[Ciphertext::num_slots()];
-  for (int idx = 0; idx < Ciphertext::num_slots(); idx++) {
-    const_vec[idx] = pt_vec[idx];
-  }
-  scheme_->multByConstVec(ct_result, ciphertext_, const_vec,
-                          Ciphertext::logp / 2);
-  delete[] const_vec;
-  return Ciphertext(ct_result);
 }
 
 }  // namespace janncy
