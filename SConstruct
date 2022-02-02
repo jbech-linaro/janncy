@@ -160,9 +160,11 @@ onnx_cpps = [
         f"{onnx_path}/onnx/defs/shape_inference.cc", ]
 
 onnx_parser_cpps = ["examples/onnx_parser.cc"] + onnx_cpps + Glob("src/*.cc")
+weight_parser_cpps = ["examples/weight_parser.cc"] + onnx_cpps + Glob("src/*.cc")
 
 env.Append(CPPPATH=[ntl_headers])
 env.Program(str(build_dir / "onnx_parser"), onnx_parser_cpps)
+env.Program(str(build_dir / "weight_parser"), weight_parser_cpps)
 
 # Test
 env.Program(str(build_dir / "tests"), Glob("test/*.cc") +
