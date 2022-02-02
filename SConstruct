@@ -142,9 +142,26 @@ env.Append(CPPFLAGS=["-ggdb", "-fno-omit-frame-pointer", "-g",
 env.Append(CPPPATH=[onnx_path, src_dir, heaanlib_path.parent.parent.parent,
                     gtest_headers])
 
+common_libs=[
+        "asan", # onnx, wp, test
+        # "cgraph", # onnx
+        "gmp", # onnx, wp, test
+        # "gtest", # test
+        # "gtest_main", # test
+        # "gvc", # onnx
+        "HEAAN", # onnx, wp, test
+        # "m",
+        "ntl", # onnx, wp, test
+        "protobuf", # onnx, wp, test
+        "pthread", # onnx, wp, test
+        "stdc++fs", # onnx, wp, test
+        ]
+
+onnx_libs = ["cgraph", "gvc"]
+tests_libs = ["gtest", "gtest_main"]
+
 # Libraries
-env.Append(LIBS=["HEAAN", "asan", "stdc++fs", "pthread", "ntl", "gmp", "m",
-                 "cgraph", "gvc", "protobuf", "gtest_main", "gtest"])
+env.Append(LIBS=common_libs)
 
 # Library paths
 env.Append(LIBPATH=[heaanlib_path.parent, gtest_lib_path])
@@ -159,13 +176,27 @@ onnx_cpps = [
         f"{onnx_path}/onnx/defs/data_type_utils.cc",
         f"{onnx_path}/onnx/defs/shape_inference.cc", ]
 
-onnx_parser_cpps = ["examples/onnx_parser.cc"] + onnx_cpps + Glob("src/*.cc")
-weight_parser_cpps = ["examples/weight_parser.cc"] + onnx_cpps + Glob("src/*.cc")
+# Files used by several targets
+common_cpps = Glob("src/*.cc")
 
+# Onnx parser
+onnx_parser_cpps = ["examples/onnx_parser.cc"] + onnx_cpps + common_cpps
+
+# Weight parser
+weight_parser_cpps = ["examples/weight_parser.cc"] + onnx_cpps + common_cpps
+tests_cpps = Glob("test/*.cc") + onnx_cpps + common_cpps
+
+# Test
 env.Append(CPPPATH=[ntl_headers])
+
+# onnx
+env.AppendUnique(LIBS=common_libs + onnx_libs)
 env.Program(str(build_dir / "onnx_parser"), onnx_parser_cpps)
+
+# weight parser
+env.AppendUnique(LIBS=common_libs)
 env.Program(str(build_dir / "weight_parser"), weight_parser_cpps)
 
 # Test
-env.Program(str(build_dir / "tests"), Glob("test/*.cc") +
-            onnx_cpps + Glob("src/*.cc"))
+env.AppendUnique(LIBS=common_libs + tests_libs)
+env.Program(str(build_dir / "tests"), tests_cpps)
