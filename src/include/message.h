@@ -3,17 +3,33 @@
 
 #include <vector>
 
+#include "include/weight_manager.h"
+
 namespace janncy {
 
 class Message {
  public:
   using Scalar = double;
   using Vector = std::vector<Scalar>;
-  explicit Message(Vector message_vec) : message_vec_(message_vec) {}
-  Vector message_vec() const { return message_vec_; }
+
+  Message() = default;
+  Message(Message&&) = default;
+  virtual ~Message() {}
+  Message(const Message&) = delete;
+  Message& operator=(const Message&) = delete;
+
+  virtual Vector Evaluate(const WeightManager& wm) const = 0;
+};
+
+class Scalar : public Message {
+ public:
+  Scalar(Message::Scalar scalar) : scalar_(scalar){};
+  Message::Vector Evaluate(const WeightManager&) const override {
+    return {scalar_};
+  }
 
  private:
-  Vector message_vec_;
+  Message::Scalar scalar_;
 };
 
 }  // namespace janncy

@@ -16,21 +16,24 @@
 #include "include/mul_cp.h"
 #include "include/mul_cs.h"
 #include "include/rotate_c.h"
+#include "include/weight_manager.h"
 
 namespace janncy {
 
 std::vector<Message::Vector> CiphertextEvaluator::Evaluate(
-    const CtDag& ct_dag, std::vector<Message::Vector> inputs) {
-  CiphertextEvaluator ct_eval(ct_dag, inputs);
+    const WeightManager& weight_manager, const CtDag& ct_dag,
+    std::vector<Message::Vector> inputs) {
+  CiphertextEvaluator ct_eval(weight_manager, ct_dag, inputs);
   for (const CtOp* node : ct_dag.nodes()) {
     node->Accept(ct_eval);
   }
   return ct_eval.result();
 }
 
-CiphertextEvaluator::CiphertextEvaluator(const CtDag& ct_dag,
+CiphertextEvaluator::CiphertextEvaluator(const WeightManager& weight_manager,
+                                         const CtDag& ct_dag,
                                          std::vector<Message::Vector> inputs)
-    : ct_dag_(ct_dag), inputs_(inputs){};
+    : weight_manager_(weight_manager), ct_dag_(ct_dag), inputs_(inputs){};
 
 void CiphertextEvaluator::Visit(const CtInput& node) {
   auto in_ct = Ciphertext::Encrypt(inputs_.back());
@@ -46,7 +49,7 @@ void CiphertextEvaluator::Visit(const AddCC& node) {
 
 void CiphertextEvaluator::Visit(const AddCP& node) {
   auto parent_ct = node_map_.at(ct_dag_.parents(node)[0]);
-  auto message = message_evaluator_.evaluate(node.message());
+  auto message = node.message()->Evaluate(weight_manager_);
   node_map_.emplace(&node, parent_ct.AddCP(message));
 }
 
@@ -63,7 +66,7 @@ void CiphertextEvaluator::Visit(const MulCC& node) {
 
 void CiphertextEvaluator::Visit(const MulCP& node) {
   auto parent_ct = node_map_.at(ct_dag_.parents(node)[0]);
-  auto message = message_evaluator_.evaluate(node.message());
+  auto message = node.message()->Evaluate(weight_manager_);
   node_map_.emplace(&node, parent_ct.MulCP(message));
 }
 

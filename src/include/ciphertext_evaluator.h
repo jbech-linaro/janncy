@@ -8,14 +8,15 @@
 #include "include/ct_dag.h"
 #include "include/ct_op_visitor.h"
 #include "include/message.h"
-#include "include/message_evaluator.h"
+#include "include/weight_manager.h"
 
 namespace janncy {
 
 class CiphertextEvaluator : public CtOpVisitor {
  public:
   static std::vector<Message::Vector> Evaluate(
-      const CtDag& ct_dag, std::vector<Message::Vector> inputs);
+      const WeightManager& weight_manager, const CtDag& ct_dag,
+      std::vector<Message::Vector> inputs);
 
   void Visit(const AddCC& node) override;
   void Visit(const AddCP& node) override;
@@ -29,9 +30,10 @@ class CiphertextEvaluator : public CtOpVisitor {
   std::vector<Message::Vector> result() const;
 
  private:
-  CiphertextEvaluator(const CtDag& ct_dag, std::vector<Message::Vector> inputs);
+  CiphertextEvaluator(const WeightManager& weight_manager, const CtDag& ct_dag,
+                      std::vector<Message::Vector> inputs);
+  const WeightManager& weight_manager_;
   const CtDag& ct_dag_;
-  MessageEvaluator message_evaluator_;
   std::vector<Message::Vector> inputs_;
   std::unordered_map<const CtOp*, Ciphertext> node_map_;
 };
