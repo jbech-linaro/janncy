@@ -71,7 +71,7 @@ IncludeCategories:
   - Regex:           '^<ext/.*\.h>'
     Priority:        2
     SortPriority:    0
-  - Regex:           '^(<|")(onnx|graphviz)/.*\.h(>|")'
+  - Regex:           '^(<|")(onnx|graphviz|gtest)/.*\.h(>|")'
     Priority:        3
     SortPriority:    0
   - Regex:           '^<.*\.h>'
