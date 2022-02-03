@@ -72,9 +72,8 @@ install_pip() {
 		fi
 	else
 		echo "Virtual environment NOT chosen, pip packages will be installed to the host system."
-		IFS=
 		read -r -p "Waiting 10 seconds, press any key to abort ... " -t 10 -n 1 -s stop
-		if [[ ! -z "${stop}" ]] || [[ ${stop} == "" ]]
+		if [[ 0 -eq $? ]]
 		then
 			exit
 		fi
