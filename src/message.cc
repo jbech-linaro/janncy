@@ -79,7 +79,7 @@ Message::Vector MaskMessage(const Message::Vector& message,
   Message::Vector result;
   result.reserve(message.size());
   for (int idx = 0; idx < message.size(); ++idx) {
-    if (idx & chunk_mask == chunk_mask) {
+    if (idx & chunk_mask != 0) {
       result.push_back(0);
     } else {
       result.push_back(message[idx]);
