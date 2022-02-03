@@ -21,6 +21,7 @@ class LayerVisitor {
   virtual ~LayerVisitor() {}
   LayerVisitor(const LayerVisitor&) = delete;
   LayerVisitor& operator=(const LayerVisitor&) = delete;
+  LayerVisitor& operator=(const LayerVisitor&&) = default;
 
   virtual void Visit(const ConvLayer& node) = 0;
   virtual void Visit(const FullyConnectedLayer& node) = 0;

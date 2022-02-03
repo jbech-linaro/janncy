@@ -15,6 +15,8 @@ class OnnxDag {
   OnnxDag(OnnxDag&&) = default;
   OnnxDag(const OnnxDag&) = delete;
   OnnxDag& operator=(const OnnxDag&) = delete;
+  OnnxDag& operator=(const OnnxDag&&) = default;
+
   const OnnxNode& OutputNameToNode(const std::string& node_name) const;
   void AddNode(std::unique_ptr<OnnxNode> onnx_node);
   std::vector<const OnnxNode*> nodes() const { return onnx_dag_.nodes(); }
