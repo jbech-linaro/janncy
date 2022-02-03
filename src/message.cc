@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "include/chunk_layout.h"
+
 namespace janncy {
 
 namespace {
@@ -53,11 +55,69 @@ Message::Vector TensorToMessageVector(const Tensor& tensor,
   return result;
 }
 
+Message::Vector ReplicateMessage(const Message::Vector& message,
+                                 const ChunkMask& chunk_mask) {
+  ChunkMask keep_mask = chunk_mask;
+  keep_mask.flip();
+  Message::Vector result;
+  result.reserve(message.size());
+  for (int idx = 0; idx < message.size(); ++idx) {
+    result.push_back(message[idx & keep_mask.to_ulong()]);
+  }
+  return message;
+}
+
+Message::Vector RotateMessage(const Message::Vector& message,
+                              int rotation_amount) {
+  Message::Vector result = message;
+  std::rotate(result.begin(), result.begin() + rotation_amount, result.end());
+  return result;
+}
+
+Message::Vector MaskMessage(const Message::Vector& message,
+                            const ChunkMask& chunk_mask) {
+  Message::Vector result;
+  result.reserve(message.size());
+  for (int idx = 0; idx < message.size(); ++idx) {
+    if (idx & chunk_mask == chunk_mask) {
+      result.push_back(0);
+    } else {
+      result.push_back(message[idx]);
+    }
+  }
+  return result;
+}
+
 }  // namespace
 
 Message::Vector WeightMessage::Evaluate(const WeightManager& wm) const {
   Tensor input_message = wm.weight(weight_id_);
   return TensorToMessageVector(input_message, chunk_layout_, offset_);
+}
+
+Message::Vector ReplicatedMessage::Evaluate(const WeightManager& wm) const {
+  auto input_message = input_->Evaluate(wm);
+  return ReplicateMessage(input_message, chunk_mask_);
+}
+
+Message::Vector RotatedMessage::Evaluate(const WeightManager& wm) const {
+  auto input_message = input_->Evaluate(wm);
+  return RotateMessage(input_message, rotation_amount_);
+}
+
+Message::Vector MaskedMessage::Evaluate(const WeightManager& wm) const {
+  auto input_message = input_->Evaluate(wm);
+  return MaskMessage(input_message, chunk_mask_);
+}
+
+Message::Vector AddedMessage::Evaluate(const WeightManager& wm) const {
+  auto input0 = input0_->Evaluate(wm);
+  auto input1 = input1_->Evaluate(wm);
+  Message::Vector result;
+  result.reserve(input0.size());
+  std::transform(input0.begin(), input0.end(), input1.begin(),
+                 std::back_inserter(result), std::plus<Message::Scalar>());
+  return result;
 }
 
 }  // namespace janncy

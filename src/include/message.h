@@ -48,18 +48,13 @@ class WeightMessage : public Message {
   std::vector<int> offset_;
 };
 
-/*
 class ReplicatedMessage : public Message {
  public:
   ReplicatedMessage(std::unique_ptr<Message> input_message,
                     ChunkMask chunk_mask)
       : input_(std::move(input_message)), chunk_mask_(chunk_mask) {}
 
-  Message::Vector Evaluate(const WeightManager& wm) const override {
-    input_->Evaluate(wm);
-    // TODO(nsamar): Implement
-    return {};
-  }
+  Message::Vector Evaluate(const WeightManager& wm) const override;
 
  private:
   std::unique_ptr<Message> input_;
@@ -71,10 +66,7 @@ class RotatedMessage : public Message {
   RotatedMessage(std::unique_ptr<Message> input_message, int rotation_amount)
       : input_(std::move(input_message)), rotation_amount_(rotation_amount) {}
 
-  Message::Vector Evaluate(const WeightManager&) const override {
-    // TODO(nsamar): Implement
-    return {};
-  }
+  Message::Vector Evaluate(const WeightManager&) const override;
 
  private:
   std::unique_ptr<Message> input_;
@@ -86,10 +78,7 @@ class MaskedMessage : public Message {
   MaskedMessage(std::unique_ptr<Message> input_message, ChunkMask chunk_mask)
       : input_(std::move(input_message)), chunk_mask_(chunk_mask) {}
 
-  Message::Vector Evaluate(const WeightManager&) const override {
-    // TODO(nsamar): Implement
-    return {};
-  }
+  Message::Vector Evaluate(const WeightManager&) const override;
 
  private:
   std::unique_ptr<Message> input_;
@@ -101,16 +90,12 @@ class AddedMessage : public Message {
   AddedMessage(std::unique_ptr<Message> input0, std::unique_ptr<Message> input1)
       : input0_(std::move(input0)), input1_(std::move(input1)) {}
 
-  Message::Vector Evaluate(const WeightManager&) const override {
-    // TODO(nsamar): Implement
-    return {};
-  }
+  Message::Vector Evaluate(const WeightManager&) const override;
 
  private:
   std::unique_ptr<Message> input0_;
   std::unique_ptr<Message> input1_;
 };
-*/
 
 }  // namespace janncy
 
