@@ -1,8 +1,10 @@
 #ifndef JANNCY_MESSAGE_H_
 #define JANNCY_MESSAGE_H_
 
+#include <memory>
 #include <vector>
 
+#include "include/chunk_layout.h"
 #include "include/weight_manager.h"
 
 namespace janncy {
@@ -31,6 +33,84 @@ class Scalar : public Message {
  private:
   Message::Scalar scalar_;
 };
+
+class WeightMessage : public Message {
+ public:
+  WeightMessage(std::string weight_id, ChunkLayout chunk_layout,
+                std::vector<int> offset)
+      : weight_id_(weight_id), chunk_layout_(chunk_layout), offset_(offset) {}
+
+  Message::Vector Evaluate(const WeightManager& wm) const override;
+
+ private:
+  std::string weight_id_;
+  ChunkLayout chunk_layout_;
+  std::vector<int> offset_;
+};
+
+/*
+class ReplicatedMessage : public Message {
+ public:
+  ReplicatedMessage(std::unique_ptr<Message> input_message,
+                    ChunkMask chunk_mask)
+      : input_(std::move(input_message)), chunk_mask_(chunk_mask) {}
+
+  Message::Vector Evaluate(const WeightManager& wm) const override {
+    input_->Evaluate(wm);
+    // TODO(nsamar): Implement
+    return {};
+  }
+
+ private:
+  std::unique_ptr<Message> input_;
+  ChunkMask chunk_mask_;
+};
+
+class RotatedMessage : public Message {
+ public:
+  RotatedMessage(std::unique_ptr<Message> input_message, int rotation_amount)
+      : input_(std::move(input_message)), rotation_amount_(rotation_amount) {}
+
+  Message::Vector Evaluate(const WeightManager&) const override {
+    // TODO(nsamar): Implement
+    return {};
+  }
+
+ private:
+  std::unique_ptr<Message> input_;
+  int rotation_amount_;
+};
+
+class MaskedMessage : public Message {
+ public:
+  MaskedMessage(std::unique_ptr<Message> input_message, ChunkMask chunk_mask)
+      : input_(std::move(input_message)), chunk_mask_(chunk_mask) {}
+
+  Message::Vector Evaluate(const WeightManager&) const override {
+    // TODO(nsamar): Implement
+    return {};
+  }
+
+ private:
+  std::unique_ptr<Message> input_;
+  ChunkMask chunk_mask_;
+};
+
+class AddedMessage : public Message {
+ public:
+  AddedMessage(std::unique_ptr<Message> input0, std::unique_ptr<Message> input1)
+      : input0_(std::move(input0)), input1_(std::move(input1)) {}
+
+  Message::Vector Evaluate(const WeightManager&) const override {
+    // TODO(nsamar): Implement
+    return {};
+  }
+
+ private:
+  std::unique_ptr<Message> input0_;
+  std::unique_ptr<Message> input1_;
+};
+*/
 
 }  // namespace janncy
 

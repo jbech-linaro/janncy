@@ -22,6 +22,10 @@ class WeightManager {
     }
   }
 
+  const Tensor& weight(std::string weight_id) const {
+    return weight_map_.at(weight_id);
+  }
+
  private:
   std::unordered_map<std::string, Tensor> weight_map_;
 };

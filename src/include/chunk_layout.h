@@ -14,7 +14,10 @@ class ChunkLayout {
  public:
   std::vector<std::optional<int>> DimensionIndices(int dimension) const;
   std::vector<std::optional<int>> DimensionIndices(int dimension,
-                                                   int offset) const;
+                                                   int offset) const {
+    // TODO(nsamar): Implement
+    return {};
+  }
 
  private:
   int chunk_size_;

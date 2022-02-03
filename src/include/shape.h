@@ -35,13 +35,13 @@ class Shape {
   int operator[](int i) const { return dimensions_[i]; }
   int& operator[](int i) { return dimensions_[i]; }
 
-  int dimension_cnt() const { return dimensions_.size(); }
+  int dimension_count() const { return dimensions_.size(); }
   int channels() const { return dimensions_[0]; }
   int ValueCnt() const;
 
   Shape SubShape(int start_i, int end_i) const;
   Shape SubShape(int start_i) const {
-    return SubShape(start_i, dimension_cnt());
+    return SubShape(start_i, dimension_count());
   }
   Shape SpatialShape() const { return SubShape(1); }
 

@@ -21,7 +21,7 @@ Shape Shape::SubShape(int start_i, int end_i) const {
 }
 
 Shape ShapeWithChannels(int channel_cnt, const Shape& spatial_shape) {
-  Shape result(spatial_shape.dimension_cnt() + 1);
+  Shape result(spatial_shape.dimension_count() + 1);
   result[0] = channel_cnt;
   std::copy(spatial_shape.begin(), spatial_shape.end(), result.begin() + 1);
   return result;

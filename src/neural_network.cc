@@ -65,7 +65,7 @@ const Layer& CreateFlatten(NeuralNetwork& nn, const Layer& parent) {
 const Layer& CreateFullyConnected(NeuralNetwork& nn, const Layer& parent,
                                   int output_dim) {
   Shape input_shape = parent.shape();
-  PANIC_IF(input_shape.dimension_cnt() != 1,
+  PANIC_IF(input_shape.dimension_count() != 1,
            "Fully-connected layer expects 1D input", input_shape);
   int input_dim = input_shape[0];
   return nn.AddNode(
