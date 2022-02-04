@@ -143,7 +143,7 @@ env.Append(CPPPATH=[onnx_path, src_dir, heaanlib_path.parent.parent.parent,
                     gtest_headers])
 
 # Libraries
-env.Append(LIBS=["HEAAN", "asan", "stdc++fs", "pthread", "ntl", "gmp", "m",
+env.Append(LIBS=["asan", "HEAAN", "stdc++fs", "pthread", "ntl", "gmp", "m",
                  "cgraph", "gvc", "protobuf", "gtest_main", "gtest"])
 
 # Library paths

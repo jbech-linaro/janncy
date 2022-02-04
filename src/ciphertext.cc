@@ -11,6 +11,7 @@
 #include <memory>
 #include <vector>
 
+#include "include/benchmark.h"
 #include "include/message.h"
 #include "include/utils.h"
 
@@ -48,6 +49,7 @@ int Ciphertext::num_slots_ = 8;
 
 Ciphertext Ciphertext::Bootstrap() const {
   heaan::Ciphertext result(ciphertext_);
+  BenchMark b(__func__, "logq=40 logQ=800 logT=4 logI=4");
   Ciphertext::scheme_->bootstrapAndEqual(result, /*logq=*/40, /*logQ=*/800,
                                          /*logT=*/4, /*logI=*/4);
   return Ciphertext(result);
@@ -58,6 +60,8 @@ Ciphertext::Ciphertext(heaan::Ciphertext ciphertext)
 
 Ciphertext Ciphertext::MulCC(const Ciphertext& rhs) const {
   heaan::Ciphertext ct_result(ciphertext_);
+	BenchMark b(__func__);
+
   // TODO(nsamar): The `const_cast` is necessary because HEAAN
   // does not const-qualify its functions properly.
   // When this is fixed, all `const_cast`s in this file should
@@ -70,14 +74,18 @@ Ciphertext Ciphertext::MulCC(const Ciphertext& rhs) const {
 Ciphertext Ciphertext::MulCP(const Message::Vector& message_vec) const {
   heaan::Ciphertext ct_result;
   auto heaan_message = MessageVecToHeaanMessage(message_vec);
-  scheme_->multByConstVec(ct_result,
-                          const_cast<heaan::Ciphertext&>(ciphertext_),
-                          heaan_message.get(), Ciphertext::logp / 2);
+  {
+    BenchMark b(__func__);
+    scheme_->multByConstVec(ct_result,
+                            const_cast<heaan::Ciphertext&>(ciphertext_),
+                            heaan_message.get(), Ciphertext::logp / 2);
+  }
   return Ciphertext(ct_result);
 }
 
 Ciphertext Ciphertext::MulCS(Message::Scalar scalar) const {
   heaan::Ciphertext ct_result(ciphertext_);
+  BenchMark b(__func__);
   Ciphertext::scheme_->multByConst(ct_result,
                                    const_cast<heaan::Ciphertext&>(ciphertext_),
                                    scalar, Ciphertext::logp);
@@ -86,6 +94,7 @@ Ciphertext Ciphertext::MulCS(Message::Scalar scalar) const {
 
 Ciphertext Ciphertext::AddCC(const Ciphertext& rhs) const {
   heaan::Ciphertext ct_result(ciphertext_);
+  BenchMark b(__func__);
   Ciphertext::scheme_->addAndEqual(
       ct_result, const_cast<heaan::Ciphertext&>(rhs.ciphertext_));
   return Ciphertext(ct_result);
@@ -94,6 +103,7 @@ Ciphertext Ciphertext::AddCC(const Ciphertext& rhs) const {
 Ciphertext Ciphertext::AddCP(const Message::Vector& message_vec) const {
   auto pt = Encrypt(message_vec);
   heaan::Ciphertext ct_result;
+  BenchMark b(__func__);
   scheme_->add(ct_result, const_cast<heaan::Ciphertext&>(ciphertext_),
                pt.ciphertext_);
   return Ciphertext(ct_result);
@@ -101,6 +111,7 @@ Ciphertext Ciphertext::AddCP(const Message::Vector& message_vec) const {
 
 Ciphertext Ciphertext::AddCS(Message::Scalar scalar) const {
   heaan::Ciphertext ct_result(ciphertext_);
+  BenchMark b(__func__);
   Ciphertext::scheme_->addConst(ct_result,
                                 const_cast<heaan::Ciphertext&>(ciphertext_),
                                 scalar, Ciphertext::logp);
@@ -109,12 +120,14 @@ Ciphertext Ciphertext::AddCS(Message::Scalar scalar) const {
 
 Ciphertext Ciphertext::RotateC(int amount) const {
   auto ct_result = heaan::Ciphertext();
+  BenchMark b(__func__);
   scheme_->leftRotateFast(ct_result,
                           const_cast<heaan::Ciphertext&>(ciphertext_), amount);
   return Ciphertext(ct_result);
 }
 
 Message::Vector Ciphertext::Decrypt() const {
+  BenchMark b(__func__);
   auto heaan_message = scheme_->decrypt(
       *secret_key_, const_cast<heaan::Ciphertext&>(ciphertext_));
   return HeaanMessageToMessageVec(heaan_message);
