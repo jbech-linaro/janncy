@@ -10,11 +10,14 @@ namespace janncy {
 
 class CtTensor {
  public:
-  explicit CtTensor(std::vector<const CtOp*> ciphertexts);
-  const std::vector<const CtOp*>& ciphertexts() const;
+  CtTensor(std::vector<const CtOp*> ciphertexts,
+           std::vector<std::vector<int>> offsets);
+  const std::vector<const CtOp*>& ciphertexts() const { return ciphertexts_; }
+  const std::vector<std::vector<int>>& offsets() const { return offsets_; }
 
  private:
   std::vector<const CtOp*> ciphertexts_;
+  std::vector<std::vector<int>> offsets_;
 };
 
 }  // namespace janncy
