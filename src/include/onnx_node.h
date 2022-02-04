@@ -20,7 +20,7 @@ class OnnxNode {
   OnnxNode(OnnxNode&&) = default;
   OnnxNode(const OnnxNode&) = delete;
   OnnxNode& operator=(const OnnxNode&) = delete;
-  OnnxNode& operator=(const OnnxNode&&) = default;
+  OnnxNode& operator=(OnnxNode&&) = default;
   virtual ~OnnxNode() {}
 
   OnnxNodeId name() const { return name_; }

@@ -16,10 +16,9 @@ class CtInput;
 class CtOpVisitor {
  public:
   CtOpVisitor() = default;
-  CtOpVisitor(CtOpVisitor&&) = default;
   virtual ~CtOpVisitor() {}
   CtOpVisitor(const CtOpVisitor&) = delete;
-  CtOpVisitor(const CtOpVisitor&&) = default;
+  CtOpVisitor(CtOpVisitor&&) = default;
   CtOpVisitor& operator=(const CtOpVisitor&) = delete;
 
   virtual void Visit(const CtInput& node) = 0;

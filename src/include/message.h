@@ -19,7 +19,7 @@ class Message {
   virtual ~Message() {}
   Message(const Message&) = delete;
   Message& operator=(const Message&) = delete;
-  Message& operator=(const Message&&) = default;
+  Message& operator=(Message&&) = default;
 
   virtual Vector Evaluate(const WeightManager& wm) const = 0;
 };

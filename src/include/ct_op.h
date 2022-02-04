@@ -16,7 +16,7 @@ class CtOp {
   virtual ~CtOp() {}
   CtOp(const CtOp&) = delete;
   CtOp& operator=(const CtOp&) = delete;
-  CtOp& operator=(const CtOp&&) = default;
+  CtOp& operator=(CtOp&&) = default;
 
   virtual void Accept(CtOpVisitor& visitor) const = 0;
   virtual std::string op_type() const = 0;

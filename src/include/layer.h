@@ -17,7 +17,7 @@ class Layer {
   virtual ~Layer() {}
   Layer(const Layer&) = delete;
   Layer& operator=(const Layer&) = delete;
-  Layer& operator=(const Layer&&) = default;
+  Layer& operator=(Layer&&) = default;
 
   virtual void Accept(LayerVisitor& visitor) const = 0;
   virtual std::string op_type() const = 0;

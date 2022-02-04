@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "include/ct_op.h"
+#include "include/tensor_layout.h"
 
 namespace janncy {
 

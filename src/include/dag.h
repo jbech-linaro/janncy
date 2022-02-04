@@ -18,7 +18,7 @@ class Dag {
   Dag<T>(Dag<T>&&) = default;
   Dag<T>(const Dag<T>&) = delete;
   Dag<T>& operator=(const Dag<T>&) = delete;
-  Dag<T>& operator=(const Dag<T>&&) = default;
+  Dag<T>& operator=(Dag<T>&&) = default;
 
   // Transfers ownership of `new_node` to the Graph object
   const T& AddNode(std::unique_ptr<T> new_node,
